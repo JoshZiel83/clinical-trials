@@ -1,0 +1,480 @@
+Table|Field|Type|Nullable|Description|CTGov Data Point|CTGov Doc Link|CTGov API Section|CTGov API Module|CTGov API Field Path
+baseline_counts|id|integer|No|primary key|||||
+baseline_counts|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+baseline_counts|result_group_id|integer|Yes||||||
+baseline_counts|ctgov_group_code|character varying|Yes||Baseline Denom Count Group Id||Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.denoms.counts.groupId
+baseline_counts|units|character varying|Yes||Baseline Denom Units|https://clinicaltrials.gov/policy/results-definitions#BaselineNumUnitsAnalyzed|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.denoms.units
+baseline_counts|scope|character varying|Yes||||||
+baseline_counts|count|integer|Yes||Baseline Denom Count Value|https://clinicaltrials.gov/policy/results-definitions#OverallBaselineNumber|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.denoms.counts.value
+baseline_measurements|id|integer|No|primary key|||||
+baseline_measurements|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+baseline_measurements|result_group_id|integer|Yes||||||
+baseline_measurements|ctgov_group_code|character varying|Yes||Baseline Measurement Group Id||Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.measurements.groupId
+baseline_measurements|classification|character varying|Yes||Baseline Class Title|https://clinicaltrials.gov/policy/results-definitions#CategoryTitle|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.title
+baseline_measurements|category|character varying|Yes||Baseline Category Title|https://clinicaltrials.gov/policy/results-definitions#CategoryTitle|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.title
+baseline_measurements|title|character varying|Yes||Baseline Measure Title|https://clinicaltrials.gov/policy/results-definitions#BaselineMeasureType|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.title
+baseline_measurements|description|text|Yes||Baseline Measure Description|https://clinicaltrials.gov/policy/results-definitions#BaselineDescription|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.description
+baseline_measurements|units|character varying|Yes||Baseline Measure Unit Of Measure|https://clinicaltrials.gov/policy/results-definitions#BaselineUnitOfMeasure|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.unitOfMeasure
+baseline_measurements|param_type|character varying|Yes||Baseline Measure Param Type|https://clinicaltrials.gov/policy/results-definitions#BaselineParamType|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.paramType
+baseline_measurements|param_value|character varying|Yes||Baseline Measurement Value|https://clinicaltrials.gov/policy/results-definitions#BaselineData|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.measurements.value
+baseline_measurements|param_value_num|numeric|Yes||Baseline Measurement Value|https://clinicaltrials.gov/policy/results-definitions#BaselineData|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.measurements.value
+baseline_measurements|dispersion_type|character varying|Yes||Baseline Measure Dispersion Type|https://clinicaltrials.gov/policy/results-definitions#BaselineDispersType|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.dispersionType
+baseline_measurements|dispersion_value|character varying|Yes||Baseline Measurement Spread||Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.measurements.spread
+baseline_measurements|dispersion_value_num|numeric|Yes||Baseline Measurement Spread||Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.measurements.spread
+baseline_measurements|dispersion_lower_limit|numeric|Yes||Baseline Measurement Lower Limit||Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.measurements.lowerLimit
+baseline_measurements|dispersion_upper_limit|numeric|Yes||Baseline Measurement Upper Limit||Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.measurements.upperLimit
+baseline_measurements|explanation_of_na|character varying|Yes||Baseline Measurement Comment||Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.classes.categories.measurements.comment
+baseline_measurements|number_analyzed|integer|Yes||||||
+baseline_measurements|number_analyzed_units|character varying|Yes||Baseline Measure Denom Units Selected|https://clinicaltrials.gov/policy/results-definitions#BaselineAnalysisPopType|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.denomUnitsSelected
+baseline_measurements|population_description|character varying|Yes||Baseline Measure Population Description|https://clinicaltrials.gov/policy/results-definitions#BaselineAnalysisPopDesc|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.populationDescription
+baseline_measurements|calculate_percentage|character varying|Yes||Baseline Measure Calculate Pct||Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.measures.calculatePct
+brief_summaries|id|integer|No|primary key|||||
+brief_summaries|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+brief_summaries|description|text|Yes||Brief Summary|https://clinicaltrials.gov/policy/protocol-definitions#BriefSummary|Protocol|Description|protocolSection.descriptionModule.briefSummary
+browse_conditions|id|integer|No|primary key|||||
+browse_conditions|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+browse_conditions|mesh_term|character varying|Yes||Condition Ancestor Term||Derived|Condition Browse|derivedSection.conditionBrowseModule.ancestors.term
+browse_conditions|downcase_mesh_term|character varying|Yes||Condition Ancestor Term||Derived|Condition Browse|derivedSection.conditionBrowseModule.ancestors.term
+browse_conditions|mesh_type|character varying|Yes||||||
+browse_interventions|id|integer|No|primary key|||||
+browse_interventions|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+browse_interventions|mesh_term|character varying|Yes||Intervention Ancestor Term||Derived|Intervention Browse|derivedSection.interventionBrowseModule.ancestors.term
+browse_interventions|downcase_mesh_term|character varying|Yes||Intervention Ancestor Term||Derived|Intervention Browse|derivedSection.interventionBrowseModule.ancestors.term
+browse_interventions|mesh_type|character varying|Yes||||||
+calculated_values|id|integer|No|primary key|||||
+calculated_values|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+calculated_values|number_of_facilities|integer|Yes||||||
+calculated_values|number_of_nsae_subjects|integer|Yes||||||
+calculated_values|number_of_sae_subjects|integer|Yes||||||
+calculated_values|registered_in_calendar_year|integer|Yes||||||
+calculated_values|nlm_download_date|date|Yes||||||
+calculated_values|actual_duration|integer|Yes||||||
+calculated_values|were_results_reported|boolean|Yes||||||
+calculated_values|months_to_report_results|integer|Yes||||||
+calculated_values|has_us_facility|boolean|Yes||||||
+calculated_values|has_single_facility|boolean|Yes||||||
+calculated_values|minimum_age_num|integer|Yes||||||
+calculated_values|maximum_age_num|integer|Yes||||||
+calculated_values|minimum_age_unit|character varying|Yes||||||
+calculated_values|maximum_age_unit|character varying|Yes||||||
+calculated_values|number_of_primary_outcomes_to_measure|integer|Yes||||||
+calculated_values|number_of_secondary_outcomes_to_measure|integer|Yes||||||
+calculated_values|number_of_other_outcomes_to_measure|integer|Yes||||||
+central_contacts|id|integer|No|primary key|||||
+central_contacts|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+central_contacts|contact_type|character varying|Yes||||||
+central_contacts|name|character varying|Yes||Central Contact Name|https://clinicaltrials.gov/policy/protocol-definitions#OverallStudyContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.centralContacts.name
+central_contacts|phone|character varying|Yes||Central Contact Phone|https://clinicaltrials.gov/policy/protocol-definitions#OverallStudyContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.centralContacts.phone
+central_contacts|email|character varying|Yes||Central ContactE Mail|https://clinicaltrials.gov/policy/protocol-definitions#OverallStudyContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.centralContacts.email
+central_contacts|phone_extension|character varying|Yes||Central Contact Phone Ext|https://clinicaltrials.gov/policy/protocol-definitions#OverallStudyContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.centralContacts.phoneExt
+central_contacts|role|character varying|Yes||Central Contact Role||Protocol|Contacts Locations|protocolSection.contactsLocationsModule.centralContacts.role
+conditions|id|integer|No|primary key|||||
+conditions|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+conditions|name|character varying|Yes||||||
+conditions|downcase_name|character varying|Yes||||||
+countries|id|integer|No|primary key|||||
+countries|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+countries|name|character varying|Yes||||||
+countries|removed|boolean|Yes||||||
+design_group_interventions|id|integer|No|primary key|||||
+design_group_interventions|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+design_group_interventions|design_group_id|integer|Yes||||||
+design_group_interventions|intervention_id|integer|Yes||||||
+design_groups|id|integer|No|primary key|||||
+design_groups|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+design_groups|group_type|character varying|Yes||Arm Group Type|https://clinicaltrials.gov/policy/protocol-definitions#ArmType|Protocol|Arms Interventions|protocolSection.armsInterventionsModule.armGroups.type
+design_groups|title|character varying|Yes||Arm Group Label|https://clinicaltrials.gov/policy/protocol-definitions#ArmLabel|Protocol|Arms Interventions|protocolSection.armsInterventionsModule.armGroups.label
+design_groups|description|text|Yes||Arm Group Description|https://clinicaltrials.gov/policy/protocol-definitions#ArmDescription|Protocol|Arms Interventions|protocolSection.armsInterventionsModule.armGroups.description
+design_outcomes|id|integer|No|primary key|||||
+design_outcomes|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+design_outcomes|outcome_type|character varying|Yes||||||
+design_outcomes|measure|text|Yes||Other Outcome Measure|https://clinicaltrials.gov/policy/protocol-definitions#OtherOMTitle|Protocol|Outcomes|protocolSection.outcomesModule.otherOutcomes.measure
+design_outcomes|time_frame|text|Yes||Other Outcome Time Frame|https://clinicaltrials.gov/policy/protocol-definitions#OtherOMTimeFrame|Protocol|Outcomes|protocolSection.outcomesModule.otherOutcomes.timeFrame
+design_outcomes|population|character varying|Yes||||||
+design_outcomes|description|text|Yes||Other Outcome Description|https://clinicaltrials.gov/policy/protocol-definitions#OtherOMDescription|Protocol|Outcomes|protocolSection.outcomesModule.otherOutcomes.description
+designs|id|integer|No|primary key|||||
+designs|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+designs|allocation|character varying|Yes||Design Allocation|https://clinicaltrials.gov/policy/protocol-definitions#IntAllocation|Protocol|Design|protocolSection.designModule.designInfo.allocation
+designs|intervention_model|character varying|Yes||Design Intervention Model|https://clinicaltrials.gov/policy/protocol-definitions#IntDesign|Protocol|Design|protocolSection.designModule.designInfo.interventionModel
+designs|observational_model|character varying|Yes||Design Observational Model|https://clinicaltrials.gov/policy/protocol-definitions#ObsStudyModel|Protocol|Design|protocolSection.designModule.designInfo.observationalModel
+designs|primary_purpose|character varying|Yes||Design Primary Purpose|https://clinicaltrials.gov/policy/protocol-definitions#IntPurpose|Protocol|Design|protocolSection.designModule.designInfo.primaryPurpose
+designs|time_perspective|character varying|Yes||Design Time Perspective|https://clinicaltrials.gov/policy/protocol-definitions#ObsTiming|Protocol|Design|protocolSection.designModule.designInfo.timePerspective
+designs|masking|character varying|Yes||Design Masking|https://clinicaltrials.gov/policy/protocol-definitions#IntMasking|Protocol|Design|protocolSection.designModule.designInfo.maskingInfo.masking
+designs|masking_description|text|Yes||Design Masking Description|https://clinicaltrials.gov/policy/protocol-definitions#MaskingDesc|Protocol|Design|protocolSection.designModule.designInfo.maskingInfo.maskingDescription
+designs|intervention_model_description|text|Yes||Design Intervention Model Description|https://clinicaltrials.gov/policy/protocol-definitions#ModelDesc|Protocol|Design|protocolSection.designModule.designInfo.interventionModelDescription
+designs|subject_masked|boolean|Yes||Design Who Masked|https://clinicaltrials.gov/policy/protocol-definitions#IntMasking|Protocol|Design|protocolSection.designModule.designInfo.maskingInfo.whoMasked
+designs|caregiver_masked|boolean|Yes||Design Who Masked|https://clinicaltrials.gov/policy/protocol-definitions#IntMasking|Protocol|Design|protocolSection.designModule.designInfo.maskingInfo.whoMasked
+designs|investigator_masked|boolean|Yes||Design Who Masked|https://clinicaltrials.gov/policy/protocol-definitions#IntMasking|Protocol|Design|protocolSection.designModule.designInfo.maskingInfo.whoMasked
+designs|outcomes_assessor_masked|boolean|Yes||Design Who Masked|https://clinicaltrials.gov/policy/protocol-definitions#IntMasking|Protocol|Design|protocolSection.designModule.designInfo.maskingInfo.whoMasked
+detailed_descriptions|id|integer|No|primary key|||||
+detailed_descriptions|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+detailed_descriptions|description|text|Yes||Detailed Description|https://clinicaltrials.gov/policy/protocol-definitions#DetailedDescription|Protocol|Description|protocolSection.descriptionModule.detailedDescription
+documents|id|integer|No|primary key|||||
+documents|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+documents|document_id|character varying|Yes||Avail IPD Id|https://clinicaltrials.gov/policy/protocol-definitions#AvailIPDId|Protocol|References|protocolSection.referencesModule.availIpds.id
+documents|document_type|character varying|Yes||Avail IPD Type|https://clinicaltrials.gov/policy/protocol-definitions#AvailIPDType|Protocol|References|protocolSection.referencesModule.availIpds.type
+documents|url|character varying|Yes||Avail IPDURL|https://clinicaltrials.gov/policy/protocol-definitions#AvailIPDURL|Protocol|References|protocolSection.referencesModule.availIpds.url
+documents|comment|text|Yes||Avail IPD Comment|https://clinicaltrials.gov/policy/protocol-definitions#AvailIPDComment|Protocol|References|protocolSection.referencesModule.availIpds.comment
+drop_withdrawals|id|integer|No|primary key|||||
+drop_withdrawals|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+drop_withdrawals|result_group_id|integer|Yes||||||
+drop_withdrawals|ctgov_group_code|character varying|Yes||Flow Reason Group Id||Results|Participant Flow|resultsSection.participantFlowModule.periods.dropWithdraws.reasons.groupId
+drop_withdrawals|period|character varying|Yes||Flow Period Title|https://clinicaltrials.gov/policy/results-definitions#PeriodTitle|Results|Participant Flow|resultsSection.participantFlowModule.periods.title
+drop_withdrawals|reason|character varying|Yes||Flow Drop Withdraw Type|https://clinicaltrials.gov/policy/results-definitions#DWReasonType|Results|Participant Flow|resultsSection.participantFlowModule.periods.dropWithdraws.type
+drop_withdrawals|count|integer|Yes||Flow Reason Num Subjects|https://clinicaltrials.gov/policy/results-definitions#DWReasonData|Results|Participant Flow|resultsSection.participantFlowModule.periods.dropWithdraws.reasons.numSubjects
+drop_withdrawals|drop_withdraw_comment|character varying|Yes||Flow Drop Withdraw Comment||Results|Participant Flow|resultsSection.participantFlowModule.periods.dropWithdraws.comment
+drop_withdrawals|reason_comment|character varying|Yes||Flow Reason Comment|https://clinicaltrials.gov/policy/results-definitions#DWReasonData|Results|Participant Flow|resultsSection.participantFlowModule.periods.dropWithdraws.reasons.comment
+drop_withdrawals|count_units|integer|Yes||||||
+eligibilities|id|integer|No|primary key|||||
+eligibilities|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+eligibilities|sampling_method|character varying|Yes||Sampling Method|https://clinicaltrials.gov/policy/protocol-definitions#EligibilitySamplingMethod|Protocol|Eligibility|protocolSection.eligibilityModule.samplingMethod
+eligibilities|gender|character varying|Yes||Sex|https://clinicaltrials.gov/policy/protocol-definitions#EligibilitySexGender|Protocol|Eligibility|protocolSection.eligibilityModule.sex
+eligibilities|minimum_age|character varying|Yes||Minimum Age|https://clinicaltrials.gov/policy/protocol-definitions#EligibilityMinAge|Protocol|Eligibility|protocolSection.eligibilityModule.minimumAge
+eligibilities|maximum_age|character varying|Yes||Maximum Age|https://clinicaltrials.gov/policy/protocol-definitions#EligibilityMaxAge|Protocol|Eligibility|protocolSection.eligibilityModule.maximumAge
+eligibilities|healthy_volunteers|boolean|Yes||Healthy Volunteers|https://clinicaltrials.gov/policy/protocol-definitions#HealthyVolunteers|Protocol|Eligibility|protocolSection.eligibilityModule.healthyVolunteers
+eligibilities|population|text|Yes||Study Population|https://clinicaltrials.gov/policy/protocol-definitions#EligibilityStudyPopulation|Protocol|Eligibility|protocolSection.eligibilityModule.studyPopulation
+eligibilities|criteria|text|Yes||Eligibility Criteria|https://clinicaltrials.gov/policy/protocol-definitions#EligibilityCriteria|Protocol|Eligibility|protocolSection.eligibilityModule.eligibilityCriteria
+eligibilities|gender_description|text|Yes||Gender Description|https://clinicaltrials.gov/policy/protocol-definitions#GenderDescription|Protocol|Eligibility|protocolSection.eligibilityModule.genderDescription
+eligibilities|gender_based|boolean|Yes||||||
+eligibilities|adult|boolean|Yes||||||
+eligibilities|child|boolean|Yes||||||
+eligibilities|older_adult|boolean|Yes||||||
+facilities|id|integer|No|primary key|||||
+facilities|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+facilities|status|character varying|Yes||Location Status|https://clinicaltrials.gov/policy/protocol-definitions#FacilityStatus|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.status
+facilities|name|character varying|Yes||Location Facility|https://clinicaltrials.gov/policy/protocol-definitions#Facility|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.facility
+facilities|city|character varying|Yes||Location City|https://clinicaltrials.gov/policy/protocol-definitions#Facility|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.city
+facilities|state|character varying|Yes||Location State|https://clinicaltrials.gov/policy/protocol-definitions#Facility|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.state
+facilities|zip|character varying|Yes||Location Zip|https://clinicaltrials.gov/policy/protocol-definitions#Facility|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.zip
+facilities|country|character varying|Yes||Location Country|https://clinicaltrials.gov/policy/protocol-definitions#Facility|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.country
+facilities|latitude|numeric|Yes||||||
+facilities|longitude|numeric|Yes||||||
+facility_contacts|id|integer|No|primary key|||||
+facility_contacts|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+facility_contacts|facility_id|integer|Yes||||||
+facility_contacts|contact_type|character varying|Yes||||||
+facility_contacts|name|character varying|Yes||Location Contact Name|https://clinicaltrials.gov/policy/protocol-definitions#FacilityContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.contacts.name
+facility_contacts|email|character varying|Yes||Location ContactE Mail|https://clinicaltrials.gov/policy/protocol-definitions#FacilityContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.contacts.email
+facility_contacts|phone|character varying|Yes||Location Contact Phone|https://clinicaltrials.gov/policy/protocol-definitions#FacilityContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.contacts.phone
+facility_contacts|phone_extension|character varying|Yes||Location Contact Phone Ext|https://clinicaltrials.gov/policy/protocol-definitions#FacilityContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.contacts.phoneExt
+facility_investigators|id|integer|No|primary key|||||
+facility_investigators|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+facility_investigators|facility_id|integer|Yes||||||
+facility_investigators|role|character varying|Yes||Location Contact Role|https://clinicaltrials.gov/policy/protocol-definitions#Investigator|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.contacts.role
+facility_investigators|name|character varying|Yes||Location Contact Name|https://clinicaltrials.gov/policy/protocol-definitions#FacilityContact|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.locations.contacts.name
+id_information|id|integer|No|primary key|||||
+id_information|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+id_information|id_source|character varying|Yes||||||
+id_information|id_value|character varying|Yes||Secondary Id|https://clinicaltrials.gov/policy/protocol-definitions#SecondaryIds|Protocol|Identification|protocolSection.identificationModule.secondaryIdInfos.id
+id_information|id_type|character varying|Yes||Secondary Id Type|https://clinicaltrials.gov/policy/protocol-definitions#SecondaryIdType|Protocol|Identification|protocolSection.identificationModule.secondaryIdInfos.type
+id_information|id_type_description|character varying|Yes||Secondary Id Domain|https://clinicaltrials.gov/policy/protocol-definitions#SecondaryIdDescription|Protocol|Identification|protocolSection.identificationModule.secondaryIdInfos.domain
+id_information|id_link|character varying|Yes||Secondary Id Link||Protocol|Identification|protocolSection.identificationModule.secondaryIdInfos.link
+intervention_other_names|id|integer|No|primary key|||||
+intervention_other_names|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+intervention_other_names|intervention_id|integer|Yes||||||
+intervention_other_names|name|character varying|Yes||||||
+interventions|id|integer|No|primary key|||||
+interventions|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+interventions|intervention_type|character varying|Yes||Intervention Type|https://clinicaltrials.gov/policy/protocol-definitions#InterventionType|Protocol|Arms Interventions|protocolSection.armsInterventionsModule.interventions.type
+interventions|name|character varying|Yes||Intervention Name|https://clinicaltrials.gov/policy/protocol-definitions#InterventionName|Protocol|Arms Interventions|protocolSection.armsInterventionsModule.interventions.name
+interventions|description|text|Yes||Intervention Description|https://clinicaltrials.gov/policy/protocol-definitions#InterventionDescription|Protocol|Arms Interventions|protocolSection.armsInterventionsModule.interventions.description
+ipd_information_types|id|integer|No|primary key|||||
+ipd_information_types|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+ipd_information_types|name|character varying|Yes||||||
+keywords|id|integer|No|primary key|||||
+keywords|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+keywords|name|character varying|Yes||||||
+keywords|downcase_name|character varying|Yes||||||
+links|id|integer|No|primary key|||||
+links|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+links|url|character varying|Yes||See Also Link URL|https://clinicaltrials.gov/policy/protocol-definitions#URL|Protocol|References|protocolSection.referencesModule.seeAlsoLinks.url
+links|description|text|Yes||See Also Link Label|https://clinicaltrials.gov/policy/protocol-definitions#LinkDescription|Protocol|References|protocolSection.referencesModule.seeAlsoLinks.label
+mesh_headings|id|integer|No|primary key|||||
+mesh_headings|qualifier|character varying|Yes||||||
+mesh_headings|heading|character varying|Yes||||||
+mesh_headings|subcategory|character varying|Yes||||||
+mesh_terms|id|integer|No|primary key|||||
+mesh_terms|qualifier|character varying|Yes||||||
+mesh_terms|tree_number|character varying|Yes||||||
+mesh_terms|description|character varying|Yes||||||
+mesh_terms|mesh_term|character varying|Yes||||||
+mesh_terms|downcase_mesh_term|character varying|Yes||||||
+milestones|id|integer|No|primary key|||||
+milestones|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+milestones|result_group_id|integer|Yes||||||
+milestones|ctgov_group_code|character varying|Yes||Flow Achievement Group Id||Results|Participant Flow|resultsSection.participantFlowModule.periods.milestones.achievements.groupId
+milestones|title|character varying|Yes||Flow Milestone Type|https://clinicaltrials.gov/policy/results-definitions#Started|Results|Participant Flow|resultsSection.participantFlowModule.periods.milestones.type
+milestones|period|character varying|Yes||Flow Period Title|https://clinicaltrials.gov/policy/results-definitions#PeriodTitle|Results|Participant Flow|resultsSection.participantFlowModule.periods.title
+milestones|description|text|Yes||||||
+milestones|count|integer|Yes||Flow Achievement Num Subjects|https://clinicaltrials.gov/policy/results-definitions#MilestoneData|Results|Participant Flow|resultsSection.participantFlowModule.periods.milestones.achievements.numSubjects
+milestones|milestone_description|character varying|Yes||Flow Milestone Comment|https://clinicaltrials.gov/policy/results-definitions#Result_ParticipantFlow_Milestone_Started_comment|Results|Participant Flow|resultsSection.participantFlowModule.periods.milestones.comment
+milestones|count_units|character varying|Yes||Flow Achievement Num Units|https://clinicaltrials.gov/policy/results-definitions#MilestoneData|Results|Participant Flow|resultsSection.participantFlowModule.periods.milestones.achievements.numUnits
+outcome_analyses|id|integer|No|primary key|||||
+outcome_analyses|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+outcome_analyses|outcome_id|integer|Yes||||||
+outcome_analyses|non_inferiority_type|character varying|Yes||Outcome Analysis Non Inferiority Type|https://clinicaltrials.gov/policy/results-definitions#StatsTestType|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.nonInferiorityType
+outcome_analyses|non_inferiority_description|text|Yes||Outcome Analysis Non Inferiority Comment|https://clinicaltrials.gov/policy/results-definitions#Result_Outcome_Analysis_statsTestTypesComment|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.nonInferiorityComment
+outcome_analyses|param_type|character varying|Yes||Outcome Analysis Param Type|https://clinicaltrials.gov/policy/results-definitions#EstParamType|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.paramType
+outcome_analyses|param_value|numeric|Yes||Outcome Analysis Param Value|https://clinicaltrials.gov/policy/results-definitions#EstValue|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.paramValue
+outcome_analyses|dispersion_type|character varying|Yes||Outcome Analysis Dispersion Type|https://clinicaltrials.gov/policy/results-definitions#EstDispersType|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.dispersionType
+outcome_analyses|dispersion_value|numeric|Yes||Outcome Analysis Dispersion Value|https://clinicaltrials.gov/policy/results-definitions#EstDispersAmount|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.dispersionValue
+outcome_analyses|p_value_modifier|character varying|Yes||Outcome AnalysisP Value|https://clinicaltrials.gov/policy/results-definitions#PValue|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.pValue
+outcome_analyses|p_value|double precision|Yes||Outcome AnalysisP Value|https://clinicaltrials.gov/policy/results-definitions#PValue|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.pValue
+outcome_analyses|ci_n_sides|character varying|Yes||Outcome Analysis CI Num Sides|https://clinicaltrials.gov/policy/results-definitions#CINumberSides|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.ciNumSides
+outcome_analyses|ci_percent|numeric|Yes||Outcome Analysis CI Pct Value|https://clinicaltrials.gov/policy/results-definitions#ConfLevel|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.ciPctValue
+outcome_analyses|ci_lower_limit|numeric|Yes||Outcome Analysis CI Lower Limit|https://clinicaltrials.gov/policy/results-definitions#LowerLimit|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.ciLowerLimit
+outcome_analyses|ci_upper_limit|numeric|Yes||Outcome Analysis CI Upper Limit|https://clinicaltrials.gov/policy/results-definitions#UpperLimit|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.ciUpperLimit
+outcome_analyses|ci_upper_limit_na_comment|character varying|Yes||Outcome Analysis CI Upper Limit Comment||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.ciUpperLimitComment
+outcome_analyses|p_value_description|character varying|Yes||Outcome AnalysisP Value Comment|https://clinicaltrials.gov/policy/results-definitions#PValueComments|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.pValueComment
+outcome_analyses|method|character varying|Yes||Outcome Analysis Statistical Method|https://clinicaltrials.gov/policy/results-definitions#Method|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.statisticalMethod
+outcome_analyses|method_description|text|Yes||Outcome Analysis Statistical Comment|https://clinicaltrials.gov/policy/results-definitions#OtherMethodComments|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.statisticalComment
+outcome_analyses|estimate_description|text|Yes||Outcome Analysis Estimate Comment|https://clinicaltrials.gov/policy/results-definitions#EstComments|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.estimateComment
+outcome_analyses|groups_description|text|Yes||Outcome Analysis Group Description|https://clinicaltrials.gov/policy/results-definitions#Result_Outcome_Analysis_statsAnalysisComment|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.groupDescription
+outcome_analyses|other_analysis_description|text|Yes||Outcome Analysis Other Analysis Description|https://clinicaltrials.gov/policy/results-definitions#OtherStats|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.otherAnalysisDescription
+outcome_analyses|ci_upper_limit_raw|character varying|Yes||Outcome Analysis CI Upper Limit|https://clinicaltrials.gov/policy/results-definitions#UpperLimit|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.ciUpperLimit
+outcome_analyses|ci_lower_limit_raw|character varying|Yes||Outcome Analysis CI Lower Limit|https://clinicaltrials.gov/policy/results-definitions#LowerLimit|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.ciLowerLimit
+outcome_analyses|p_value_raw|character varying|Yes||Outcome AnalysisP Value|https://clinicaltrials.gov/policy/results-definitions#PValue|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.analyses.pValue
+outcome_analysis_groups|id|integer|No|primary key|||||
+outcome_analysis_groups|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+outcome_analysis_groups|outcome_analysis_id|integer|Yes||||||
+outcome_analysis_groups|result_group_id|integer|Yes||||||
+outcome_analysis_groups|ctgov_group_code|character varying|Yes||||||
+outcome_counts|id|integer|No|primary key|||||
+outcome_counts|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+outcome_counts|outcome_id|integer|Yes||||||
+outcome_counts|result_group_id|integer|Yes||||||
+outcome_counts|ctgov_group_code|character varying|Yes||Outcome Denom Count Group Id||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.denoms.counts.groupId
+outcome_counts|scope|character varying|Yes||||||
+outcome_counts|units|character varying|Yes||Outcome Denom Units|https://clinicaltrials.gov/policy/results-definitions#NumUnitsAnalyzed|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.denoms.units
+outcome_counts|count|integer|Yes||Outcome Denom Count Value|https://clinicaltrials.gov/policy/results-definitions#SubjectsAnalyzed|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.denoms.counts.value
+outcome_measurements|id|integer|No|primary key|||||
+outcome_measurements|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+outcome_measurements|outcome_id|integer|Yes||||||
+outcome_measurements|result_group_id|integer|Yes||||||
+outcome_measurements|ctgov_group_code|character varying|Yes||Outcome Measurement Group Id||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.groupId
+outcome_measurements|classification|character varying|Yes||Outcome Class Title|https://clinicaltrials.gov/policy/results-definitions#OutcomeCategoryTitle|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.title
+outcome_measurements|category|character varying|Yes||Outcome Category Title|https://clinicaltrials.gov/policy/results-definitions#OutcomeCategoryTitle|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.title
+outcome_measurements|title|character varying|Yes||Outcome Measure Title|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureTitle|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.title
+outcome_measurements|description|text|Yes||Outcome Measure Description|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureDesc|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.description
+outcome_measurements|units|character varying|Yes||Outcome Measure Unit Of Measure|https://clinicaltrials.gov/policy/results-definitions#OutcomeUnitOfMeasure|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.unitOfMeasure
+outcome_measurements|param_type|character varying|Yes||Outcome Measure Param Type|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureParamType|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.paramType
+outcome_measurements|param_value|character varying|Yes||Outcome Measurement Value|https://clinicaltrials.gov/policy/results-definitions#OutcomeData|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.value
+outcome_measurements|param_value_num|numeric|Yes||Outcome Measurement Value|https://clinicaltrials.gov/policy/results-definitions#OutcomeData|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.value
+outcome_measurements|dispersion_type|character varying|Yes||Outcome Measure Dispersion Type|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureDispersType|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.dispersionType
+outcome_measurements|dispersion_value|character varying|Yes||Outcome Measurement Spread||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.spread
+outcome_measurements|dispersion_value_num|numeric|Yes||Outcome Measurement Spread||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.spread
+outcome_measurements|dispersion_lower_limit|numeric|Yes||Outcome Measurement Lower Limit||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.lowerLimit
+outcome_measurements|dispersion_upper_limit|numeric|Yes||Outcome Measurement Upper Limit||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.upperLimit
+outcome_measurements|explanation_of_na|text|Yes||Outcome Measurement Comment||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.comment
+outcome_measurements|dispersion_upper_limit_raw|character varying|Yes||Outcome Measurement Upper Limit||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.upperLimit
+outcome_measurements|dispersion_lower_limit_raw|character varying|Yes||Outcome Measurement Lower Limit||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.classes.categories.measurements.lowerLimit
+outcomes|id|integer|No|primary key|||||
+outcomes|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+outcomes|outcome_type|character varying|Yes||Outcome Measure Type|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureType|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.type
+outcomes|title|text|Yes||Outcome Measure Title|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureTitle|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.title
+outcomes|description|text|Yes||Outcome Measure Description|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureDesc|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.description
+outcomes|time_frame|text|Yes||Outcome Measure Time Frame|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureTimeFrame|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.timeFrame
+outcomes|population|text|Yes||Outcome Measure Population Description|https://clinicaltrials.gov/policy/results-definitions#AnalysisPopulation|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.populationDescription
+outcomes|anticipated_posting_date|date|Yes||Outcome Measure Anticipated Posting Date|https://clinicaltrials.gov/policy/results-definitions#OutcomeAnticipatedPostDate|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.anticipatedPostingDate
+outcomes|anticipated_posting_month_year|character varying|Yes||Outcome Measure Anticipated Posting Date|https://clinicaltrials.gov/policy/results-definitions#OutcomeAnticipatedPostDate|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.anticipatedPostingDate
+outcomes|units|character varying|Yes||Outcome Measure Unit Of Measure|https://clinicaltrials.gov/policy/results-definitions#OutcomeUnitOfMeasure|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.unitOfMeasure
+outcomes|units_analyzed|character varying|Yes||Outcome Measure Type Units Analyzed|https://clinicaltrials.gov/policy/results-definitions#TypeUnitsAnalyzed|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.typeUnitsAnalyzed
+outcomes|dispersion_type|character varying|Yes||Outcome Measure Dispersion Type|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureDispersType|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.dispersionType
+outcomes|param_type|character varying|Yes||Outcome Measure Param Type|https://clinicaltrials.gov/policy/results-definitions#OutcomeMeasureParamType|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.paramType
+overall_officials|id|integer|No|primary key|||||
+overall_officials|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+overall_officials|role|character varying|Yes||Overall Official Role|https://clinicaltrials.gov/policy/protocol-definitions#StudyOfficials|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.overallOfficials.role
+overall_officials|name|character varying|Yes||Overall Official Name|https://clinicaltrials.gov/policy/protocol-definitions#StudyOfficials|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.overallOfficials.name
+overall_officials|affiliation|character varying|Yes||Overall Official Affiliation|https://clinicaltrials.gov/policy/protocol-definitions#StudyOfficials|Protocol|Contacts Locations|protocolSection.contactsLocationsModule.overallOfficials.affiliation
+participant_flows|id|integer|No|primary key|||||
+participant_flows|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+participant_flows|recruitment_details|text|Yes||Flow Recruitment Details|https://clinicaltrials.gov/policy/results-definitions#RecruitDetails|Results|Participant Flow|resultsSection.participantFlowModule.recruitmentDetails
+participant_flows|pre_assignment_details|text|Yes||Flow Pre Assignment Details|https://clinicaltrials.gov/policy/results-definitions#PreAssignDetails|Results|Participant Flow|resultsSection.participantFlowModule.preAssignmentDetails
+participant_flows|units_analyzed|character varying|Yes||Flow Type Units Analyzed|https://clinicaltrials.gov/policy/results-definitions#PopFlowTypeUnitsRandomized|Results|Participant Flow|resultsSection.participantFlowModule.typeUnitsAnalyzed
+pending_results|id|integer|No|primary key|||||
+pending_results|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+pending_results|event|character varying|Yes||Unposted Event Type||Annotation|Annotation|annotationSection.annotationModule.unpostedAnnotation.unpostedEvents.type
+pending_results|event_date_description|character varying|Yes||Unposted Event Date||Annotation|Annotation|annotationSection.annotationModule.unpostedAnnotation.unpostedEvents.date
+pending_results|event_date|date|Yes||Unposted Event Date||Annotation|Annotation|annotationSection.annotationModule.unpostedAnnotation.unpostedEvents.date
+provided_documents|id|integer|No|primary key|||||
+provided_documents|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+provided_documents|document_type|character varying|Yes||Large Doc Label|https://clinicaltrials.gov/policy/results-definitions#DocUploadSubtitle|Document|Large Document|documentSection.largeDocumentModule.largeDocs.label
+provided_documents|has_protocol|boolean|Yes||Large Doc Has Protocol||Document|Large Document|documentSection.largeDocumentModule.largeDocs.hasProtocol
+provided_documents|has_icf|boolean|Yes||Large Doc Has ICF||Document|Large Document|documentSection.largeDocumentModule.largeDocs.hasIcf
+provided_documents|has_sap|boolean|Yes||Large Doc Has SAP||Document|Large Document|documentSection.largeDocumentModule.largeDocs.hasSap
+provided_documents|document_date|date|Yes||Large Doc Date|https://clinicaltrials.gov/policy/results-definitions#DocUploadDocDate|Document|Large Document|documentSection.largeDocumentModule.largeDocs.date
+provided_documents|url|character varying|Yes||Large Doc Filename||Document|Large Document|documentSection.largeDocumentModule.largeDocs.filename
+reported_event_totals|id|integer|No|primary key|||||
+reported_event_totals|nct_id|character varying|No|foreign key referencing studies.nct_id|||||
+reported_event_totals|ctgov_group_code|character varying|No||Event Group Id||Results|Adverse Events|resultsSection.adverseEventsModule.eventGroups.id
+reported_event_totals|event_type|character varying|Yes||||||
+reported_event_totals|classification|character varying|No||||||
+reported_event_totals|subjects_affected|integer|Yes||Event Group Deaths Num Affected|https://clinicaltrials.gov/policy/results-definitions#Mortality_Affected|Results|Adverse Events|resultsSection.adverseEventsModule.eventGroups.deathsNumAffected
+reported_event_totals|subjects_at_risk|integer|Yes||Event Group Deaths Num At Risk|https://clinicaltrials.gov/policy/results-definitions#Mortality_AtRisk|Results|Adverse Events|resultsSection.adverseEventsModule.eventGroups.deathsNumAtRisk
+reported_event_totals|created_at|timestamp without time zone|No||||||
+reported_event_totals|updated_at|timestamp without time zone|No||||||
+reported_events|id|integer|No|primary key|||||
+reported_events|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+reported_events|result_group_id|integer|Yes||||||
+reported_events|ctgov_group_code|character varying|Yes||Other Event Stats Group Id||Results|Adverse Events|resultsSection.adverseEventsModule.otherEvents.stats.groupId
+reported_events|time_frame|text|Yes||Events Time Frame|https://clinicaltrials.gov/policy/results-definitions#Result_AdverseEvents_timeFrame|Results|Adverse Events|resultsSection.adverseEventsModule.timeFrame
+reported_events|event_type|character varying|Yes||||||
+reported_events|default_vocab|character varying|Yes||||||
+reported_events|default_assessment|character varying|Yes|This field is deprecated and no longer used|||||
+reported_events|subjects_affected|integer|Yes||Other Event Stats Num Affected|https://clinicaltrials.gov/policy/results-definitions#AdverseEventAffected|Results|Adverse Events|resultsSection.adverseEventsModule.otherEvents.stats.numAffected
+reported_events|subjects_at_risk|integer|Yes||Other Event Stats Num At Risk|https://clinicaltrials.gov/policy/results-definitions#AdverseEventAtRisk|Results|Adverse Events|resultsSection.adverseEventsModule.otherEvents.stats.numAtRisk
+reported_events|description|text|Yes||Events Description|https://clinicaltrials.gov/policy/results-definitions#Result_AdverseEvents_additDescription|Results|Adverse Events|resultsSection.adverseEventsModule.description
+reported_events|event_count|integer|Yes||Other Event Stats Num Events|https://clinicaltrials.gov/policy/results-definitions#OtherAEEvents|Results|Adverse Events|resultsSection.adverseEventsModule.otherEvents.stats.numEvents
+reported_events|organ_system|character varying|Yes||Other Event Organ System|https://clinicaltrials.gov/policy/results-definitions#OrganSystem|Results|Adverse Events|resultsSection.adverseEventsModule.otherEvents.organSystem
+reported_events|adverse_event_term|character varying|Yes||Other Event Term|https://clinicaltrials.gov/policy/results-definitions#AdverseEventTerm|Results|Adverse Events|resultsSection.adverseEventsModule.otherEvents.term
+reported_events|frequency_threshold|integer|Yes||Events Frequency Threshold|https://clinicaltrials.gov/policy/results-definitions#FrequencyThreshold|Results|Adverse Events|resultsSection.adverseEventsModule.frequencyThreshold
+reported_events|vocab|character varying|Yes||Other Event Source Vocabulary|https://clinicaltrials.gov/policy/results-definitions#AdverseEventVocab|Results|Adverse Events|resultsSection.adverseEventsModule.otherEvents.sourceVocabulary
+reported_events|assessment|character varying|Yes||Other Event Assessment Type|https://clinicaltrials.gov/policy/results-definitions#AssessType|Results|Adverse Events|resultsSection.adverseEventsModule.otherEvents.assessmentType
+responsible_parties|id|integer|No|primary key|||||
+responsible_parties|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+responsible_parties|responsible_party_type|character varying|Yes||Responsible Party Type|https://clinicaltrials.gov/policy/protocol-definitions#RespParty|Protocol|Sponsor Collaborators|protocolSection.sponsorCollaboratorsModule.responsibleParty.type
+responsible_parties|name|character varying|Yes||Responsible Party Investigator Full Name|https://clinicaltrials.gov/policy/protocol-definitions#InvestigatorName|Protocol|Sponsor Collaborators|protocolSection.sponsorCollaboratorsModule.responsibleParty.investigatorFullName
+responsible_parties|title|character varying|Yes||Responsible Party Investigator Title|https://clinicaltrials.gov/policy/protocol-definitions#InvestigatorOfTitle|Protocol|Sponsor Collaborators|protocolSection.sponsorCollaboratorsModule.responsibleParty.investigatorTitle
+responsible_parties|organization|character varying|Yes||Responsible Party Old Organization|https://clinicaltrials.gov/policy/protocol-definitions#InvestigatorAffil|Protocol|Sponsor Collaborators|protocolSection.sponsorCollaboratorsModule.responsibleParty.oldOrganization
+responsible_parties|affiliation|text|Yes||Responsible Party Investigator Affiliation|https://clinicaltrials.gov/policy/protocol-definitions#InvestigatorAffil|Protocol|Sponsor Collaborators|protocolSection.sponsorCollaboratorsModule.responsibleParty.investigatorAffiliation
+responsible_parties|old_name_title|character varying|Yes||Responsible Party Old Name Title|https://clinicaltrials.gov/policy/protocol-definitions#InvestigatorName|Protocol|Sponsor Collaborators|protocolSection.sponsorCollaboratorsModule.responsibleParty.oldNameTitle
+result_agreements|id|integer|No|primary key|||||
+result_agreements|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+result_agreements|pi_employee|boolean|Yes||Agreement PI Sponsor Employee|https://clinicaltrials.gov/policy/results-definitions#PIEmployment|Results|More Info|resultsSection.moreInfoModule.certainAgreement.piSponsorEmployee
+result_agreements|agreement|text|Yes||||||
+result_agreements|restriction_type|character varying|Yes||Agreement Restriction Type|https://clinicaltrials.gov/policy/results-definitions#RestrictionType|Results|More Info|resultsSection.moreInfoModule.certainAgreement.restrictionType
+result_agreements|other_details|text|Yes||Agreement Other Details|https://clinicaltrials.gov/policy/results-definitions#OtherRestrictionType|Results|More Info|resultsSection.moreInfoModule.certainAgreement.otherDetails
+result_agreements|restrictive_agreement|boolean|Yes||Agreement Restrictive Agreement|https://clinicaltrials.gov/policy/results-definitions#PIAgreement|Results|More Info|resultsSection.moreInfoModule.certainAgreement.restrictiveAgreement
+result_contacts|id|integer|No|primary key|||||
+result_contacts|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+result_contacts|organization|character varying|Yes||Point Of Contact Organization|https://clinicaltrials.gov/policy/results-definitions#OrgName|Results|More Info|resultsSection.moreInfoModule.pointOfContact.organization
+result_contacts|name|character varying|Yes||Point Of Contact Title|https://clinicaltrials.gov/policy/results-definitions#NameOfficialTitle|Results|More Info|resultsSection.moreInfoModule.pointOfContact.title
+result_contacts|phone|character varying|Yes||Point Of Contact Phone|https://clinicaltrials.gov/policy/results-definitions#Phone|Results|More Info|resultsSection.moreInfoModule.pointOfContact.phone
+result_contacts|email|character varying|Yes||Point Of ContactE Mail|https://clinicaltrials.gov/policy/results-definitions#Email|Results|More Info|resultsSection.moreInfoModule.pointOfContact.email
+result_contacts|extension|character varying|Yes||Point Of Contact Phone Ext|https://clinicaltrials.gov/policy/results-definitions#PhoneExt|Results|More Info|resultsSection.moreInfoModule.pointOfContact.phoneExt
+result_groups|id|integer|No|primary key|||||
+result_groups|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+result_groups|ctgov_group_code|character varying|Yes||Outcome Group Id||Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.groups.id
+result_groups|result_type|character varying|Yes||||||
+result_groups|title|character varying|Yes||Outcome Group Title|https://clinicaltrials.gov/policy/results-definitions#OutcomeArmGroupTitle|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.groups.title
+result_groups|description|text|Yes||Outcome Group Description|https://clinicaltrials.gov/policy/results-definitions#OutcomeArmGroupDesc|Results|Outcome Measures|resultsSection.outcomeMeasuresModule.outcomeMeasures.groups.description
+result_groups|outcome_id|integer|Yes||||||
+retractions|id|bigint|No|primary key|||||
+retractions|reference_id|integer|Yes||||||
+retractions|pmid|character varying|Yes||Retraction PMID||Protocol|References|protocolSection.referencesModule.references.retractions.pmid
+retractions|source|character varying|Yes||Retraction Source||Protocol|References|protocolSection.referencesModule.references.retractions.source
+retractions|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+search_results|id|integer|No|primary key|||||
+search_results|nct_id|character varying|No|foreign key referencing studies.nct_id|||||
+search_results|name|character varying|No||||||
+search_results|created_at|timestamp without time zone|No||||||
+search_results|updated_at|timestamp without time zone|No||||||
+search_results|grouping|character varying|No||||||
+search_results|study_search_id|integer|Yes||||||
+search_term_results|id|bigint|No|primary key|||||
+search_term_results|nct_id|character varying|No|foreign key referencing studies.nct_id|||||
+search_term_results|search_term_id|bigint|No||||||
+search_term_results|created_at|timestamp without time zone|No||||||
+search_term_results|updated_at|timestamp without time zone|No||||||
+search_terms|id|bigint|No|primary key|||||
+search_terms|term|character varying|No||||||
+search_terms|group|character varying|Yes||||||
+search_terms|created_at|timestamp without time zone|No||||||
+search_terms|updated_at|timestamp without time zone|No||||||
+sponsors|id|integer|No|primary key|||||
+sponsors|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+sponsors|agency_class|character varying|Yes||Collaborator Class||Protocol|Sponsor Collaborators|protocolSection.sponsorCollaboratorsModule.collaborators.class
+sponsors|lead_or_collaborator|character varying|Yes||||||
+sponsors|name|character varying|Yes||Collaborator Name|https://clinicaltrials.gov/policy/protocol-definitions#Collaborators|Protocol|Sponsor Collaborators|protocolSection.sponsorCollaboratorsModule.collaborators.name
+studies|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+studies|nlm_download_date_description|character varying|Yes|deprecated field, no longer in use|||||
+studies|study_first_submitted_date|date|Yes||Study First Submit Date||Protocol|Status|protocolSection.statusModule.studyFirstSubmitDate
+studies|results_first_submitted_date|date|Yes||Results First Submit Date||Protocol|Status|protocolSection.statusModule.resultsFirstSubmitDate
+studies|disposition_first_submitted_date|date|Yes||Disp First Submit Date||Protocol|Status|protocolSection.statusModule.dispFirstSubmitDate
+studies|last_update_submitted_date|date|Yes||Last Update Submit Date||Protocol|Status|protocolSection.statusModule.lastUpdateSubmitDate
+studies|study_first_submitted_qc_date|date|Yes||Study First Submit QC Date||Protocol|Status|protocolSection.statusModule.studyFirstSubmitQcDate
+studies|study_first_posted_date|date|Yes||Study First Post Date||Protocol|Status|protocolSection.statusModule.studyFirstPostDateStruct.date
+studies|study_first_posted_date_type|character varying|Yes||Study First Post Date Type||Protocol|Status|protocolSection.statusModule.studyFirstPostDateStruct.type
+studies|results_first_submitted_qc_date|date|Yes||Results First Submit QC Date||Protocol|Status|protocolSection.statusModule.resultsFirstSubmitQcDate
+studies|results_first_posted_date|date|Yes||Results First Post Date||Protocol|Status|protocolSection.statusModule.resultsFirstPostDateStruct.date
+studies|results_first_posted_date_type|character varying|Yes||Results First Post Date Type||Protocol|Status|protocolSection.statusModule.resultsFirstPostDateStruct.type
+studies|disposition_first_submitted_qc_date|date|Yes||Disp First Submit QC Date||Protocol|Status|protocolSection.statusModule.dispFirstSubmitQcDate
+studies|disposition_first_posted_date|date|Yes||Disp First Post Date||Protocol|Status|protocolSection.statusModule.dispFirstPostDateStruct.date
+studies|disposition_first_posted_date_type|character varying|Yes||Disp First Post Date Type||Protocol|Status|protocolSection.statusModule.dispFirstPostDateStruct.type
+studies|last_update_submitted_qc_date|date|Yes||Last Update Submit Date||Protocol|Status|protocolSection.statusModule.lastUpdateSubmitDate
+studies|last_update_posted_date|date|Yes||Last Update Post Date||Protocol|Status|protocolSection.statusModule.lastUpdatePostDateStruct.date
+studies|last_update_posted_date_type|character varying|Yes||Last Update Post Date Type||Protocol|Status|protocolSection.statusModule.lastUpdatePostDateStruct.type
+studies|start_month_year|character varying|Yes||Start Date|https://clinicaltrials.gov/policy/protocol-definitions#StartDate|Protocol|Status|protocolSection.statusModule.startDateStruct.date
+studies|start_date_type|character varying|Yes||Start Date Type||Protocol|Status|protocolSection.statusModule.startDateStruct.type
+studies|start_date|date|Yes||Start Date|https://clinicaltrials.gov/policy/protocol-definitions#StartDate|Protocol|Status|protocolSection.statusModule.startDateStruct.date
+studies|verification_month_year|character varying|Yes||Status Verified Date|https://clinicaltrials.gov/policy/protocol-definitions#VerificationDate|Protocol|Status|protocolSection.statusModule.statusVerifiedDate
+studies|verification_date|date|Yes||Status Verified Date|https://clinicaltrials.gov/policy/protocol-definitions#VerificationDate|Protocol|Status|protocolSection.statusModule.statusVerifiedDate
+studies|completion_month_year|character varying|Yes||Completion Date|https://clinicaltrials.gov/policy/protocol-definitions#LastFollowUpDate|Protocol|Status|protocolSection.statusModule.completionDateStruct.date
+studies|completion_date_type|character varying|Yes||Completion Date Type|https://clinicaltrials.gov/policy/protocol-definitions#LastFollowUpDate|Protocol|Status|protocolSection.statusModule.completionDateStruct.type
+studies|completion_date|date|Yes||Completion Date|https://clinicaltrials.gov/policy/protocol-definitions#LastFollowUpDate|Protocol|Status|protocolSection.statusModule.completionDateStruct.date
+studies|primary_completion_month_year|character varying|Yes||Primary Completion Date|https://clinicaltrials.gov/policy/protocol-definitions#LastFollowUpDate|Protocol|Status|protocolSection.statusModule.primaryCompletionDateStruct.date
+studies|primary_completion_date_type|character varying|Yes||Primary Completion Date Type|https://clinicaltrials.gov/policy/protocol-definitions#LastFollowUpDate|Protocol|Status|protocolSection.statusModule.primaryCompletionDateStruct.type
+studies|primary_completion_date|date|Yes||Primary Completion Date|https://clinicaltrials.gov/policy/protocol-definitions#LastFollowUpDate|Protocol|Status|protocolSection.statusModule.primaryCompletionDateStruct.date
+studies|target_duration|character varying|Yes||Target Duration|https://clinicaltrials.gov/policy/protocol-definitions#RoPR|Protocol|Design|protocolSection.designModule.targetDuration
+studies|study_type|character varying|Yes||Study Type|https://clinicaltrials.gov/policy/protocol-definitions#StudyType|Protocol|Design|protocolSection.designModule.studyType
+studies|acronym|character varying|Yes||Acronym|https://clinicaltrials.gov/policy/protocol-definitions#Acronym|Protocol|Identification|protocolSection.identificationModule.acronym
+studies|baseline_population|text|Yes||Baseline Population Description|https://clinicaltrials.gov/policy/results-definitions#BaselineAnalysisPopulationDesc|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.populationDescription
+studies|brief_title|text|Yes||Brief Title|https://clinicaltrials.gov/policy/protocol-definitions#BriefTitle|Protocol|Identification|protocolSection.identificationModule.briefTitle
+studies|official_title|text|Yes||Official Title|https://clinicaltrials.gov/policy/protocol-definitions#OfficialTitle|Protocol|Identification|protocolSection.identificationModule.officialTitle
+studies|overall_status|character varying|Yes||Overall Status|https://clinicaltrials.gov/policy/protocol-definitions#OverallStatus|Protocol|Status|protocolSection.statusModule.overallStatus
+studies|last_known_status|character varying|Yes||Last Known Status||Protocol|Status|protocolSection.statusModule.lastKnownStatus
+studies|phase|character varying|Yes||Phase|https://clinicaltrials.gov/policy/protocol-definitions#StudyPhase|Protocol|Design|protocolSection.designModule.phases
+studies|enrollment|integer|Yes||Enrollment Count|https://clinicaltrials.gov/policy/protocol-definitions#IntEnrollment|Protocol|Design|protocolSection.designModule.enrollmentInfo.count
+studies|enrollment_type|character varying|Yes||Enrollment Type|https://clinicaltrials.gov/policy/protocol-definitions#IntEnrollment|Protocol|Design|protocolSection.designModule.enrollmentInfo.type
+studies|source|character varying|Yes||Org Full Name||Protocol|Identification|protocolSection.identificationModule.organization.fullName
+studies|limitations_and_caveats|character varying|Yes||Limitations And Caveats Description|https://clinicaltrials.gov/policy/results-definitions#AdverseEventDataLimitCaveats|Results|More Info|resultsSection.moreInfoModule.limitationsAndCaveats.description
+studies|number_of_arms|integer|Yes||||||
+studies|number_of_groups|integer|Yes||||||
+studies|why_stopped|character varying|Yes||Why Stopped|https://clinicaltrials.gov/policy/protocol-definitions#WhyStudyStopped|Protocol|Status|protocolSection.statusModule.whyStopped
+studies|has_expanded_access|boolean|Yes||Has Expanded Access|https://clinicaltrials.gov/policy/protocol-definitions#HasExpandedAccess|Protocol|Status|protocolSection.statusModule.expandedAccessInfo.hasExpandedAccess
+studies|expanded_access_type_individual|boolean|Yes||Exp Acc Type Individual||Protocol|Design|protocolSection.designModule.expandedAccessTypes.individual
+studies|expanded_access_type_intermediate|boolean|Yes||Exp Acc Type Intermediate||Protocol|Design|protocolSection.designModule.expandedAccessTypes.intermediate
+studies|expanded_access_type_treatment|boolean|Yes||Exp Acc Type Treatment||Protocol|Design|protocolSection.designModule.expandedAccessTypes.treatment
+studies|has_dmc|boolean|Yes||Oversight Has DMC|https://clinicaltrials.gov/policy/protocol-definitions#hasDMC|Protocol|Oversight|protocolSection.oversightModule.oversightHasDmc
+studies|is_fda_regulated_drug|boolean|Yes||Is FDA Regulated Drug|https://clinicaltrials.gov/policy/protocol-definitions#FDADrugProduct|Protocol|Oversight|protocolSection.oversightModule.isFdaRegulatedDrug
+studies|is_fda_regulated_device|boolean|Yes||Is FDA Regulated Device|https://clinicaltrials.gov/policy/protocol-definitions#FDAReg|Protocol|Oversight|protocolSection.oversightModule.isFdaRegulatedDevice
+studies|is_unapproved_device|boolean|Yes||Is Unapproved Device|https://clinicaltrials.gov/policy/protocol-definitions#deviceNotCleared|Protocol|Oversight|protocolSection.oversightModule.isUnapprovedDevice
+studies|is_ppsd|boolean|Yes||Is PPSD|https://clinicaltrials.gov/policy/protocol-definitions#PediatricPostmarket|Protocol|Oversight|protocolSection.oversightModule.isPpsd
+studies|is_us_export|boolean|Yes||Is US Export|https://clinicaltrials.gov/policy/protocol-definitions#ProductFromUS|Protocol|Oversight|protocolSection.oversightModule.isUsExport
+studies|biospec_retention|character varying|Yes||Bio Spec Retention|https://clinicaltrials.gov/policy/protocol-definitions#ObsBiospecimenRetention|Protocol|Design|protocolSection.designModule.bioSpec.retention
+studies|biospec_description|text|Yes||Bio Spec Description|https://clinicaltrials.gov/policy/protocol-definitions#ObsBiospecimenDescription|Protocol|Design|protocolSection.designModule.bioSpec.description
+studies|ipd_time_frame|character varying|Yes||IPD Sharing Time Frame|https://clinicaltrials.gov/policy/protocol-definitions#IPDSharingTimeFrame|Protocol|Ipd Sharing Statement|protocolSection.ipdSharingStatementModule.timeFrame
+studies|ipd_access_criteria|character varying|Yes||IPD Sharing Access Criteria|https://clinicaltrials.gov/policy/protocol-definitions#IPDSharingAccess|Protocol|Ipd Sharing Statement|protocolSection.ipdSharingStatementModule.accessCriteria
+studies|ipd_url|character varying|Yes||IPD Sharing URL|https://clinicaltrials.gov/policy/protocol-definitions#IPDSharingURL|Protocol|Ipd Sharing Statement|protocolSection.ipdSharingStatementModule.url
+studies|plan_to_share_ipd|character varying|Yes||IPD Sharing|https://clinicaltrials.gov/policy/protocol-definitions#PlantoShareIPD|Protocol|Ipd Sharing Statement|protocolSection.ipdSharingStatementModule.ipdSharing
+studies|plan_to_share_ipd_description|character varying|Yes||IPD Sharing Description|https://clinicaltrials.gov/policy/protocol-definitions#IPDSharingPlanDescription|Protocol|Ipd Sharing Statement|protocolSection.ipdSharingStatementModule.description
+studies|created_at|timestamp without time zone|No||||||
+studies|updated_at|timestamp without time zone|No||||||
+studies|source_class|character varying|Yes||Org Class||Protocol|Identification|protocolSection.identificationModule.organization.class
+studies|delayed_posting|boolean|Yes||Delayed Posting|https://clinicaltrials.gov/policy/protocol-definitions#PostPriorFDAAApproval|Protocol|Status|protocolSection.statusModule.delayedPosting
+studies|expanded_access_nctid|character varying|Yes||Expanded Access NCT Id|https://clinicaltrials.gov/policy/protocol-definitions#EANCTNumber|Protocol|Status|protocolSection.statusModule.expandedAccessInfo.nctId
+studies|expanded_access_status_for_nctid|character varying|Yes||Expanded Access Status For NCT Id||Protocol|Status|protocolSection.statusModule.expandedAccessInfo.statusForNctId
+studies|fdaaa801_violation|boolean|Yes||FDAA A801 Violation||Protocol|Oversight|protocolSection.oversightModule.fdaaa801Violation
+studies|baseline_type_units_analyzed|character varying|Yes||Baseline Type Units Analyzed|https://clinicaltrials.gov/policy/results-definitions#BaselineTypeUnitsAnalyzed|Results|Baseline Characteristics|resultsSection.baselineCharacteristicsModule.typeUnitsAnalyzed
+studies|patient_registry|boolean|Yes||Patient Registry||Protocol|Design|protocolSection.designModule.patientRegistry
+study_records|id|bigint|No|primary key|||||
+study_records|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+study_records|type|character varying|Yes||||||
+study_records|content|json|Yes||||||
+study_records|sha|character varying|Yes||||||
+study_records|created_at|timestamp without time zone|No||||||
+study_records|updated_at|timestamp without time zone|No||||||
+study_references|id|integer|No|primary key|||||
+study_references|nct_id|character varying|Yes|foreign key referencing studies.nct_id|||||
+study_references|pmid|character varying|Yes||Reference PMID|https://clinicaltrials.gov/policy/protocol-definitions#PubMedId|Protocol|References|protocolSection.referencesModule.references.pmid
+study_references|reference_type|character varying|Yes||Reference Type|https://clinicaltrials.gov/policy/protocol-definitions#IsResultsRef|Protocol|References|protocolSection.referencesModule.references.type
+study_references|citation|text|Yes||Reference Citation|https://clinicaltrials.gov/policy/protocol-definitions#Citation|Protocol|References|protocolSection.referencesModule.references.citation
+study_searches|id|integer|No|primary key|||||
+study_searches|save_tsv|boolean|No||||||
+study_searches|query|character varying|No||||||
+study_searches|grouping|character varying|No||||||
+study_searches|name|character varying|No||||||
+study_searches|beta_api|boolean|No||||||
+study_searches|created_at|timestamp without time zone|No||||||
+study_searches|updated_at|timestamp without time zone|No||||||
+study_searches|active|boolean|Yes||||||
