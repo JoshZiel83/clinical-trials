@@ -1,4 +1,21 @@
-## Naming Conventions
+# Overview
+> **Note** All information in this file is from the [AACT](https://aact.ctti-clinicaltrials.org/) information pages, which are copyrighted by the CTTI.  The information is reproduced here for convenience
+
+AACT is a publicly available relational database that contains all information (protocol and result data elements) about every study registered in ClinicalTrials.gov. Content is downloaded from ClinicalTrials.gov daily and loaded into AACT. The Clinical Trials Transformation Initiative (CTTI) enhanced AACT in October, 2016 to include the following features:
+- Database content refreshed daily
+- Database directly accessible in the cloud
+- Static copies of the database available for download
+- Open source tools freely available (postgreSQL, Ruby on Rails, Tableau Public)
+- Source code available via Github
+
+## AACT Database Schema
+
+![Schematic representation of CTTI Tables](aact_schema.png)
+
+Each table includes the unique identifier assigned by ClinicalTrials.gov: nct_id. This provides a way to find all data about a particular study and serves as the key that joins related information across multiple tables. Every table (except Studies) also includes an id column which uniquely identifies each row in the table. In most cases, you need to use the nct_id to join tables.
+
+
+### Naming Conventions
 - Table names are all plural. (ie. studies, facilities, interventions, etc.)
 - Column names are all singular. (ie. description, phase, name, etc.)
 - Table/column names derived from multiple words are delimited with underscores. (ie. mesh_term, study_first_submitted_date, number_of_groups, etc.)
@@ -10,16 +27,16 @@
   - These foreign keys always link to the id column of the parent table. `Child_Table.parent_table_id = Parent_Tables.id` 
   - For example, a row in Facility_Contacts links to it’s facility through the facility_id column: `Facility_Contacts.facility_id = Facilities.id`
 
-## Structural Conventions
+### Structural Conventions
 - Every table has an nct_id column to link rows to its related study in the Studies table. All study-related data can be linked directly to the Studies table via the nct_id. (Note: The schema diagram omits several of the lines that represent relationships to Studies. This was done to avoid appearing complex and confusing. Relationships to the Studies table can be assumed since every table includes the NCT ID.) `Studies.nct_id = Outcomes.nct_id` will link outcomes to their related study.
 - Every table has the primary key: id. (Studies is the one exception since it's primary key is the unique study identifier assigned by ClinicalTrials.gov: nct_id.)
 - Columns that end with _date contain date-type values.
 - Columns that contain month/year dates are saved as character strings in a column with a _month_year suffix. A date-type estimate of the value (using the 1st of the month as the 'day') is stored in an adjacent column with the _date suffix. (This applies to date values in the Studies table.)
 - Derived/calculated values are stored in the Calculated_Values table.
 
-**While we tried to rigorously adhere to these conventions, reality occasionally failed to cooperate, so compromises were made and exceptions to these rules exist.** For example, to limit duplicate verbiage, we preferred the table name References over Study_References, however the word 'References' is a PostgreSQL reserved word and cannot be used as a table name, so Study_References it is.
+**While the AACT tries to rigorously adhere to these conventions, reality occasionally failed to cooperate, so compromises were made and exceptions to these rules exist.** For example, to limit duplicate verbiage, the table name References was preferred over Study_References, however the word 'References' is a PostgreSQL reserved word and cannot be used as a table name, so Study_References it is.
 
-## How are arms/groups identified?
+### How are arms/groups identified?
 
 Considerable thought went into how to present arm and group information to facilitate analysis by simplifying naming and data structures while retaining data fidelity. NLM defines groups/arms this way:
 1) Arm: A pre-specified group or subgroup of participant(s) in a clinical trial assigned to receive specific intervention(s) (or no intervention) according to a protocol.
@@ -27,7 +44,7 @@ Considerable thought went into how to present arm and group information to facil
 
 In short, observational studies use the term ‘groups’; interventional studies use ‘arms’, though for the purpose of analysis, they both refer to the same thing. Because 'group' is more intuitive to the general public, AACT standardized on the term 'group(s)' and does not use the term 'arms'.
 
-## Participant Groups: Registry vs Results
+### Participant Groups: Registry vs Results
 
 When a study is registered in ClinicalTrials.gov, information is entered about how the study defines participant groups. In AACT, this information is stored in the Design_Groups table, while info about actual groups that is entered after the study has completed is stored in the Result_Groups table. (AACT has not attempted to link data between these 2 tables.)
 
@@ -57,15 +74,15 @@ ClinicalTrials.gov assigns an identifier to each group/result that is unique wit
 
 >Notice that the integer in the code provided by ClinicalTrials.gov (ctgov_group_code) is often the same for one group across the different result types, but this is not always the case. In the example above, BG000, EG000 & FG000 all represent the 'experimental group', so you're tempted to think that '000' equates to to the 'experimental group' for this study, however for Outcomes, OG000 represents the control group. In short, the number in the ctgov_group_code often links the same group across all result types in a study, **but for about 25% of studies, this is not the case, so it can't be counted on to indicate this relationship.**
 
-## Information about dates
+### Information about dates
 When clinicaltrials.gov started tracking studies, it only tracked the month & year for some fields and not the day for several date values including start date, completion date, primary completion date and verification date. Because day is not provided for some studies, AACT stores these dates in the studies table as character type rather than date type values. Character type dates are of limited utility in an analytic database because they can’t be used to perform standard date calculations such as determining study duration or the average number of months for someone to report results or identify studies registered before/after a certain date.
 
-We provide 2 columns in the Studies table for each date element:
+There are 2 columns in the Studies table for each date element:
 - A character-type column that displays the value exactly as it was received from ClinicalTrials.gov
 - A date-type column that can be used for date calculations.
 - If the date received from ClinicalTrials.gov has only month/year, in order to convert the string to a date, it is assigned the first day of the month. For example, a study with start date “June 2014” will have “June 2014” in the start_month_year column and “06/01/14” in the start_date column.
 
-## Information about dates related to 'pending results'
+### Information about dates related to 'pending results'
 On May 9, 2018, the NLM added a new section of date information to the ClinicalTrials.gov API. The section is labeled "pendng_results" and serves to provide information about result submission activity while the results await quality control review.
 
 NLM provides result submission date(s) for studies that have results awaiting quality control (QC) review. The results themselves are not publicly posted until the review is complete. The dates for three types of events related to results submission are reported in the Pending_Results table:
@@ -81,7 +98,7 @@ Result tables (Reported_Events, Outcomes, Baseline_Measurements, etc.) are popul
 All rows for the study with reviewed/approved results are removed from the Pending_Events table.
 More information about the quality control (QC) review process and how this information is presented in ClinicalTrials.gov can be found in the December, 2017 NLM Technical Bulletin
 
-## Information about trial sites (Facilities and Countries)
+### Information about trial sites (Facilities and Countries)
 Information about organizations where the study is/was conducted (aka. facilities, trial sites) is stored in the Facilities table. This represents the facility information that was included in the study record on the date that information was downloaded from ClinicalTrials.gov.
 
 The name and email/phone for the contact person (and optionally, a backup contact) at a facility is available if the facility status (Facilities.status) is ‘Recruiting’ or ‘Not yet recruiting’, and if the data provider has provided such information. This information is stored in AACT in the Facility_Contacts table, which is a ‘child’ of the Facilities table. Facility-level contact information is not required if a central contact has been provided. Contact information is removed from the publicly available content at ClinicalTrials.gov (and therefore from AACT) when the facility is no longer recruiting, or when the overall study status (Studies.overall_status) changes to indicate that the study has completed recruitment.
@@ -94,7 +111,7 @@ The reasons facilities are removed are varied and unknown. A site may have been 
 
 Users who are interested in identifying countries where participants are being/were enrolled may use either the Facilities or Countries (where Countries.removed is not true) with equivalent results.
 
-## “Delayed Results” data elements are available in AACT
+### “Delayed Results” data elements are available in AACT
 A responsible party of an applicable clinical trial may delay the deadline for submitting results information to ClinicalTrials.gov for up to two additional years if one of the following two certification conditions applies to the trial:
 
 Initial approval: trial completed before a drug, biologic or device studied in the trial is initially approved, licensed or cleared by the FDA for any use.
