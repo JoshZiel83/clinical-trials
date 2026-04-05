@@ -9,6 +9,7 @@ load_dotenv()
 PROJECT_ROOT = Path(__file__).parent.parent
 DUCKDB_PATH = PROJECT_ROOT / "data" / "clinical_trials.duckdb"
 RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
+REFERENCE_DATA_DIR = PROJECT_ROOT / "data" / "reference"
 
 # AACT connection parameters
 AACT_HOST = "aact-db.ctti-clinicaltrials.org"

@@ -1,5 +1,7 @@
-# Data
-data/
+# Data - exclude large/generated files, track reference data and docs
+data/raw/
+data/logs/
+data/*.duckdb
 
 # Python
 __pycache__/

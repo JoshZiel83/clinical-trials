@@ -51,20 +51,63 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 ---
 
-## Phase 2A: Condition Normalization + Therapeutic Areas
+## Phase 2A: Condition Normalization + Therapeutic Areas ✅
 
-**Goal**: Map conditions → MeSH → therapeutic areas. Enables TA-level analysis.
+**Goal**: Map conditions → canonical MeSH terms → therapeutic areas. Enables TA-level analysis.
 
-1. **MeSH reference data**: Download MeSH descriptor XML from NLM. Parse to extract descriptor UI, name, tree numbers. Load into `ref_mesh_descriptors` table in DuckDB.
-2. **TA mapping table**: Hand-curate `ref_therapeutic_areas` (~24 rows) mapping MeSH Category C top-level codes to ~12-15 TAs. Starting point: [NBK611886](https://www.ncbi.nlm.nih.gov/books/NBK611886/table/ch4.tab1/).
-3. **AACT coverage pass**: Join `conditions` → `browse_conditions` → `ref_mesh_descriptors` → `ref_therapeutic_areas`. Multi-label: a condition in multiple MeSH branches gets all applicable TAs. Output: `norm_study_therapeutic_areas(nct_id, condition_name, mesh_term, mesh_tree_number, therapeutic_area)`.
-4. **Coverage notebook** (`notebooks/02_condition_coverage.ipynb`): % of studies with TA tags, top unmapped conditions, TA distribution. This determines urgency of Phase 2C.
+**Completed 2026-04-05.**
 
-**Setup needed**: MeSH XML download (free, no account).
+**Key finding**: The `raw.browse_conditions` table already contains NLM-computed MeSH ancestors (e.g., "Neoplasms", "Cardiovascular Diseases") which directly correspond to therapeutic area categories. This eliminated the need for the planned 300MB MeSH XML download — ancestor names are mapped directly to TAs.
 
-**Done when**: Can query "active studies per therapeutic area" from DuckDB.
+**Approach — two-layer architecture:**
+1. **Condition dictionary** (`ref.condition_dictionary`): Maps free-text condition names to canonical MeSH terms using five layered methods:
+   - *Exact match* (case-insensitive): 3,247 mappings
+   - *1:1 study match* (study has exactly 1 condition + 1 MeSH term): 8,263 mappings
+   - *Co-occurrence dominance* (most frequent co-occurring MeSH term): 2,712 mappings
+   - *Cancer-synonym expansion* ("[Site] Cancer" → "[Site] Neoplasms"): 350 mappings
+   - *Fuzzy matching* (rapidfuzz token_sort_ratio): 4,637 mappings — **needs refactoring** (see Phase 2A.1 below)
+   - Dictionary is extensible: manual or QuickUMLS entries added to the dictionary are automatically picked up on the next pipeline run.
+2. **TA mapping**: `browse_conditions` MeSH ancestor names joined to a hand-curated `ref.therapeutic_areas` mapping (21 entries → 21 TAs).
 
-**Module**: `src/mesh.py` (parsing), `src/normalize_conditions.py` (mapping), `src/therapeutic_areas.py` (TA rollup)
+**Output tables:**
+- `ref.condition_dictionary` — 19,209 entries (33.6% of unique condition names)
+- `ref.therapeutic_areas` — 21 MeSH ancestor → TA mappings
+- `norm.study_conditions` — 316,463 rows, 86.5% of studies have ≥1 canonical condition
+- `norm.study_therapeutic_areas` — 202,132 rows, 78.2% of studies have ≥1 TA
+
+**TA distribution (top 10):**
+- Oncology: 27,515 | General/Symptoms: 27,197 | Neurology: 17,151
+- Cardiovascular: 13,415 | Metabolic/Endocrine: 11,612 | Psychiatry: 10,365
+- Gastroenterology: 9,977 | Immunology: 9,199 | Respiratory: 8,954
+- Behavioral/Lifestyle: 8,529
+
+**Coverage gap**: 25,438 studies have conditions but no NLM MeSH mapping at all — this is the primary target for Phase 2C (QuickUMLS).
+
+**Unit tests**: 47 tests total (17 normalize_conditions + 11 therapeutic_areas + 19 existing), all passing.
+
+**Module**: `src/normalize_conditions.py` (dictionary building + study conditions), `src/therapeutic_areas.py` (TA ref table + study TAs)
+**Entry point**: `run_normalize_conditions.py`
+**Validation**: `notebooks/02_condition_coverage.ipynb`
+
+---
+
+## Phase 2A.1: Fuzzy Match Enrichment Workflow
+
+**Goal**: Refactor fuzzy matching from an automatic dictionary layer into a HITL (human-in-the-loop) enrichment workflow. Fuzzy matches are too noisy to trust automatically — they should generate candidates for review, not populate the dictionary directly.
+
+**Why**: Layers 1-4 (exact, 1:1, co-occurrence, cancer-synonym) are grounded in NLM's own MeSH assignments or deterministic rules. Fuzzy matching is speculation — string similarity alone produces wrong mappings (e.g., "15q13.3 deletion syndrome" → "16p11.2 Deletion Syndrome"). Mixing speculative mappings into the trusted dictionary forces downstream consumers to filter by confidence, defeating the purpose.
+
+**Approach:**
+1. **Remove fuzzy layer from `build_condition_dictionary()`** — the dictionary stays clean (layers 1-4 + manual entries only)
+2. **Create `ref.condition_candidates`** — a staging table for fuzzy match proposals with scores, for human review
+3. **Enrichment notebook or script** — generates fuzzy candidates, presents them for review (sorted by study count / impact), and promotes approved ones to the dictionary as `mapping_method='manual'`
+4. **Review workflow**: Export candidates as CSV → review → import approved mappings back into dictionary
+
+**Depends on**: Phase 2A complete.
+
+**Done when**: Fuzzy matching produces a reviewable candidate list, and there's a clear path to promote reviewed mappings into the dictionary.
+
+**Module**: `src/normalize_conditions.py` (refactored), `notebooks/02a_condition_enrichment.ipynb` (review workflow)
 
 ---
 
@@ -172,18 +215,40 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 - Retry logic for external API calls (ChEMBL)
 - Metadata table: `pipeline_runs(run_id, start_time, end_time, status, studies_extracted)`
 
+### Data evolution considerations
+
+The pipeline must handle two kinds of change over time:
+
+**A. AACT data changes between extractions:**
+- New studies appear (recruiting starts), existing studies change status or update conditions/interventions
+- NLM may update `browse_conditions` MeSH mappings as their algorithms improve
+- The current full-rebuild approach (replace `raw.*`, re-derive `norm.*`) handles this correctly at today's scale (~120K studies, <60s total)
+- At larger scale or higher frequency, consider: extraction diffing (what changed since last run), incremental normalization (only process new/changed studies), and archiving prior snapshots for longitudinal analysis
+
+**B. Accumulated mappings improve with more data:**
+- The condition dictionary's automated layers (exact, 1:1, co-occurrence, cancer-synonym) are re-derived each run — more studies = more co-occurrence evidence = better mappings
+- Manual/HITL curations persist across runs and are never overwritten by automated methods
+- Risk: a manual mapping could become stale if MeSH vocabulary is updated (unlikely but possible). Phase 5 should include a validation step that checks manual dictionary entries still reference valid MeSH terms in `browse_conditions`.
+
+**When to address:**
+- Current architecture (full rebuild + persistent manual entries) is sound through Phase 3A and likely through Phase 4
+- Phase 5 is the right time to formalize: extraction diffing, incremental processing, stale mapping detection, and run-over-run quality metrics
+- Until then, the key invariant to maintain: **automated dictionary layers are always re-derivable from raw data; manual entries are the only state that persists and must be protected**
+
 ---
 
 ## Dependency Graph
 
 ```
-Phase 0 (Scaffolding)
+Phase 0 (Scaffolding) ✅
   │
-Phase 1 (Raw Extract)
+Phase 1 (Raw Extract) ✅
   │
-  ├── Phase 2A (Conditions + TAs) ──┐
-  │                                  ├── Phase 3A (Core Analysis!)
-  ├── Phase 2B (Study Design) ──────┘
+  ├── Phase 2A (Conditions + TAs) ✅ ──┐
+  │     │                               ├── Phase 3A (Core Analysis!)
+  │     └── Phase 2A.1 (Fuzzy HITL)    │
+  │                                     │
+  ├── Phase 2B (Study Design) ─────────┘
   │
   ├── Phase 2C (QuickUMLS)     [after 2A coverage analysis]
   ├── Phase 2D (Drugs)          [independent, lower priority]
@@ -194,14 +259,14 @@ Phase 1 (Raw Extract)
       Phase 5 (Automation)
 ```
 
-**Recommended solo-developer order**: 0 → 1 → 2A → 2B → 3A → 2C → 2D → 2E → 4 → 5
+**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2C → 2D → 2E → 4 → 5
 
 ## Action Items
 
 1. ~~**Register AACT account**~~ ✅ Done
 2. **Apply for UMLS license** — 1-3 day approval, needed by Phase 2C (applied, pending)
-3. **Download MeSH XML** — needed for Phase 2A
-4. **Bookmark NBK611886 TA mapping table** — starting point for TA curation
+3. ~~**Download MeSH XML**~~ — not needed for Phase 2A (ancestor-name approach used instead); may be needed for Phase 2C
+4. ~~**Bookmark NBK611886 TA mapping table**~~ ✅ Used as starting point for `data/reference/therapeutic_area_mapping.json`
 
 ## Key Files
 
@@ -212,12 +277,16 @@ Phase 1 (Raw Extract)
 - `config/tables.py` — extraction table list, status filters
 - `src/extract.py` — extraction pipeline
 - `src/logging_config.py` — centralized logging
+- `src/normalize_conditions.py` — condition dictionary building + study conditions
+- `src/therapeutic_areas.py` — TA reference table + study TA assignment
+- `data/reference/therapeutic_area_mapping.json` — hand-curated MeSH ancestor → TA mapping (21 entries)
+- `data/DATABASE_SCHEMA.md` — DuckDB schema documentation
 
 ## Verification
 
 After each phase, the corresponding notebook serves as the verification step:
-- Phase 1 → `01_raw_data_validation.ipynb` (row counts, distributions)
-- Phase 2A → `02_condition_coverage.ipynb` (TA coverage %, distribution)
+- Phase 1 → `01_raw_data_validation.ipynb` ✅ (row counts, distributions)
+- Phase 2A → `02_condition_coverage.ipynb` ✅ (dictionary stats, TA coverage %, distribution, spot-checks)
 - Phase 2B → `03_design_classification.ipynb` (precision spot-checks)
 - Phase 3A → `04_innovation_by_therapeutic_area.ipynb` (the core analysis)
 - Phase 2D → `05_drug_normalization.ipynb` (coverage rates, top unmatched)
