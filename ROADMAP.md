@@ -91,47 +91,56 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 ---
 
-## Phase 2A.1: Fuzzy Match Enrichment Workflow
+## Phase 2A.1: Fuzzy Match Enrichment Workflow ✅
 
 **Goal**: Refactor fuzzy matching from an automatic dictionary layer into a HITL (human-in-the-loop) enrichment workflow. Fuzzy matches are too noisy to trust automatically — they should generate candidates for review, not populate the dictionary directly.
 
-**Why**: Layers 1-4 (exact, 1:1, co-occurrence, cancer-synonym) are grounded in NLM's own MeSH assignments or deterministic rules. Fuzzy matching is speculation — string similarity alone produces wrong mappings (e.g., "15q13.3 deletion syndrome" → "16p11.2 Deletion Syndrome"). Mixing speculative mappings into the trusted dictionary forces downstream consumers to filter by confidence, defeating the purpose.
+**Completed 2026-04-07.**
 
-**Approach:**
-1. **Remove fuzzy layer from `build_condition_dictionary()`** — the dictionary stays clean (layers 1-4 + manual entries only)
-2. **Create `ref.condition_candidates`** — a staging table for fuzzy match proposals with scores, for human review
-3. **Enrichment notebook or script** — generates fuzzy candidates, presents them for review (sorted by study count / impact), and promotes approved ones to the dictionary as `mapping_method='manual'`
-4. **Review workflow**: Export candidates as CSV → review → import approved mappings back into dictionary
+**What changed:**
+1. **Removed fuzzy layer from `build_condition_dictionary()`** — the dictionary now only contains layers 1-4 (exact, 1:1-study, co-occurrence, cancer-synonym) plus manual/quickumls entries. `'fuzzy'` removed from `AUTOMATED_METHODS`.
+2. **Created `ref.condition_candidates`** — staging table with columns: `condition_name`, `canonical_term`, `score` (rapidfuzz 75-100), `study_count`, `status` (pending/approved/rejected), `created_at`. Approved/rejected decisions persist across regenerations.
+3. **Refactored `_build_fuzzy_mappings()` → `generate_fuzzy_candidates()`** — public function that writes to candidates table instead of dictionary. Returns DataFrame for notebook display.
+4. **Added helper functions**: `promote_candidates()` (insert approved candidates as `manual`/`high`), `export_candidates_csv()`, `import_reviewed_csv()`.
+5. **Enrichment notebook** (`notebooks/02a_condition_enrichment.ipynb`): generate candidates → review by impact/confidence → promote or export to CSV for offline review.
 
-**Depends on**: Phase 2A complete.
+**Impact**: Removing ~4,637 fuzzy entries from the dictionary drops condition coverage. This is intentional — the enrichment notebook lets a reviewer recover coverage with verified quality.
 
-**Done when**: Fuzzy matching produces a reviewable candidate list, and there's a clear path to promote reviewed mappings into the dictionary.
+**Unit tests**: 32 tests total (21 normalize_conditions + 11 therapeutic_areas), all passing.
 
 **Module**: `src/normalize_conditions.py` (refactored), `notebooks/02a_condition_enrichment.ipynb` (review workflow)
 
 ---
 
-## Phase 2B: Study Design Classification
+## Phase 2B: Study Design Classification ✅
 
 **Goal**: Classify every study by design type (5 levels). Can run in parallel with 2A.
 
-1. **Levels 1, 2, 4, 5 from structured fields** (`studies` + `designs` tables):
-   - L1 Study Type: from `study_type`
-   - L2 Design Architecture: combinatorial rules on `allocation` + `intervention_model` (e.g., Randomized + Parallel → "Parallel RCT", Non-Randomized + Single Group → "Single-Arm"); observational uses `observational_model`
-   - L4 Blinding: from `masking`
-   - L5 Purpose: from `primary_purpose`
-   - Output: `class_study_design(nct_id, study_type, design_architecture, blinding_level, purpose)`
+**Completed 2026-04-07.**
 
-2. **Level 3: Innovative features via keyword/regex NLP** on `brief_title`, `official_title`, `detailed_descriptions.description`, `keywords.name`:
-   - Patterns: adaptive, basket, umbrella, platform, bayesian, SMART, N-of-1, pragmatic, enrichment, seamless, master protocol
-   - Word-boundary regex with context-aware exclusions (e.g., "adaptive" not followed by "behavior"/"immunity")
-   - Multi-label output: `class_innovative_features(nct_id, feature_type, source_field, matched_text)`
+**Levels 1, 2, 4, 5** (`class.study_design` — one row per study):
+- L1 Study Type: from `study_type` (INTERVENTIONAL: 87,581 | OBSERVATIONAL: 30,931 | EXPANDED_ACCESS: 252)
+- L2 Design Architecture: combinatorial rules on `allocation` + `intervention_model` for interventional; `observational_model` for observational. Top: Parallel RCT (47,427), Single-Arm (24,339), Cohort (20,441)
+- L4 Blinding: mapped from `masking` (Open Label: 52,955 | Double Blind: 9,329 | Single Blind: 13,300 | Quadruple Blind: 6,907 | Triple Blind: 5,063)
+- L5 Purpose: from `primary_purpose` (Treatment: 57,207 | Prevention: 8,315 | Other: 5,398 | ...)
 
-3. **Validation notebook** (`notebooks/03_design_classification.ipynb`): distributions, spot-check 10-20 per feature type for precision.
+**Level 3** (`class.innovative_features` — multi-label):
+- 11 feature types detected via word-boundary regex with context-aware exclusions on `brief_title`, `official_title`, `detailed_descriptions.description`, `keywords.name`
+- 4,680 studies (3.9%) flagged with at least one innovative feature
+- Distribution: adaptive (2,519) | pragmatic (1,194) | platform (268) | bayesian (256) | SMART (222) | umbrella (182) | master protocol (167) | basket (151) | seamless (126) | N-of-1 (49) | enrichment (9)
 
-**Done when**: Every study classified. Innovative features flagged with known precision.
+**Data quality notes:**
+- AACT uses "None" string as NULL placeholder for fields that don't apply (e.g., masking for observational studies) — handled by treating "None" as NULL
+- 266 studies have no `raw.designs` record — L2/L4/L5 are NULL for these
+- "platform" requires "trial/study/design/protocol" context to avoid tech-platform false positives
+- "SMART" is case-sensitive to avoid "smart" adjective
+- "enrichment" requires "design/strategy/trial/study" context to avoid nutritional enrichment
+
+**Unit tests**: 26 tests (13 classify_design + 13 innovative_features), all passing.
 
 **Module**: `src/classify_design.py`, `src/innovative_features.py`
+**Entry point**: `run_classify_design.py`
+**Validation**: `notebooks/03_design_classification.ipynb`
 
 ---
 
@@ -246,9 +255,9 @@ Phase 1 (Raw Extract) ✅
   │
   ├── Phase 2A (Conditions + TAs) ✅ ──┐
   │     │                               ├── Phase 3A (Core Analysis!)
-  │     └── Phase 2A.1 (Fuzzy HITL)    │
+  │     └── Phase 2A.1 (Fuzzy HITL) ✅ │
   │                                     │
-  ├── Phase 2B (Study Design) ─────────┘
+  ├── Phase 2B (Study Design) ✅ ──────┘
   │
   ├── Phase 2C (QuickUMLS)     [after 2A coverage analysis]
   ├── Phase 2D (Drugs)          [independent, lower priority]
@@ -280,6 +289,8 @@ Phase 1 (Raw Extract) ✅
 - `src/normalize_conditions.py` — condition dictionary building + study conditions
 - `src/therapeutic_areas.py` — TA reference table + study TA assignment
 - `data/reference/therapeutic_area_mapping.json` — hand-curated MeSH ancestor → TA mapping (21 entries)
+- `src/classify_design.py` — study design classification (L1/L2/L4/L5)
+- `src/innovative_features.py` — innovative feature detection (L3, regex NLP)
 - `data/DATABASE_SCHEMA.md` — DuckDB schema documentation
 
 ## Verification

@@ -5,8 +5,10 @@ import duckdb
 from src.normalize_conditions import (
     build_condition_dictionary,
     create_study_conditions,
+    generate_fuzzy_candidates,
     is_non_condition,
     normalize_condition,
+    promote_candidates,
 )
 
 
@@ -273,7 +275,7 @@ def _setup_fuzzy_test_db():
     conn.execute("""
         CREATE TABLE raw.studies AS
         SELECT * FROM (VALUES
-            ('NCT001'), ('NCT002'), ('NCT003'), ('NCT004')
+            ('NCT001'), ('NCT002'), ('NCT003'), ('NCT004'), ('NCT005')
         ) AS t(nct_id)
     """)
 
@@ -283,7 +285,8 @@ def _setup_fuzzy_test_db():
             ('NCT001', 'Breast Cancer', 'breast cancer'),
             ('NCT002', 'Advanced Lung Cancer', 'advanced lung cancer'),
             ('NCT003', 'Immunotherapy', 'immunotherapy'),
-            ('NCT004', 'Overweght and Obesity', 'overweght and obesity')
+            ('NCT004', 'Diabetic Nephropathy', 'diabetic nephropathy'),
+            ('NCT005', 'Diabetic Nephropathy', 'diabetic nephropathy')
         ) AS t(nct_id, name, downcase_name)
     """)
 
@@ -294,7 +297,8 @@ def _setup_fuzzy_test_db():
             ('NCT999', 'Breast Neoplasms', 'breast neoplasms', 'mesh-list'),
             ('NCT999', 'Lung Neoplasms', 'lung neoplasms', 'mesh-list'),
             ('NCT999', 'Obesity', 'obesity', 'mesh-list'),
-            ('NCT999', 'Overweight', 'overweight', 'mesh-list')
+            ('NCT999', 'Overweight', 'overweight', 'mesh-list'),
+            ('NCT999', 'Diabetic Nephropathies', 'diabetic nephropathies', 'mesh-list')
         ) AS t(nct_id, mesh_term, downcase_mesh_term, mesh_type)
     """)
 
@@ -334,30 +338,134 @@ def test_cancer_synonym_with_qualifier():
 
 
 def test_fuzzy_skips_non_conditions():
-    """Non-condition terms like 'Immunotherapy' should not get a fuzzy match."""
+    """Non-condition terms like 'Immunotherapy' should not appear in candidates."""
     conn = _setup_fuzzy_test_db()
     build_condition_dictionary(conn)
+    generate_fuzzy_candidates(conn)
 
     result = conn.execute("""
-        SELECT * FROM ref.condition_dictionary
+        SELECT * FROM ref.condition_candidates
         WHERE condition_name = 'immunotherapy'
     """).fetchone()
     assert result is None
     conn.close()
 
 
-def test_fuzzy_singleton_gets_low_confidence():
-    """A condition appearing in only 1 study should get 'low' confidence from fuzzy."""
+def test_fuzzy_candidate_has_correct_study_count():
+    """Fuzzy candidates should reflect the correct study count."""
+    conn = _setup_fuzzy_test_db()
+    build_condition_dictionary(conn)
+    generate_fuzzy_candidates(conn)
+
+    result = conn.execute("""
+        SELECT study_count, status
+        FROM ref.condition_candidates
+        WHERE condition_name = 'diabetic nephropathy'
+    """).fetchone()
+    # "diabetic nephropathy" appears in NCT004 and NCT005 → study_count=2
+    assert result is not None
+    assert result[0] == 2
+    assert result[1] == "pending"
+    conn.close()
+
+
+def test_build_dictionary_no_fuzzy_entries():
+    """After building dictionary, no rows should have mapping_method='fuzzy'."""
     conn = _setup_fuzzy_test_db()
     build_condition_dictionary(conn)
 
+    fuzzy_count = conn.execute("""
+        SELECT COUNT(*) FROM ref.condition_dictionary
+        WHERE mapping_method = 'fuzzy'
+    """).fetchone()[0]
+    assert fuzzy_count == 0
+    conn.close()
+
+
+def test_generate_fuzzy_candidates_creates_table():
+    """generate_fuzzy_candidates should create ref.condition_candidates with correct schema."""
+    conn = _setup_fuzzy_test_db()
+    build_condition_dictionary(conn)
+    df = generate_fuzzy_candidates(conn)
+
+    # Table exists and has rows
+    count = conn.execute("SELECT COUNT(*) FROM ref.condition_candidates").fetchone()[0]
+    assert count > 0
+
+    # All rows are pending
+    non_pending = conn.execute("""
+        SELECT COUNT(*) FROM ref.condition_candidates WHERE status != 'pending'
+    """).fetchone()[0]
+    assert non_pending == 0
+
+    # DataFrame matches table
+    assert len(df) == count
+    assert set(df.columns) >= {"condition_name", "canonical_term", "score", "study_count", "status"}
+    conn.close()
+
+
+def test_promote_candidates():
+    """Promoting a candidate should add it to the dictionary as manual/high."""
+    import pandas as pd
+
+    conn = _setup_fuzzy_test_db()
+    build_condition_dictionary(conn)
+    generate_fuzzy_candidates(conn)
+
+    # Promote one candidate
+    approved = pd.DataFrame([{
+        "condition_name": "diabetic nephropathy",
+        "canonical_term": "Diabetic Nephropathies",
+    }])
+    promoted = promote_candidates(conn, approved)
+
+    # Should appear in dictionary
     result = conn.execute("""
-        SELECT confidence, mapping_method
+        SELECT mapping_method, confidence
         FROM ref.condition_dictionary
-        WHERE condition_name = 'overweght and obesity'
-        AND mapping_method = 'fuzzy'
+        WHERE condition_name = 'diabetic nephropathy'
     """).fetchone()
-    # This is a singleton (1 study) so should be low confidence
-    if result is not None:
-        assert result[0] == "low"
+    assert result is not None
+    assert result[0] == "manual"
+    assert result[1] == "high"
+    assert promoted == 1
+
+    # Candidate status should be updated
+    status = conn.execute("""
+        SELECT status FROM ref.condition_candidates
+        WHERE condition_name = 'diabetic nephropathy'
+    """).fetchone()
+    assert status[0] == "approved"
+    conn.close()
+
+
+def test_regenerate_preserves_reviewed_candidates():
+    """Regenerating candidates should preserve approved/rejected, only refresh pending."""
+    conn = _setup_fuzzy_test_db()
+    build_condition_dictionary(conn)
+    generate_fuzzy_candidates(conn)
+
+    # Mark one as rejected
+    conn.execute("""
+        UPDATE ref.condition_candidates
+        SET status = 'rejected'
+        WHERE condition_name = 'diabetic nephropathy'
+    """)
+
+    # Regenerate
+    generate_fuzzy_candidates(conn)
+
+    # Rejected row should still be there
+    rejected = conn.execute("""
+        SELECT status FROM ref.condition_candidates
+        WHERE condition_name = 'diabetic nephropathy' AND status = 'rejected'
+    """).fetchone()
+    assert rejected is not None
+
+    # Should not have a new pending row for the rejected condition
+    pending_dup = conn.execute("""
+        SELECT COUNT(*) FROM ref.condition_candidates
+        WHERE condition_name = 'diabetic nephropathy' AND status = 'pending'
+    """).fetchone()[0]
+    assert pending_dup == 0
     conn.close()
