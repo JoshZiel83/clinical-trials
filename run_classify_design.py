@@ -3,7 +3,7 @@
 from config.settings import get_duckdb_connection
 from src.logging_config import setup_logging
 from src.classify_design import classify_study_design
-from src.innovative_features import detect_innovative_features
+from src.innovative_features import detect_innovative_features, detect_ai_mentions
 
 if __name__ == "__main__":
     setup_logging()
@@ -11,5 +11,6 @@ if __name__ == "__main__":
     try:
         classify_study_design(conn)
         detect_innovative_features(conn)
+        detect_ai_mentions(conn)
     finally:
         conn.close()

@@ -82,6 +82,31 @@ INNOVATIVE_PATTERNS = [
         "exclusion": None,
         "case_sensitive": False,
     },
+    # --- AI-augmented design methods ---
+    {
+        "feature_type": "digital twin",
+        "pattern": r"\bdigital\s+twin",
+        "exclusion": None,
+        "case_sensitive": False,
+    },
+    {
+        "feature_type": "in silico",
+        "pattern": r"\bin[- ]?silico\s+(trial|study|clinical|simulation)",
+        "exclusion": None,
+        "case_sensitive": False,
+    },
+    {
+        "feature_type": "AI-augmented design",
+        "pattern": r"\bAI[- ](driven|guided|optimized|augmented)\s+(design|protocol|randomiz|dosing|allocation|trial\s+design)",
+        "exclusion": None,
+        "case_sensitive": False,
+    },
+    {
+        "feature_type": "AI-augmented design",
+        "pattern": r"\breinforcement\s+learning\b.{0,60}(dos|treatment\s+allocat|adaptive|randomiz)",
+        "exclusion": None,
+        "case_sensitive": False,
+    },
 ]
 
 
@@ -215,6 +240,105 @@ def detect_innovative_features(duck_conn):
     logger.info("Feature distribution (studies):")
     for feat, cnt in dist:
         logger.info(f"  {feat}: {cnt:,}")
+
+    return row_count
+
+
+# Broad AI/ML mention patterns — flags studies that reference AI/ML anywhere
+# in free-text fields. NOT limited to design methodology; intended as a research
+# flag for further investigation.
+AI_MENTION_PATTERNS = [
+    ("artificial intelligence", r"(?i)\bartificial intelligence\b"),
+    ("machine learning", r"(?i)\bmachine learning\b"),
+    ("deep learning", r"(?i)\bdeep learning\b"),
+    ("neural network", r"(?i)\bneural network\b"),
+    ("large language model", r"(?i)\blarge language model|\bLLM\b"),
+    ("ChatGPT/GPT", r"(?i)\bChatGPT\b|\bGPT[- ]?[34o]\b"),
+    ("natural language processing", r"(?i)\bnatural language processing\b"),
+    ("computer vision", r"(?i)\bcomputer vision\b"),
+    ("reinforcement learning", r"(?i)\breinforcement learning\b"),
+]
+
+
+def detect_ai_mentions(duck_conn):
+    """Flag studies that mention AI/ML terms in titles, descriptions, or keywords.
+
+    Creates class.ai_mentions with one row per (nct_id, ai_term, source_field).
+    This is a broad research flag, not limited to AI-as-design-methodology.
+
+    Returns the number of rows created.
+    """
+    duck_conn.execute("CREATE SCHEMA IF NOT EXISTS class")
+    duck_conn.execute("DROP TABLE IF EXISTS class.ai_mentions")
+
+    all_queries = []
+    for term_label, pattern in AI_MENTION_PATTERNS:
+        sql_pat = pattern.replace("'", "''")
+        for source_field, table, text_col in [
+            ("brief_title", "raw.studies", "brief_title"),
+            ("official_title", "raw.studies", "official_title"),
+            ("description", "raw.detailed_descriptions", "description"),
+            ("keyword", "raw.keywords", "name"),
+        ]:
+            nct_col = "nct_id" if table == "raw.studies" else f"{table.split('.')[-1][0:2]}.nct_id"
+            if table == "raw.studies":
+                q = f"""
+                    SELECT nct_id, '{term_label}' AS ai_term,
+                           '{source_field}' AS source_field
+                    FROM raw.studies
+                    WHERE {text_col} IS NOT NULL
+                    AND regexp_matches({text_col}, '{sql_pat}')
+                """
+            elif table == "raw.detailed_descriptions":
+                q = f"""
+                    SELECT dd.nct_id, '{term_label}' AS ai_term,
+                           '{source_field}' AS source_field
+                    FROM raw.detailed_descriptions dd
+                    WHERE dd.{text_col} IS NOT NULL
+                    AND regexp_matches(dd.{text_col}, '{sql_pat}')
+                """
+            else:
+                q = f"""
+                    SELECT k.nct_id, '{term_label}' AS ai_term,
+                           '{source_field}' AS source_field
+                    FROM raw.keywords k
+                    WHERE k.{text_col} IS NOT NULL
+                    AND regexp_matches(k.{text_col}, '{sql_pat}')
+                """
+            all_queries.append(q)
+
+    union_sql = "\nUNION ALL\n".join(all_queries)
+
+    duck_conn.execute(f"""
+        CREATE TABLE class.ai_mentions AS
+        SELECT DISTINCT nct_id, ai_term, source_field
+        FROM (
+            {union_sql}
+        )
+    """)
+
+    row_count = duck_conn.execute(
+        "SELECT COUNT(*) FROM class.ai_mentions"
+    ).fetchone()[0]
+    study_count = duck_conn.execute(
+        "SELECT COUNT(DISTINCT nct_id) FROM class.ai_mentions"
+    ).fetchone()[0]
+
+    # Log term distribution
+    dist = duck_conn.execute("""
+        SELECT ai_term, COUNT(DISTINCT nct_id) AS study_count
+        FROM class.ai_mentions
+        GROUP BY ai_term
+        ORDER BY study_count DESC
+    """).fetchall()
+
+    logger.info(
+        f"Created class.ai_mentions: {row_count:,} rows, "
+        f"{study_count:,} studies with at least one AI/ML mention"
+    )
+    logger.info("AI/ML term distribution (studies):")
+    for term, cnt in dist:
+        logger.info(f"  {term}: {cnt:,}")
 
     return row_count
 

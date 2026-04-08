@@ -144,20 +144,42 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 ---
 
-## Phase 3A: Core Analysis — Design Innovation by Therapeutic Area
+## Phase 3A: Core Analysis — Design Innovation by Therapeutic Area ✅
 
 **Goal**: The payoff. Join 2A + 2B outputs to answer the primary research question.
 
+**Completed 2026-04-08.**
+
 **Depends on**: Phases 2A and 2B both complete.
 
-- **Notebook** (`notebooks/04_innovation_by_therapeutic_area.ipynb`):
-  - % of trials with any innovative design feature, by TA
-  - Breakdown by feature type (adaptive, basket, umbrella, platform) × TA
-  - Trends over time (using `start_date`)
-  - Phase distribution of innovative designs by TA
-  - Geographic patterns (from `countries`)
+**What was built:**
 
-**Done when**: Charts and tables answering "how do innovative trial designs vary across therapeutic areas?"
+1. **Expanded innovative feature detection** — added 3 new feature types to `src/innovative_features.py`:
+   - `digital twin` (30 studies) — virtual patient models for trial augmentation
+   - `in silico` (1 study) — computational trial simulations (requires trial/study context)
+   - `AI-augmented design` (6 studies) — AI genuinely augmenting trial methodology (AI-driven/guided + design context, reinforcement learning + dosing/allocation context). Excludes AI-as-intervention.
+   - Total innovative features: 14 types, 4,714 studies (up from 4,681)
+
+2. **AI/ML mention flag** (`class.ai_mentions`) — broad research flag for any study referencing AI/ML in titles, descriptions, or keywords. Not limited to design methodology; intended for further investigation.
+   - 9 term categories: artificial intelligence (1,603), machine learning (927), deep learning (378), neural network (131), large language model (113), ChatGPT/GPT (59), NLP (65), computer vision (59), reinforcement learning (42)
+   - 2,600 studies flagged (2.2% of all studies)
+   - Wired into `run_classify_design.py` pipeline
+
+3. **Analysis notebook** (`notebooks/04_innovation_by_therapeutic_area.ipynb`) — R kernel, 26 cells:
+   - Innovation rate by TA (horizontal bar chart)
+   - Feature type × TA heatmap + stacked bar for top 5 TAs
+   - Time trends (overall + faceted by top 6 TAs)
+   - Phase distribution of innovative designs by TA
+   - Geographic patterns (country bar chart + country × TA heatmap)
+   - AI/ML section: mention counts by term, TA distribution, overlap with innovative features, AI mention time trend
+   - Summary table with all TAs + pivoted feature counts
+
+**Unit tests**: 88 total (24 innovative features + 13 classify design + rest unchanged), all passing.
+
+**Reference**: `resources/Innovative & Emerging Clinical Trial Designs.md` — comprehensive catalog of innovative/emerging trial design types used to guide feature detection gap analysis.
+
+**Module**: `src/innovative_features.py` (expanded), `run_classify_design.py` (updated)
+**Notebook**: `notebooks/04_innovation_by_therapeutic_area.ipynb`
 
 ---
 
@@ -254,7 +276,7 @@ Phase 0 (Scaffolding) ✅
 Phase 1 (Raw Extract) ✅
   │
   ├── Phase 2A (Conditions + TAs) ✅ ──┐
-  │     │                               ├── Phase 3A (Core Analysis!)
+  │     │                               ├── Phase 3A (Core Analysis) ✅
   │     └── Phase 2A.1 (Fuzzy HITL) ✅ │
   │                                     │
   ├── Phase 2B (Study Design) ✅ ──────┘
@@ -290,7 +312,8 @@ Phase 1 (Raw Extract) ✅
 - `src/therapeutic_areas.py` — TA reference table + study TA assignment
 - `data/reference/therapeutic_area_mapping.json` — hand-curated MeSH ancestor → TA mapping (21 entries)
 - `src/classify_design.py` — study design classification (L1/L2/L4/L5)
-- `src/innovative_features.py` — innovative feature detection (L3, regex NLP)
+- `src/innovative_features.py` — innovative feature detection (L3, regex NLP) + AI mention flag
+- `resources/Innovative & Emerging Clinical Trial Designs.md` — reference catalog of innovative/emerging trial designs
 - `data/DATABASE_SCHEMA.md` — DuckDB schema documentation
 
 ## Verification
@@ -298,6 +321,6 @@ Phase 1 (Raw Extract) ✅
 After each phase, the corresponding notebook serves as the verification step:
 - Phase 1 → `01_raw_data_validation.ipynb` ✅ (row counts, distributions)
 - Phase 2A → `02_condition_coverage.ipynb` ✅ (dictionary stats, TA coverage %, distribution, spot-checks)
-- Phase 2B → `03_design_classification.ipynb` (precision spot-checks)
-- Phase 3A → `04_innovation_by_therapeutic_area.ipynb` (the core analysis)
+- Phase 2B → `03_design_classification.ipynb` ✅ (precision spot-checks)
+- Phase 3A → `04_innovation_by_therapeutic_area.ipynb` ✅ (the core analysis, R kernel)
 - Phase 2D → `05_drug_normalization.ipynb` (coverage rates, top unmatched)

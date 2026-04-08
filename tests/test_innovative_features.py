@@ -2,7 +2,12 @@
 
 import duckdb
 
-from src.innovative_features import detect_innovative_features, INNOVATIVE_PATTERNS
+from src.innovative_features import (
+    detect_innovative_features,
+    detect_ai_mentions,
+    INNOVATIVE_PATTERNS,
+    AI_MENTION_PATTERNS,
+)
 
 
 def _setup_features_test_db():
@@ -27,7 +32,13 @@ def _setup_features_test_db():
             ('NCT011', 'Digital Health Platform', 'Evaluation of a Digital Health Platform for Diabetes Management', 'INTERVENTIONAL'),
             ('NCT012', 'A Seamless Phase II/III Study', 'A Seamless Phase II/III Adaptive Study of Drug Z', 'INTERVENTIONAL'),
             ('NCT013', 'Master Protocol for Rare Diseases', 'A Master Protocol Evaluating Treatments for Rare Diseases', 'INTERVENTIONAL'),
-            ('NCT014', 'N-of-1 Trial Design', 'An N-of-1 Crossover Trial of Analgesics', 'INTERVENTIONAL')
+            ('NCT014', 'N-of-1 Trial Design', 'An N-of-1 Crossover Trial of Analgesics', 'INTERVENTIONAL'),
+            ('NCT015', 'Digital Twin for Stroke Prognosis', 'Development of a Digital Twin Model for Stroke Outcome Prediction', 'OBSERVATIONAL'),
+            ('NCT016', 'In Silico Trial of Drug Q', 'An In Silico Trial Simulation of Drug Q Pharmacokinetics', 'INTERVENTIONAL'),
+            ('NCT017', 'AI-Driven Colonoscopy Screening', 'AI-Driven Screening Tool for Colorectal Cancer Detection', 'INTERVENTIONAL'),
+            ('NCT018', 'AI-Guided Trial Design', 'An AI-Guided Trial Design for Adaptive Dosing in Oncology', 'INTERVENTIONAL'),
+            ('NCT019', 'Machine Learning Sepsis Prediction', 'A Machine Learning Model to Predict Sepsis in ICU Patients', 'OBSERVATIONAL'),
+            ('NCT020', 'Standard Drug Study', 'A Randomized Study of Drug R vs Placebo', 'INTERVENTIONAL')
         ) AS t(nct_id, brief_title, official_title, study_type)
     """)
 
@@ -37,7 +48,11 @@ def _setup_features_test_db():
             ('NCT001', 'This is an adaptive design trial with interim analyses.'),
             ('NCT005', 'This is a standard randomized controlled trial with conventional design.'),
             ('NCT007', 'This study uses a SMART design to optimize treatment sequences.'),
-            ('NCT012', 'This is a seamless phase 2/3 study with bayesian monitoring.')
+            ('NCT012', 'This is a seamless phase 2/3 study with bayesian monitoring.'),
+            ('NCT015', 'This study develops a digital twin of patient physiology for personalized stroke care.'),
+            ('NCT017', 'This trial uses artificial intelligence to improve colonoscopy adenoma detection rates.'),
+            ('NCT018', 'This study uses reinforcement learning to optimize dosing and treatment allocation in an adaptive platform.'),
+            ('NCT019', 'We apply deep learning and neural network models to predict sepsis onset from ICU monitoring data.')
         ) AS t(nct_id, description)
     """)
 
@@ -50,7 +65,10 @@ def _setup_features_test_db():
             ('NCT005', 'randomized controlled trial'),
             ('NCT007', 'SMART'),
             ('NCT008', 'pragmatic trial'),
-            ('NCT012', 'bayesian')
+            ('NCT012', 'bayesian'),
+            ('NCT015', 'digital twin'),
+            ('NCT017', 'artificial intelligence'),
+            ('NCT019', 'machine learning')
         ) AS t(nct_id, name)
     """)
 
@@ -245,6 +263,157 @@ def test_pragmatic_detected():
     result = conn.execute("""
         SELECT * FROM class.innovative_features
         WHERE nct_id = 'NCT008' AND feature_type = 'pragmatic'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+# --- AI-augmented design pattern tests ---
+
+
+def test_digital_twin_detected():
+    """'digital twin' should trigger the digital twin feature."""
+    conn = _setup_features_test_db()
+    detect_innovative_features(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.innovative_features
+        WHERE nct_id = 'NCT015' AND feature_type = 'digital twin'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+def test_in_silico_trial_detected():
+    """'in silico trial' should trigger the in silico feature."""
+    conn = _setup_features_test_db()
+    detect_innovative_features(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.innovative_features
+        WHERE nct_id = 'NCT016' AND feature_type = 'in silico'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+def test_ai_augmented_design_detected():
+    """'AI-Guided Trial Design' in title should trigger AI-augmented design."""
+    conn = _setup_features_test_db()
+    detect_innovative_features(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.innovative_features
+        WHERE nct_id = 'NCT018' AND feature_type = 'AI-augmented design'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+def test_ai_intervention_not_flagged_as_design():
+    """AI as intervention (NCT017 'AI-Driven Screening') should NOT be AI-augmented design."""
+    conn = _setup_features_test_db()
+    detect_innovative_features(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.innovative_features
+        WHERE nct_id = 'NCT017' AND feature_type = 'AI-augmented design'
+    """).fetchall()
+    assert len(result) == 0
+    conn.close()
+
+
+def test_reinforcement_learning_dosing_detected():
+    """RL + dosing context in description should trigger AI-augmented design."""
+    conn = _setup_features_test_db()
+    detect_innovative_features(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.innovative_features
+        WHERE nct_id = 'NCT018' AND feature_type = 'AI-augmented design'
+        AND source_field = 'description'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+# --- AI-mention flag tests ---
+
+
+def test_ai_mentions_detects_artificial_intelligence():
+    """Studies mentioning 'artificial intelligence' should appear in ai_mentions."""
+    conn = _setup_features_test_db()
+    detect_ai_mentions(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.ai_mentions
+        WHERE nct_id = 'NCT017' AND ai_term = 'artificial intelligence'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+def test_ai_mentions_detects_machine_learning():
+    """Studies mentioning 'machine learning' should appear in ai_mentions."""
+    conn = _setup_features_test_db()
+    detect_ai_mentions(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.ai_mentions
+        WHERE nct_id = 'NCT019' AND ai_term = 'machine learning'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+def test_ai_mentions_detects_deep_learning():
+    """'deep learning' in description should be flagged."""
+    conn = _setup_features_test_db()
+    detect_ai_mentions(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.ai_mentions
+        WHERE nct_id = 'NCT019' AND ai_term = 'deep learning'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+def test_ai_mentions_detects_neural_network():
+    """'neural network' in description should be flagged."""
+    conn = _setup_features_test_db()
+    detect_ai_mentions(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.ai_mentions
+        WHERE nct_id = 'NCT019' AND ai_term = 'neural network'
+    """).fetchall()
+    assert len(result) > 0
+    conn.close()
+
+
+def test_ai_mentions_no_false_positives():
+    """A standard drug study (NCT020) should not appear in ai_mentions."""
+    conn = _setup_features_test_db()
+    detect_ai_mentions(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.ai_mentions
+        WHERE nct_id = 'NCT020'
+    """).fetchall()
+    assert len(result) == 0
+    conn.close()
+
+
+def test_ai_mentions_keyword_source():
+    """AI terms in keywords should be picked up."""
+    conn = _setup_features_test_db()
+    detect_ai_mentions(conn)
+
+    result = conn.execute("""
+        SELECT * FROM class.ai_mentions
+        WHERE nct_id = 'NCT017' AND source_field = 'keyword'
+        AND ai_term = 'artificial intelligence'
     """).fetchall()
     assert len(result) > 0
     conn.close()
