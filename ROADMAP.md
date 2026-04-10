@@ -199,16 +199,35 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 ---
 
-## Phase 2D: Drug Normalization
+## Phase 2D: Drug Normalization ✅
 
 **Goal**: Map intervention names to canonical drug identifiers.
 
-1. AACT baseline: `interventions` (type Drug/Biological) → `browse_interventions` MeSH (~47% coverage)
-2. ChEMBL API: string preprocess (strip dosage/route info, normalize casing) → query `molecule_synonyms` for unmatched names. Rate-limit to ~5 req/sec.
-3. Output: `norm_drugs(nct_id, intervention_name, canonical_name, canonical_id, match_source)`
-4. Validation notebook (`notebooks/05_drug_normalization.ipynb`)
+**Completed 2026-04-09.**
+
+**Approach — three-layer dictionary:**
+1. **Control/comparator mapping** (`control-map`, high confidence): Regex-based mapping of placebo, vehicle, saline, standard-of-care, sham, and other control terms to 9 canonical names. Runs first so control terms are excluded from subsequent layers.
+2. **MeSH exact match** (`mesh-exact`, high confidence): Normalized intervention name matches `browse_interventions.downcase_mesh_term` within the same study.
+3. **ChEMBL local synonym lookup** (`chembl-synonym`, high confidence): Exact match against 128K synonyms extracted from ChEMBL 36 SQLite database into `data/reference/chembl_synonyms.parquet` (2.4MB). No API calls needed — runs in seconds.
+
+**MeSH co-occurrence — removed**: An earlier version included a co-occurrence layer that mapped 1:1 Drug/Biological intervention to mesh-list term within a study. This was removed because the assumption that a single intervention and single mesh term refer to the same compound is unreliable for drugs. Analysis showed ~62% of co-occurrence entries had no name overlap between the intervention and the MeSH term, producing incorrect mappings (e.g., "mosunetuzumab" → "Dexamethasone", "chemotherapy" → "Drug Therapy"). The condition dictionary's co-occurrence layer works better because conditions and MeSH conditions are more directly linked; for drugs, NLM's `browse_interventions` MeSH terms can refer to different compounds than the listed intervention (e.g., a combination study listing only one drug as a formal intervention while NLM maps another). A future V2 could recover some of this coverage via fuzzy name matching with a similarity threshold.
+
+**String preprocessing** (`normalize_drug_name()`): Strips dosage patterns (e.g., "500mg", "100 mg/m2"), route/formulation terms (IV, tablets, injection, etc.), parenthetical content, and normalizes casing/whitespace.
+
+**Output tables:**
+- `ref.drug_dictionary` — maps normalized intervention names to canonical drug identifiers
+- `norm.study_drugs` — Drug + Biological intervention types only
+- Manual entries are preserved across automated rebuilds (same pattern as condition dictionary)
+
+**Unit tests**: 36 tests, all passing. Full suite: 125 tests.
+
+**ChEMBL data source**: ChEMBL 36 (2025-07-28), CC BY-SA 3.0. Reference files in `data/raw/chembl_260410/` (release notes, schema docs, license). SQLite dump downloaded, synonyms extracted to Parquet, dump deleted.
+
+**ChEMBL ID backfill**: After all layers run, a backfill pass looks up each MeSH/control `canonical_name` in the ChEMBL synonym table to populate `canonical_id`. Entries without a ChEMBL ID are typically MeSH-only terms or control substances.
 
 **Module**: `src/normalize_drugs.py`
+**Entry point**: `run_normalize_drugs.py`
+**Validation**: `notebooks/05_drug_normalization.ipynb`
 
 ---
 
@@ -282,7 +301,7 @@ Phase 1 (Raw Extract) ✅
   ├── Phase 2B (Study Design) ✅ ──────┘
   │
   ├── Phase 2C (QuickUMLS)     [after 2A coverage analysis]
-  ├── Phase 2D (Drugs)          [independent, lower priority]
+  ├── Phase 2D (Drugs) ✅       [independent]
   └── Phase 2E (Sponsors)       [independent, lowest priority]
         │
       Phase 4 (Views)           [after all normalizations]
@@ -314,6 +333,8 @@ Phase 1 (Raw Extract) ✅
 - `src/classify_design.py` — study design classification (L1/L2/L4/L5)
 - `src/innovative_features.py` — innovative feature detection (L3, regex NLP) + AI mention flag
 - `resources/Innovative & Emerging Clinical Trial Designs.md` — reference catalog of innovative/emerging trial designs
+- `src/normalize_drugs.py` — drug dictionary building + study drugs (3 layers: control mapping, MeSH exact, ChEMBL local)
+- `data/reference/chembl_synonyms.parquet` — 128K ChEMBL synonyms extracted from ChEMBL 36 SQLite (2.4MB)
 - `data/DATABASE_SCHEMA.md` — DuckDB schema documentation
 
 ## Verification

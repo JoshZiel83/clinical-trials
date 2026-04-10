@@ -1,7 +1,7 @@
 # DuckDB Schema Documentation
 
 **Database**: `data/clinical_trials.duckdb`
-**Last updated**: 2026-04-07
+**Last updated**: 2026-04-09
 
 ---
 
@@ -10,8 +10,8 @@
 | Schema | Purpose | Tables |
 |--------|---------|--------|
 | `raw` | Direct mirrors of AACT tables, filtered to active/planned studies. No transformations. | 14 tables |
-| `ref` | Reference/lookup tables for normalization. Hand-curated or derived. | 3 tables |
-| `norm` | Normalized entities with provenance tracking. | 2 tables |
+| `ref` | Reference/lookup tables for normalization. Hand-curated or derived. | 4 tables |
+| `norm` | Normalized entities with provenance tracking. | 3 tables |
 | `class` | Study design classification and innovative feature detection. | 2 tables |
 | `meta` | Pipeline metadata (extraction logs, run statistics). | 1 table |
 
@@ -195,6 +195,23 @@ Hand-curated mapping from MeSH ancestor names to therapeutic areas. Source: `dat
 
 **21 rows** — maps to 21 therapeutic areas. Multiple ancestors can map to the same TA (e.g., "Endocrine System Diseases" and "Nutritional and Metabolic Diseases" both → "Metabolic/Endocrine").
 
+### `ref.drug_dictionary`
+Maps normalized intervention names to canonical drug identifiers. Built by `src/normalize_drugs.py`. Manual entries are preserved across automated rebuilds.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `source_name` | VARCHAR | NOT NULL | Normalized intervention name (lowercase, dosage/route stripped) |
+| `canonical_name` | VARCHAR | NOT NULL | Canonical drug name (MeSH term or ChEMBL pref_name) |
+| `canonical_id` | VARCHAR | YES | ChEMBL ID (NULL for MeSH-only matches) |
+| `mapping_method` | VARCHAR | NOT NULL | How the mapping was derived (see below) |
+| `confidence` | VARCHAR | NOT NULL | `high` or `medium` |
+
+**Mapping methods** (in priority order):
+- `control-map` — regex-based mapping of placebo, vehicle, saline, standard-of-care, and other control terms
+- `mesh-exact` — normalized name exactly matches `browse_interventions.downcase_mesh_term` within the same study
+- `chembl-synonym` — exact match against local ChEMBL 36 synonym Parquet file (128K synonyms)
+- `manual` — hand-curated entries; preserved across automated rebuilds
+
 ---
 
 ## `norm` Schema
@@ -225,6 +242,19 @@ Study-level therapeutic area assignments derived from `raw.browse_conditions` Me
 | `match_source` | VARCHAR | `mesh-ancestor` or `mesh-list` |
 
 **202,132 rows** — 93,606 distinct studies (78.2% coverage)
+
+### `norm.study_drugs`
+Drug/Biological interventions enriched with canonical drug name from the drug dictionary. Only includes Drug and Biological intervention types. Unmapped drugs have NULL canonical fields.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `nct_id` | VARCHAR | | Study identifier |
+| `intervention_type` | VARCHAR | | DRUG or BIOLOGICAL |
+| `intervention_name` | VARCHAR | | Original name from `raw.interventions` |
+| `canonical_name` | VARCHAR | YES | Canonical drug name (NULL if unmapped) |
+| `canonical_id` | VARCHAR | YES | ChEMBL ID (NULL if MeSH-only or unmapped) |
+| `mapping_method` | VARCHAR | | control-map, mesh-exact, chembl-synonym, manual, or unmatched |
+| `confidence` | VARCHAR | YES | high, medium, or NULL (if unmatched) |
 
 ---
 
@@ -294,6 +324,7 @@ raw.studies (nct_id)
   ├── raw.studies + raw.detailed_descriptions + raw.keywords
   │     └── class.innovative_features (regex NLP on free-text fields)
   ├── raw.interventions (nct_id)
+  │     └── norm.study_drugs (intervention_name → ref.drug_dictionary)
   ├── raw.browse_interventions (nct_id)
   ├── raw.sponsors (nct_id)
   ├── raw.countries (nct_id)
