@@ -183,19 +183,11 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 ---
 
-## Phase 2C: QuickUMLS for Unmapped Conditions (if needed)
+## Phase 2C: QuickUMLS for Unmapped Conditions — **subsumed into Phase 6**
 
-**Goal**: Improve TA coverage from ~62% to ~80-90%.
+Originally planned as a standalone dictionary layer for the ~25K conditions without NLM MeSH mappings. After reviewing the landscape — fuzzy conditions (2A.1), drug residuals (2D), and sponsor dedup (2E) all share the same "propose candidate → human verify → promote to `manual`" shape — this phase has been folded into **Phase 6 (HITL Enrichment Platform)**. QuickUMLS becomes one tool among several that a Claude agent can call to generate candidates, rather than an automated dictionary layer.
 
-**Depends on**: Phase 2A coverage analysis results. If 62% is sufficient for core TAs, defer further.
-
-- Apply for free UMLS license at https://uts.nlm.nih.gov/uts/ **(do this early — 1-3 day approval)**
-- Install QuickUMLS, build local index from UMLS Metathesaurus
-- Run on unique unmapped condition strings → UMLS CUIs → MeSH tree numbers via MRCONSO
-- Feed through existing TA pipeline from Phase 2A
-- Manual curation for top ~200-500 high-frequency unmapped strings
-
-**Setup needed**: UMLS license (free, apply during Phase 0/1)
+**Still needed ahead of Phase 6**: UMLS license approval (free, 1-3 day turnaround at https://uts.nlm.nih.gov/uts/). Index build will be a one-shot `scripts/build_quickumls_index.py`, not part of the recurring pipeline.
 
 ---
 
@@ -231,17 +223,38 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 ---
 
-## Phase 2E: Sponsor Deduplication
+## Phase 2E: Sponsor Deduplication — **subsumed into Phase 6**
 
-**Goal**: Group sponsor name variants to canonical organizations.
+Originally planned as a standalone fuzzy-dedup module. Same rationale as 2C: the workflow (normalize → fuzzy candidates → manual review → canonical dictionary) is identical to the condition and drug enrichment patterns, so sponsor dedup becomes one more domain inside **Phase 6**. The deterministic normalization step (case folding, legal suffix stripping via `rapidfuzz`) still lives in `src/normalize_sponsors.py`; only the candidate generation + review layer is absorbed.
 
-- String normalization: case, legal suffixes (Inc/Ltd/Corp/GmbH), punctuation
-- Fuzzy matching via `rapidfuzz` (Jaro-Winkler or token-sort)
-- Use `agency_class` as grouping hint
-- Manual review for top ~100 sponsors
-- Output: `norm_sponsors(original_name, canonical_name, agency_class)`
+**Output once Phase 6 ships**: `norm.study_sponsors(original_name, canonical_name, agency_class)` backed by `ref.sponsor_dictionary` (manual entries promoted from `ref.mapping_candidates` where `domain='sponsor'`).
 
-**Module**: `src/normalize_sponsors.py`
+---
+
+## Phase 6: HITL Enrichment Platform
+
+**Goal**: Consolidate all human-in-the-loop mapping workflows (fuzzy conditions, QuickUMLS conditions, unmatched drug interventions, sponsor dedup) into a single platform: shared candidate schema, a Claude agent that uses matching algorithms as tools to generate candidates, and a read-only R/Shiny app for reviewer promotion.
+
+**Motivation**: Phases 2A.1, 2C, 2D-residual, and 2E all share the same shape — propose mappings from a noisy source, verify, persist as `manual` dictionary entries. Building three separate candidate workflows means duplicating schema, promotion logic, and review UX. A unified platform collapses them and replaces brittle per-domain rules with per-item agent reasoning that is cached, budgeted, and auditable.
+
+**Depends on**: Phase 4 (Views) recommended first so the review app can show coverage dashboards; UMLS license approval (for the QuickUMLS tool, not blocking other domains).
+
+**Architecture:**
+
+1. **Shared candidate plumbing** (`src/hitl.py`) — generalize `ref.condition_candidates` into a domain-tagged `ref.mapping_candidates` (columns: `domain`, `source_value`, `canonical_term`, `canonical_id`, `score`, `study_count`, `source`, `rationale`, `tool_trace` JSON, `status`, timestamps). Lift existing helpers (`generate_candidates`, `promote_candidates`, `export_candidates_csv`, `import_reviewed_csv`) from `src/normalize_conditions.py` into `hitl.py`, parameterized by domain. Add `import_decision_log()` for Shiny roundtrip.
+
+2. **Claude-agent candidate generator** (`src/enrichment_agent.py`) — one entry per domain (`condition`, `drug`, `sponsor`). Matching algorithms become **tools** the agent calls: fuzzy MeSH / fuzzy ChEMBL / fuzzy sponsor, QuickUMLS lookup, co-occurrence lookup, `normalize_drug_name`, dictionary lookups. For easy items the agent calls one tool and returns; for hard items it investigates across tools. Guardrails: SHA-cached by `(domain, normalized input)` in `meta.agent_cache` so reruns are free; per-run USD budget with resumable checkpointing; system prompt enforces tool-grounding (no ungrounded mappings); golden eval set (`tests/fixtures/enrichment_golden.json`, ~200 labeled items per domain) gates prompt/tool changes.
+
+3. **R/Shiny review app** (`apps/review/app.R`) — read-only DuckDB connection, one tab per domain, sortable `DT::datatable` with filters (status, score, study_count, source), expandable row showing agent rationale + tool trace, batch approve/reject actions. Writes decisions to `data/reviews/decisions_YYYY-MM-DD.parquet` (not directly to DuckDB — avoids the single-writer constraint). Pipeline imports the decision log on the next run via `run_hitl_sync.py`.
+
+**Entry points:**
+- `run_enrichment_agent.py --domain {condition|drug|sponsor} --budget <USD> [--resume]`
+- `run_hitl_sync.py` — imports latest decision log, promotes approvals, rebuilds affected dictionaries
+- `scripts/build_quickumls_index.py` — one-shot UMLS Metathesaurus index build (gated on license)
+
+**Modules**: `src/hitl.py`, `src/enrichment_agent.py`, `src/normalize_sponsors.py` (deterministic piece), `apps/review/app.R`
+**Config**: `ANTHROPIC_API_KEY` in `.env`; model + budget defaults in `config/settings.py`
+**Migration**: existing `ref.condition_candidates` rows migrated into `ref.mapping_candidates` with `domain='condition'`; old table dropped; `notebooks/02a_condition_enrichment.ipynb` continues to work via delegated helpers.
 
 ---
 
@@ -300,21 +313,23 @@ Phase 1 (Raw Extract) ✅
   │                                     │
   ├── Phase 2B (Study Design) ✅ ──────┘
   │
-  ├── Phase 2C (QuickUMLS)     [after 2A coverage analysis]
-  ├── Phase 2D (Drugs) ✅       [independent]
-  └── Phase 2E (Sponsors)       [independent, lowest priority]
+  ├── Phase 2C (QuickUMLS)     → subsumed into Phase 6
+  ├── Phase 2D (Drugs) ✅       [independent; residuals flow into Phase 6]
+  └── Phase 2E (Sponsors)      → subsumed into Phase 6
         │
-      Phase 4 (Views)           [after all normalizations]
+      Phase 4 (Views)           [after deterministic normalizations]
+        │
+      Phase 6 (HITL Platform)   [unifies candidate + review workflows]
         │
       Phase 5 (Automation)
 ```
 
-**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2C → 2D → 2E → 4 → 5
+**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2D → 4 → 6 → 5
 
 ## Action Items
 
 1. ~~**Register AACT account**~~ ✅ Done
-2. **Apply for UMLS license** — 1-3 day approval, needed by Phase 2C (applied, pending)
+2. **Apply for UMLS license** — 1-3 day approval, needed for the QuickUMLS tool in Phase 6 (applied, pending)
 3. ~~**Download MeSH XML**~~ — not needed for Phase 2A (ancestor-name approach used instead); may be needed for Phase 2C
 4. ~~**Bookmark NBK611886 TA mapping table**~~ ✅ Used as starting point for `data/reference/therapeutic_area_mapping.json`
 
@@ -345,3 +360,4 @@ After each phase, the corresponding notebook serves as the verification step:
 - Phase 2B → `03_design_classification.ipynb` ✅ (precision spot-checks)
 - Phase 3A → `04_innovation_by_therapeutic_area.ipynb` ✅ (the core analysis, R kernel)
 - Phase 2D → `05_drug_normalization.ipynb` (coverage rates, top unmatched)
+- Phase 6 → `apps/review/app.R` (Shiny review UI) + golden eval (`tests/test_enrichment_agent.py`) + coverage deltas in notebooks 02 and 05 after a promotion batch
