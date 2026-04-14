@@ -413,6 +413,109 @@ def get_coverage_stats(duck_conn):
     return stats
 
 
+def generate_drug_fuzzy_candidates(duck_conn, score_cutoff=88, top_n=2000):
+    """Propose canonical mappings for unmatched drug interventions.
+
+    Pulls top-impact unmatched intervention names (by study count),
+    normalizes them via `normalize_drug_name`, scores rapidfuzz WRatio
+    against (a) ChEMBL synonyms and (b) MeSH intervention terms. Writes
+    best proposals (score ≥ cutoff) into `ref.mapping_candidates` with
+    domain='drug', source='fuzzy'.
+
+    `top_n` caps the candidate set to keep the N×M score calc tractable.
+    """
+    import pandas as pd
+    from rapidfuzz import fuzz, process
+
+    from src import hitl
+
+    unmatched = duck_conn.execute("""
+        SELECT intervention_name AS raw_name,
+               COUNT(DISTINCT nct_id) AS study_count
+        FROM norm.study_drugs
+        WHERE mapping_method = 'unmatched'
+        GROUP BY intervention_name
+        ORDER BY study_count DESC
+        LIMIT ?
+    """, [top_n]).fetchdf()
+
+    if unmatched.empty:
+        logger.info("[drug] no unmatched interventions; nothing to fuzzy-match")
+        hitl.insert_candidates(
+            duck_conn, "drug",
+            pd.DataFrame(columns=["source_value", "canonical_term", "score", "study_count"]),
+            source="fuzzy",
+        )
+        return 0
+
+    # Build match targets from ChEMBL synonyms + MeSH intervention terms
+    targets = {}  # normalized_target -> (canonical_name, canonical_id)
+    if CHEMBL_SYNONYMS_PATH.exists():
+        chembl = pd.read_parquet(CHEMBL_SYNONYMS_PATH).dropna(subset=["synonym", "pref_name"])
+        for _, r in chembl.iterrows():
+            syn = str(r["synonym"]).lower().strip()
+            pref = str(r["pref_name"]).strip()
+            # Skip junk synonyms that produce false positives: too short,
+            # purely numeric, or single-token punctuation.
+            if len(syn) < 4 or syn.isdigit() or syn.replace("-", "").isdigit():
+                continue
+            if syn and pref and syn not in targets:
+                targets[syn] = (pref, r["chembl_id"])
+    mesh = duck_conn.execute("""
+        SELECT DISTINCT downcase_mesh_term AS term
+        FROM raw.browse_interventions
+        WHERE mesh_type = 'mesh-list'
+    """).fetchdf()
+    for term in mesh["term"]:
+        t = str(term).strip()
+        if t and t not in targets:
+            targets[t] = (t, None)
+
+    target_list = list(targets.keys())
+    logger.info(
+        f"[drug] fuzzy-matching {len(unmatched):,} unmatched names "
+        f"against {len(target_list):,} targets (cutoff={score_cutoff})"
+    )
+
+    proposals = []
+    for _, row in unmatched.iterrows():
+        raw_name = row["raw_name"]
+        study_count = int(row["study_count"])
+        normalized = normalize_drug_name(raw_name)
+        if not normalized or len(normalized) < 3:
+            continue
+        result = process.extractOne(
+            normalized, target_list, scorer=fuzz.WRatio, score_cutoff=score_cutoff
+        )
+        if result is None:
+            continue
+        match_key, score, _ = result
+        canonical_name, canonical_id = targets[match_key]
+        proposals.append({
+            "source_value": normalized,
+            "canonical_term": canonical_name,
+            "canonical_id": canonical_id,
+            "score": float(score),
+            "study_count": study_count,
+        })
+
+    df = pd.DataFrame(proposals) if proposals else pd.DataFrame(
+        columns=["source_value", "canonical_term", "canonical_id", "score", "study_count"]
+    )
+    # Collapse duplicates (multiple raw names may normalize to the same source_value
+    # and point at the same canonical — keep the highest-impact row).
+    if not df.empty:
+        df = (
+            df.sort_values(["source_value", "canonical_term", "study_count"],
+                           ascending=[True, True, False])
+              .drop_duplicates(subset=["source_value", "canonical_term"], keep="first")
+              .reset_index(drop=True)
+        )
+    hitl.insert_candidates(duck_conn, "drug", df, source="fuzzy")
+    logger.info(f"[drug] generated {len(df):,} fuzzy candidates")
+    return len(df)
+
+
 def run_normalization_pipeline(duck_conn=None, skip_chembl=False):
     """Run the full drug normalization pipeline.
 
@@ -427,6 +530,7 @@ def run_normalization_pipeline(duck_conn=None, skip_chembl=False):
         logger.info("Building drug dictionary...")
         build_drug_dictionary(duck_conn, skip_chembl=skip_chembl)
         create_study_drugs(duck_conn)
+        generate_drug_fuzzy_candidates(duck_conn)
         stats = get_coverage_stats(duck_conn)
         return stats
     finally:

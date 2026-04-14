@@ -344,8 +344,8 @@ def test_fuzzy_skips_non_conditions():
     generate_fuzzy_candidates(conn)
 
     result = conn.execute("""
-        SELECT * FROM ref.condition_candidates
-        WHERE condition_name = 'immunotherapy'
+        SELECT * FROM ref.mapping_candidates
+        WHERE domain = 'condition' AND source_value = 'immunotherapy'
     """).fetchone()
     assert result is None
     conn.close()
@@ -359,8 +359,8 @@ def test_fuzzy_candidate_has_correct_study_count():
 
     result = conn.execute("""
         SELECT study_count, status
-        FROM ref.condition_candidates
-        WHERE condition_name = 'diabetic nephropathy'
+        FROM ref.mapping_candidates
+        WHERE domain = 'condition' AND source_value = 'diabetic nephropathy'
     """).fetchone()
     # "diabetic nephropathy" appears in NCT004 and NCT005 → study_count=2
     assert result is not None
@@ -383,22 +383,22 @@ def test_build_dictionary_no_fuzzy_entries():
 
 
 def test_generate_fuzzy_candidates_creates_table():
-    """generate_fuzzy_candidates should create ref.condition_candidates with correct schema."""
+    """generate_fuzzy_candidates should populate ref.mapping_candidates for domain='condition'."""
     conn = _setup_fuzzy_test_db()
     build_condition_dictionary(conn)
     df = generate_fuzzy_candidates(conn)
 
-    # Table exists and has rows
-    count = conn.execute("SELECT COUNT(*) FROM ref.condition_candidates").fetchone()[0]
+    count = conn.execute(
+        "SELECT COUNT(*) FROM ref.mapping_candidates WHERE domain = 'condition'"
+    ).fetchone()[0]
     assert count > 0
 
-    # All rows are pending
     non_pending = conn.execute("""
-        SELECT COUNT(*) FROM ref.condition_candidates WHERE status != 'pending'
+        SELECT COUNT(*) FROM ref.mapping_candidates
+        WHERE domain = 'condition' AND status != 'pending'
     """).fetchone()[0]
     assert non_pending == 0
 
-    # DataFrame matches table
     assert len(df) == count
     assert set(df.columns) >= {"condition_name", "canonical_term", "score", "study_count", "status"}
     conn.close()
@@ -432,8 +432,8 @@ def test_promote_candidates():
 
     # Candidate status should be updated
     status = conn.execute("""
-        SELECT status FROM ref.condition_candidates
-        WHERE condition_name = 'diabetic nephropathy'
+        SELECT status FROM ref.mapping_candidates
+        WHERE domain = 'condition' AND source_value = 'diabetic nephropathy'
     """).fetchone()
     assert status[0] == "approved"
     conn.close()
@@ -445,27 +445,25 @@ def test_regenerate_preserves_reviewed_candidates():
     build_condition_dictionary(conn)
     generate_fuzzy_candidates(conn)
 
-    # Mark one as rejected
     conn.execute("""
-        UPDATE ref.condition_candidates
+        UPDATE ref.mapping_candidates
         SET status = 'rejected'
-        WHERE condition_name = 'diabetic nephropathy'
+        WHERE domain = 'condition' AND source_value = 'diabetic nephropathy'
     """)
 
-    # Regenerate
     generate_fuzzy_candidates(conn)
 
-    # Rejected row should still be there
     rejected = conn.execute("""
-        SELECT status FROM ref.condition_candidates
-        WHERE condition_name = 'diabetic nephropathy' AND status = 'rejected'
+        SELECT status FROM ref.mapping_candidates
+        WHERE domain = 'condition' AND source_value = 'diabetic nephropathy'
+          AND status = 'rejected'
     """).fetchone()
     assert rejected is not None
 
-    # Should not have a new pending row for the rejected condition
     pending_dup = conn.execute("""
-        SELECT COUNT(*) FROM ref.condition_candidates
-        WHERE condition_name = 'diabetic nephropathy' AND status = 'pending'
+        SELECT COUNT(*) FROM ref.mapping_candidates
+        WHERE domain = 'condition' AND source_value = 'diabetic nephropathy'
+          AND status = 'pending'
     """).fetchone()[0]
     assert pending_dup == 0
     conn.close()

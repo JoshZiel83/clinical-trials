@@ -1,7 +1,10 @@
 # Data - exclude large/generated files, track reference data and docs
 data/raw/
 data/logs/
+data/reviews/
+data/reference/umls/
 data/*.duckdb
+data/*.zip
 
 # Python
 __pycache__/

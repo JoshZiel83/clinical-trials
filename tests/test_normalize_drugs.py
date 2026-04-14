@@ -8,6 +8,7 @@ from src.normalize_drugs import (
     build_drug_dictionary,
     classify_control,
     create_study_drugs,
+    generate_drug_fuzzy_candidates,
     get_coverage_stats,
     is_non_drug,
     normalize_drug_name,
@@ -397,4 +398,28 @@ def test_coverage_stats_values():
     assert 0 <= stats["intervention_coverage_pct"] <= 100
     assert 0 <= stats["study_coverage_pct"] <= 100
     assert stats["total_interventions"] > 0
+    conn.close()
+
+
+def test_generate_drug_fuzzy_candidates_inserts_into_mapping_candidates():
+    """Unmatched interventions should surface as sponsor=... err, drug fuzzy candidates."""
+    conn = _setup_test_db()
+    # Add an unmatched intervention similar to a known MeSH term
+    conn.execute("""
+        INSERT INTO raw.interventions VALUES
+        (99, 'NCT005', 'DRUG', 'Metphormin', 'typo')
+    """)
+    build_drug_dictionary(conn, skip_chembl=True)
+    create_study_drugs(conn)
+    n = generate_drug_fuzzy_candidates(conn, score_cutoff=80, top_n=100)
+    assert n >= 1
+
+    rows = conn.execute("""
+        SELECT source_value, canonical_term, score, status
+        FROM ref.mapping_candidates WHERE domain = 'drug'
+    """).fetchall()
+    assert rows
+    # Our typo should be among them
+    assert any("metphormin" in r[0] for r in rows)
+    assert all(r[3] == "pending" for r in rows)
     conn.close()

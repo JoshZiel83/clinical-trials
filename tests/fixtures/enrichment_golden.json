@@ -1,0 +1,19 @@
+{
+  "_notes": "Labeled items per domain for evaluating the enrichment agent. Keep small (smoke test); expand with top-impact residuals over time. `expected_canonical` is the human-reviewed truth; `expect_abstain: true` means a confident abstention is the right answer.",
+  "condition": [
+    {"source_value": "breast ca", "expected_canonical": "Breast Neoplasms"},
+    {"source_value": "diabeteic nephropathy", "expected_canonical": "Diabetic Nephropathies"},
+    {"source_value": "t2dm", "expected_canonical": "Diabetes Mellitus, Type 2"},
+    {"source_value": "nsclc", "expected_canonical": "Carcinoma, Non-Small-Cell Lung"},
+    {"source_value": "healthy volunteers", "expect_abstain": true}
+  ],
+  "drug": [
+    {"source_value": "nab-paclitaxel", "expected_canonical": "PACLITAXEL"},
+    {"source_value": "bupivacain", "expected_canonical": "BUPIVACAINE"},
+    {"source_value": "placebo tablet", "expect_abstain": true}
+  ],
+  "sponsor": [
+    {"source_value": "Hoffman La Roche", "expected_canonical": "Hoffmann-La Roche"},
+    {"source_value": "Astra Zeneca", "expected_canonical": "AstraZeneca"}
+  ]
+}

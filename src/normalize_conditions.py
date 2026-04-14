@@ -1,5 +1,6 @@
 """Build condition dictionary and map study conditions to canonical MeSH terms."""
 
+import os
 import re
 
 from config.settings import get_duckdb_connection
@@ -286,32 +287,21 @@ def generate_fuzzy_candidates(duck_conn):
     """Generate fuzzy match candidates for human review.
 
     Matches unmapped conditions against mesh-list terms using rapidfuzz.
-    Results are written to ref.condition_candidates (not the dictionary).
-    Only 'pending' candidates are cleared and regenerated; approved/rejected
-    decisions from prior reviews are preserved.
+    Storage is delegated to src.hitl (ref.mapping_candidates with
+    domain='condition', source='fuzzy'). Approved/rejected decisions
+    persist across regenerations.
 
-    Returns a pandas DataFrame of the generated candidates.
+    Returns a pandas DataFrame of the generated candidates with columns
+    [condition_name, canonical_term, score, study_count, status] for
+    backward compatibility with the enrichment notebook.
     """
     import pandas as pd
     from rapidfuzz import fuzz, process
 
-    # Create candidates table if needed
-    duck_conn.execute("CREATE SCHEMA IF NOT EXISTS ref")
-    duck_conn.execute("""
-        CREATE TABLE IF NOT EXISTS ref.condition_candidates (
-            condition_name  VARCHAR NOT NULL,
-            canonical_term  VARCHAR NOT NULL,
-            score           FLOAT NOT NULL,
-            study_count     INTEGER NOT NULL,
-            status          VARCHAR NOT NULL DEFAULT 'pending',
-            created_at      TIMESTAMP DEFAULT current_timestamp
-        )
-    """)
+    from src import hitl
 
-    # Clear pending candidates (preserve approved/rejected history)
-    duck_conn.execute("DELETE FROM ref.condition_candidates WHERE status = 'pending'")
+    hitl.ensure_candidates_table(duck_conn)
 
-    # Get mesh-list terms as match targets
     mesh_terms = duck_conn.execute("""
         SELECT DISTINCT mesh_term
         FROM raw.browse_conditions
@@ -319,15 +309,14 @@ def generate_fuzzy_candidates(duck_conn):
     """).fetchall()
     mesh_list = [row[0] for row in mesh_terms]
 
-    # Get unmapped condition names with study counts
-    # Exclude conditions already in dictionary OR already reviewed (approved/rejected)
     unmapped = duck_conn.execute("""
-        SELECT LOWER(c.name) AS condition_name, COUNT(DISTINCT c.nct_id) AS study_count
+        SELECT LOWER(c.name) AS condition_name,
+               COUNT(DISTINCT c.nct_id) AS study_count
         FROM raw.conditions c
         WHERE LOWER(c.name) NOT IN (SELECT condition_name FROM ref.condition_dictionary)
         AND LOWER(c.name) NOT IN (
-            SELECT condition_name FROM ref.condition_candidates
-            WHERE status IN ('approved', 'rejected')
+            SELECT source_value FROM ref.mapping_candidates
+            WHERE domain = 'condition' AND status IN ('approved', 'rejected')
         )
         GROUP BY LOWER(c.name)
     """).fetchdf()
@@ -337,16 +326,13 @@ def generate_fuzzy_candidates(duck_conn):
         cond_name = row["condition_name"]
         study_count = int(row["study_count"])
 
-        # Skip non-conditions
         if is_non_condition(cond_name):
             continue
 
-        # Normalize for matching
         normalized = normalize_condition(cond_name)
         if len(normalized) < 3:
             continue
 
-        # Find best match
         result = process.extractOne(
             normalized, mesh_list, scorer=fuzz.token_sort_ratio, score_cutoff=75
         )
@@ -354,134 +340,71 @@ def generate_fuzzy_candidates(duck_conn):
             continue
 
         match_term, score, _ = result
-
         candidates.append({
-            "condition_name": cond_name,
+            "source_value": cond_name,
             "canonical_term": match_term,
             "score": float(score),
             "study_count": study_count,
-            "status": "pending",
         })
 
-    if candidates:
-        df = pd.DataFrame(candidates)
-        duck_conn.execute("""
-            INSERT INTO ref.condition_candidates
-            (condition_name, canonical_term, score, study_count, status)
-            SELECT condition_name, canonical_term, score, study_count, status
-            FROM df
-        """)
-    else:
-        df = pd.DataFrame(columns=[
-            "condition_name", "canonical_term", "score", "study_count", "status",
-        ])
+    df = pd.DataFrame(candidates) if candidates else pd.DataFrame(
+        columns=["source_value", "canonical_term", "score", "study_count"]
+    )
+    hitl.insert_candidates(duck_conn, "condition", df, source="fuzzy")
 
-    logger.info(f"Generated {len(candidates):,} fuzzy candidates for review")
-    return df
+    logger.info(f"Generated {len(df):,} fuzzy candidates for review")
+
+    # Return in legacy column naming for the enrichment notebook
+    return df.rename(columns={"source_value": "condition_name"}).assign(status="pending")
 
 
 def promote_candidates(duck_conn, approved_df):
     """Promote approved candidates into the condition dictionary as manual entries.
 
-    Args:
-        duck_conn: DuckDB connection.
-        approved_df: DataFrame with columns [condition_name, canonical_term].
-
-    Returns the number of entries promoted.
+    approved_df: DataFrame with columns [condition_name, canonical_term].
+    Returns number promoted. Thin wrapper around src.hitl.promote_candidates.
     """
-    import pandas as pd
+    from src import hitl
 
-    if approved_df.empty:
+    if approved_df is None or approved_df.empty:
         return 0
-
-    # Skip conditions already in the dictionary
-    existing = duck_conn.execute(
-        "SELECT condition_name FROM ref.condition_dictionary"
-    ).fetchdf()
-    existing_names = set(existing["condition_name"]) if not existing.empty else set()
-
-    to_promote = approved_df[
-        ~approved_df["condition_name"].isin(existing_names)
-    ].copy()
-
-    if to_promote.empty:
-        logger.info("No new candidates to promote (all already in dictionary)")
-        return 0
-
-    # Insert into dictionary as manual entries
-    promote_df = pd.DataFrame({
-        "condition_name": to_promote["condition_name"],
-        "canonical_term": to_promote["canonical_term"],
-        "mapping_method": "manual",
-        "confidence": "high",
-    })
-    duck_conn.execute(
-        "INSERT INTO ref.condition_dictionary SELECT * FROM promote_df"
-    )
-
-    # Update candidate status
-    promoted_names = list(to_promote["condition_name"])
-    duck_conn.execute("""
-        UPDATE ref.condition_candidates
-        SET status = 'approved'
-        WHERE condition_name IN (SELECT unnest(?))
-    """, [promoted_names])
-
-    logger.info(f"Promoted {len(promote_df):,} candidates to dictionary as manual entries")
-    return len(promote_df)
+    normalized_df = approved_df.rename(columns={"condition_name": "source_value"})
+    return hitl.promote_candidates(duck_conn, "condition", normalized_df)
 
 
 def export_candidates_csv(duck_conn, output_path=None):
-    """Export pending candidates to CSV for offline review.
-
-    Returns the output file path.
-    """
-    import os
+    """Export pending condition candidates to CSV for offline review."""
+    from src import hitl
 
     if output_path is None:
         output_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "data", "reference", "condition_candidates.csv",
         )
-
-    df = duck_conn.execute("""
-        SELECT condition_name, canonical_term, score, study_count, status
-        FROM ref.condition_candidates
-        WHERE status = 'pending'
-        ORDER BY study_count DESC, score DESC
-    """).fetchdf()
-
-    df.to_csv(output_path, index=False)
-    logger.info(f"Exported {len(df):,} pending candidates to {output_path}")
-    return output_path
+    return hitl.export_candidates_csv(duck_conn, "condition", output_path)
 
 
 def import_reviewed_csv(duck_conn, csv_path):
-    """Import a reviewed CSV, promoting approved rows and recording rejections.
+    """Import a reviewed condition-candidates CSV.
 
-    The CSV should have a 'status' column edited to 'approved' or 'rejected'.
-    Returns the number of entries promoted.
+    Accepts both legacy (`condition_name`) and new (`source_value`) column
+    names for backward compatibility.
     """
     import pandas as pd
 
+    from src import hitl
+
     reviewed = pd.read_csv(csv_path)
-
-    # Promote approved rows
-    approved = reviewed[reviewed["status"] == "approved"]
-    promoted = promote_candidates(duck_conn, approved)
-
-    # Mark rejected rows
-    rejected = reviewed[reviewed["status"] == "rejected"]
-    if not rejected.empty:
-        rejected_names = list(rejected["condition_name"])
-        duck_conn.execute("""
-            UPDATE ref.condition_candidates
-            SET status = 'rejected'
-            WHERE condition_name IN (SELECT unnest(?))
-        """, [rejected_names])
-        logger.info(f"Marked {len(rejected):,} candidates as rejected")
-
-    return promoted
+    if "condition_name" in reviewed.columns and "source_value" not in reviewed.columns:
+        # Legacy CSV — translate and write a temp file
+        import tempfile
+        tmp = tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w")
+        reviewed.rename(columns={"condition_name": "source_value"}).to_csv(
+            tmp.name, index=False
+        )
+        tmp.close()
+        return hitl.import_reviewed_csv(duck_conn, "condition", tmp.name)
+    return hitl.import_reviewed_csv(duck_conn, "condition", csv_path)
 
 
 def create_study_conditions(duck_conn):

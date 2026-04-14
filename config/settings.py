@@ -19,6 +19,13 @@ AACT_SCHEMA = "ctgov"
 AACT_USER = os.environ.get("AACT_USER", "")
 AACT_PASSWORD = os.environ.get("AACT_PASSWORD", "")
 
+# Anthropic / enrichment agent
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+AGENT_DEFAULT_MODEL = os.environ.get("AGENT_DEFAULT_MODEL", "claude-opus-4-6")
+AGENT_MAX_TOKENS = int(os.environ.get("AGENT_MAX_TOKENS", "4096"))
+AGENT_DEFAULT_MAX_PENDING = int(os.environ.get("AGENT_DEFAULT_MAX_PENDING", "500"))
+AGENT_SYSTEM_PROMPT_VERSION = "v1"  # bump to invalidate cache on prompt changes
+
 # Status filter for active/planned trials
 ACTIVE_STATUSES = (
     "RECRUITING",

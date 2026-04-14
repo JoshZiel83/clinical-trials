@@ -187,7 +187,7 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 Originally planned as a standalone dictionary layer for the ~25K conditions without NLM MeSH mappings. After reviewing the landscape — fuzzy conditions (2A.1), drug residuals (2D), and sponsor dedup (2E) all share the same "propose candidate → human verify → promote to `manual`" shape — this phase has been folded into **Phase 6 (HITL Enrichment Platform)**. QuickUMLS becomes one tool among several that a Claude agent can call to generate candidates, rather than an automated dictionary layer.
 
-**Still needed ahead of Phase 6**: UMLS license approval (free, 1-3 day turnaround at https://uts.nlm.nih.gov/uts/). Index build will be a one-shot `scripts/build_quickumls_index.py`, not part of the recurring pipeline.
+UMLS license approved 2026-04-13; UMLS 2025AB Metathesaurus zip processed via `scripts/build_quickumls_index.py` (Phase 6D); QuickUMLS index lives at `data/reference/umls/quickumls_index/` (5.4 GB, 10.6M terms).
 
 ---
 
@@ -231,7 +231,24 @@ Originally planned as a standalone fuzzy-dedup module. Same rationale as 2C: the
 
 ---
 
-## Phase 6: HITL Enrichment Platform
+## Phase 6: HITL Enrichment Platform ✅
+
+**Completed 2026-04-14** (slices 6A–6F).
+
+- **6A** — `src/hitl.py` + `ref.mapping_candidates` (domain-tagged shared candidate table); `src/normalize_conditions.py` helpers refactored to thin wrappers; `scripts/migrate_condition_candidates.py` (no-op on current live DB).
+- **6B** — `src/normalize_sponsors.py` (case-fold + legal-suffix stripping → `ref.sponsor_dictionary`); `norm.study_sponsors` (209,621 rows, 395 changed by normalization); 378 fuzzy merge candidates (top 2,000 canonicals, WRatio ≥88); `views.study_summary` swapped to canonical sponsors. Run via `run_normalize_sponsors.py`.
+- **6C** — `generate_drug_fuzzy_candidates` in `src/normalize_drugs.py`; 903 drug fuzzy proposals on the live DB (e.g. `nab paclitaxel → PACLITAXEL` 95%, `bupivacain → BUPIVACAINE` 95%).
+- **6D** — `scripts/build_quickumls_index.py` + `src/quickumls_tool.py`; UMLS 2025AB index built (5.4 GB, 10.6M terms); macOS libiconv linkage workaround documented in `CLAUDE.md`.
+- **6E** — `src/enrichment_agent.py` (Anthropic SDK + beta tool runner + Opus 4.6 + adaptive thinking); `src/enrichment_tools.py` (per-domain tools: fuzzy/QuickUMLS/co-occurrence/dictionary lookups); per-domain `max_pending` throttle (default 500); USD budget; SHA cache (`meta.agent_cache`); grounding enforcement (`finalize_proposal` rejects empty trace). Live smoke test: `overweight and obesity → Overweight` (C0497406) with multi-tool rationale, ~$0.10/item Opus 4.6. Run via `run_enrichment_agent.py --domain ... --budget ... --limit ...`.
+- **6F** — `apps/review/app.R` (read-only DuckDB Shiny app, one tab per domain, batch approve/reject → Parquet decision log); `run_hitl_sync.py` (imports unapplied logs, promotes approvals, rebuilds affected `norm.*` + `views.study_summary`); idempotent via `meta.decision_log_applied`.
+
+**Tests**: 184 passing + 1 skipped (skip = `test_lookup_without_index_raises`, correctly inactive now that the QuickUMLS index exists).
+
+**Modules** added: `src/hitl.py`, `src/normalize_sponsors.py`, `src/quickumls_tool.py`, `src/enrichment_tools.py`, `src/enrichment_agent.py`. **Entry points**: `run_normalize_sponsors.py`, `run_enrichment_agent.py`, `run_hitl_sync.py`. **Scripts**: `scripts/migrate_condition_candidates.py`, `scripts/build_quickumls_index.py`. **App**: `apps/review/`.
+
+---
+
+## Phase 6 (legacy detail — original plan, preserved for reference)
 
 **Goal**: Consolidate all human-in-the-loop mapping workflows (fuzzy conditions, QuickUMLS conditions, unmatched drug interventions, sponsor dedup) into a single platform: shared candidate schema, a Claude agent that uses matching algorithms as tools to generate candidates, and a read-only R/Shiny app for reviewer promotion.
 
@@ -258,14 +275,144 @@ Originally planned as a standalone fuzzy-dedup module. Same rationale as 2C: the
 
 ---
 
-## Phase 4: Analytical Views (Layer 4)
+## Phase 4: Analytical Views (Layer 4) ✅
 
 **Goal**: Denormalized, query-ready tables.
 
-- Wide `view_study_summary` joining: studies + design classification + innovative features + TAs + canonical sponsor + drug names + countries
-- Materialized in DuckDB (scale is small enough)
+**Completed 2026-04-14.**
+
+- `views.study_summary` — one row per study (119,753 rows, matches `raw.studies` exactly)
+- Joins: `raw.studies` + `class.study_design` + `class.innovative_features` + `class.ai_mentions` + `norm.study_therapeutic_areas` + `norm.study_conditions` + `norm.study_drugs` + `raw.countries` + `raw.sponsors`
+- Multi-valued dimensions aggregated into DuckDB `LIST` columns (therapeutic_areas, canonical_drugs, countries, etc.) plus 14 per-feature booleans (`is_adaptive`, `is_basket`, ...) for easy column-wise filtering
+- Convenience scalars: `start_year`, `has_innovative_feature`, `has_ai_mention`, `primary_therapeutic_area` (most-frequent ancestor, alphabetical tiebreak)
+- Sponsor columns are **interim**: `lead_sponsor_name` / `collaborator_names` carry raw un-normalized strings from `raw.sponsors`; will be replaced by `norm.study_sponsors` once Phase 6 ships
+- Coverage (matches Phase 2/3A): 78.2% ≥1 TA | 20.5% ≥1 mapped drug | 3.9% innovative feature | 2.2% AI mention | 100% lead sponsor
+
+**Unit tests**: 14 new tests in `tests/test_views.py` (list aggregation, boolean flag derivation, primary TA tiebreak, excluded `removed=TRUE` countries, missing-design-row nulls, sponsor fallback). Full suite: 139 tests, all passing.
 
 **Module**: `src/views.py`
+**Entry point**: `run_views.py`
+**Validation**: `notebooks/06_views_validation.ipynb`
+
+---
+
+## Phase 7: Data Model Hardening (deferred)
+
+**Added 2026-04-14 from first-use observations during Phase 6F review.** Four architectural concerns surfaced after running the HITL app against live data. None blocks today's pipeline, but each compounds with scale and with Phase 5 (refresh automation). Scheduled *before* Phase 5 — re-running on top of a raw-coupled view + inconsistent rejection semantics is a footgun.
+
+### Sequencing rationale
+
+Each slice is independently valuable and ordered by dependency:
+
+1. **7A — Rejection persistence** (cheapest; no migration). Unblocks reviewer productivity immediately.
+2. **7B — Canonical entity tables** (foundation for 7C and cleaner analytics).
+3. **7C — `enriched.*` layer** (depends on 7B). Decouples views from `raw.*`, enabling safe re-extraction.
+4. **7D — Sponsor dedup v2 via agent** (depends on 7B + Phase 6E). Largest scope; most likely to evolve in design as we learn from 6E in production.
+5. **7E — Reference source versioning** (naturally pairs with 7B). Gives every derived row a reproducibility provenance stamp.
+
+Only after 7A–7C (and ideally 7E) land should Phase 5 (refresh automation) ship.
+
+### Phase 7A: Unify rejection semantics
+
+**Symptom**: Rejected mappings can regenerate, and behavior is inconsistent across domains:
+
+| Domain | Current behavior | Location |
+|---|---|---|
+| `condition` | Over-aggressive: any rejected `source_value` is banned from *all* future proposals | `src/normalize_conditions.py:319` — `WHERE status IN ('approved','rejected')` |
+| `drug` | Weak: only exact `(source_value, canonical_term, source)` triples are deduped | `src/hitl.py:111-127` + `generate_drug_fuzzy_candidates` has no source-level filter |
+| `sponsor` | Same as drug | `generate_sponsor_fuzzy_candidates` has no source-level filter |
+
+**Root cause**: Rejection semantics were never specified; each domain's generator shipped with different filters.
+
+**Proposed direction**: Define *reject* as "this specific `(source_value → canonical_term)` mapping is wrong" — different canonicals for the same source *may* reappear. Layer on a count-based throttle: after N (default 2) rejections of distinct canonicals for a given `source_value`, skip that source_value for that `source` type. An explicit "hide" action in the Shiny app (distinct from reject) handles the case where the reviewer wants to suppress a source entirely. Align all three domains to this behavior, remove the condition-domain's `NOT IN` filter, and add the throttle to `src/hitl.py` so generators don't each reinvent it.
+
+**Status**: deferred — tracked, not scheduled.
+
+### Phase 7B: Canonical entity tables
+
+**Symptom**: `ref.condition_dictionary.canonical_term` is a free-text MeSH string; `ref.drug_dictionary.canonical_name` is free text despite having `canonical_id` (ChEMBL); `ref.sponsor_dictionary.canonical_name` is pure free text. Downstream `norm.*` and `views.*` key on these strings.
+
+**Root cause**: The pipeline grew domain by domain without a shared entity model. Each dictionary carries labels, not identities.
+
+**Proposed direction**: Introduce an `entities` schema with stable surrogate IDs:
+- `entities.condition(condition_id BIGINT PK, canonical_term VARCHAR NOT NULL UNIQUE, mesh_descriptor_id VARCHAR, umls_cui VARCHAR, …)`
+- `entities.drug(drug_id BIGINT PK, canonical_name VARCHAR NOT NULL UNIQUE, chembl_id VARCHAR, mesh_descriptor_id VARCHAR, unii VARCHAR, …)`
+- `entities.sponsor(sponsor_id BIGINT PK, canonical_name VARCHAR NOT NULL UNIQUE, ror_id VARCHAR, ringgold_id VARCHAR, …)`
+
+Dictionary tables reference `*_id` via FK instead of repeating strings; `norm.*` and `views.study_summary` join via IDs. Renames are safe (update one label row, not thousands of joins). Multi-ID crosswalks (MeSH D-code, UMLS CUI, ChEMBL, RxCUI, UNII, ROR, Ringgold) get a durable home.
+
+**Migration effort**: rewrite three dictionaries; re-key four `norm.*` tables and the view. Adds one new schema. No new external data sources required — current columns are repurposed as the seed for `entities.*`.
+
+**Status**: deferred — tracked, not scheduled.
+
+### Phase 7C: Decouple analytical view from `raw.*`
+
+**Symptom**: `src/views.py` reads directly from `raw.studies`, `raw.interventions`, `raw.countries`, `raw.browse_conditions`, `raw.sponsors` alongside the `class.*` / `norm.*` layers.
+
+**Root cause**: Phase 4 prioritized shipping the wide view over layering. The raw dependency was cheap because re-extraction happened manually and infrequently.
+
+**Risk on re-run** (Phase 5):
+- During an extraction the view transiently points at stale/partial data.
+- `raw.interventions.id`, `raw.sponsors.id` etc. are surrogate keys that are *not* stable across extractions — nothing depends on them today, but any future snapshot/audit work would break.
+- Downstream analytical snapshots keyed to `views.study_summary` get silently redefined on each re-extract with no versioning.
+
+**Proposed direction**: Introduce an `enriched.*` schema as the stable intermediate layer. `views.study_summary` reads only from `enriched.*` + `entities.*` (7B). Population from `raw.*` into `enriched.*` lives in a narrow "projection" module run at the tail of Phase 1/2; only those modules see `raw.*`. Enables snapshotting (`enriched.study_YYYYMMDD` tables) and extraction-diffing to make Phase 5 safer.
+
+**Status**: deferred — tracked, not scheduled. Prerequisite for Phase 5.
+
+### Phase 7D: Sponsor dedup v2 — anchor-driven agent
+
+**Symptom**: `src/normalize_sponsors.py::generate_sponsor_fuzzy_candidates` produces a queue with high false-positive rate. Spot-check of live data: legitimately distinct institutions collide on `rapidfuzz.WRatio` (e.g. `Hunan Provincial People's Hospital` vs `Hunan Cancer Hospital`), while parent/subsidiary variants that SHOULD merge (e.g. `Novartis` vs `Novartis Pharmaceuticals`) look identical in score space to those false positives. Reviewer burden is high and signal is low.
+
+**Root cause**: String similarity doesn't encode org identity. Pharma parent/subsidiary, university/hospital-system, and acronym-vs-full-name relationships all need semantic reasoning.
+
+**Proposed direction**: Invert the search. Anchor on a curated set of high-frequency canonicals (top ~200 by `study_count`, optionally human-blessed). For each lower-frequency canonical, use the Phase 6E enrichment agent to ask "is this a variant of any anchor?" The agent can use industry knowledge plus evidence (co-occurring study metadata, MeSH pharma entries, shared city/country, ROR hierarchy if available) to propose or reject a merge with rationale. Deterministic `rapidfuzz` becomes a *coarse gate* that narrows the candidate set the agent sees — not the direct reviewer queue.
+
+**Depends on**: 7B (stable sponsor IDs make merge operations auditable) + Phase 6E (already shipped).
+
+**Status**: deferred — tracked, not scheduled.
+
+### Phase 7E: Reference source versioning
+
+**Symptom**: External reference data (ChEMBL 36 synonyms, UMLS 2025AB Metathesaurus, MeSH TA mapping) is loaded from hardcoded paths with no version metadata inside the DB. Derived tables (`ref.drug_dictionary`, `meta.agent_cache`, QuickUMLS outputs) can't be traced back to the specific reference version that produced them. If ChEMBL releases 37 next quarter and someone rebuilds, there's no audit trail.
+
+**Root cause**: The reference datasets were added one at a time during Phase 2D and 6D with flat paths (`data/reference/chembl_synonyms.parquet`, `data/reference/umls/quickumls_index/`) and no in-DB registration. Reproducibility wasn't a goal until the pipeline started producing reviewed artifacts.
+
+**Why not load everything into DuckDB**: full UMLS MRCONSO is 2.2 GB uncompressed and QuickUMLS needs its own binary on-disk index either way — duplicating it into DuckDB just costs disk for no SQL-side win. ChEMBL synonyms *could* go in (only 2.4 MB), but keeping both references on the same "file + metadata row" pattern is easier to reason about than an asymmetric "ChEMBL in DB, UMLS on disk" split.
+
+**Proposed direction** — hybrid: metadata in DB, data stays on disk, provenance stamped on derived rows.
+
+1. **`meta.reference_sources` table** — single source of truth for "what's current, where it lives, when it was built":
+   ```
+   source_name  VARCHAR  (chembl | umls | mesh_ta_mapping | …)
+   version      VARCHAR  (36 | 2025AB | …)
+   acquired_at  TIMESTAMP
+   built_at     TIMESTAMP
+   path         VARCHAR  (e.g. data/reference/chembl/36/synonyms.parquet)
+   checksum     VARCHAR  (sha256 of the file or index manifest)
+   is_active    BOOLEAN  (exactly one true per source_name)
+   notes        VARCHAR  (license, URL, post-processing)
+   PRIMARY KEY (source_name, version)
+   ```
+
+2. **Directory convention: `data/reference/<source>/<version>/…`** instead of today's flatter layout. New version = new directory alongside the old; old stays for rollback until explicitly purged. One-time migration:
+   - `data/reference/chembl_synonyms.parquet → data/reference/chembl/36/synonyms.parquet`
+   - `data/reference/umls/quickumls_index → data/reference/umls/2025AB/quickumls_index`
+   - `data/reference/therapeutic_area_mapping.json → data/reference/mesh_ta_mapping/v1/mapping.json` (with a `version` bumped whenever the JSON is edited).
+
+3. **Loaders read the active version from `meta.reference_sources`**, not a hardcoded path. `CHEMBL_SYNONYMS_PATH` in `src/normalize_drugs.py` becomes a lookup; `DEFAULT_INDEX_PATH` in `src/quickumls_tool.py` likewise.
+
+4. **Provenance stamping on derived tables** — each dictionary entry and agent cache row records which reference versions it was built against. Two options, pick per table:
+   - Simplest: a `source_versions` JSON column on `ref.drug_dictionary` / `ref.condition_dictionary` / `meta.agent_cache` — e.g. `{"chembl": "36", "umls": "2025AB"}`.
+   - More normalized: a run-level `meta.reference_snapshot(run_id, source_name, version)` joined from `meta.pipeline_runs` once Phase 5 lands.
+
+5. **Retention policy** — ChEMBL is tiny; keep all versions indefinitely. UMLS indexes are ~5 GB each; policy-dependent, default to keeping the last two releases.
+
+**Limits** (worth being explicit about): this makes reproducibility *traceable* ("this mapping came from ChEMBL 36 + UMLS 2025AB") but not *automatic*. You can't re-run last quarter's extraction against last quarter's references unless you retained those directories. Automatic rollback would require keeping the old versions around — policy, not code.
+
+**Depends on**: nothing hard. Pairs naturally with 7B (entity tables want `chembl_release` / `umls_release` on the row level once the entity `*_id` scheme is in place), so ideally run 7B and 7E together — the schema migrations touch adjacent tables.
+
+**Status**: deferred — tracked, not scheduled.
 
 ---
 
@@ -317,19 +464,26 @@ Phase 1 (Raw Extract) ✅
   ├── Phase 2D (Drugs) ✅       [independent; residuals flow into Phase 6]
   └── Phase 2E (Sponsors)      → subsumed into Phase 6
         │
-      Phase 4 (Views)           [after deterministic normalizations]
+      Phase 4 (Views) ✅         [after deterministic normalizations]
         │
-      Phase 6 (HITL Platform)   [unifies candidate + review workflows]
+      Phase 6 (HITL Platform) ✅  [unifies candidate + review workflows]
         │
-      Phase 5 (Automation)
+      Phase 7 (Data Model Hardening)  — DEFERRED, scheduled before 5
+        ├── 7A (Rejection persistence)     [independent]
+        ├── 7B (Canonical entity tables)   [pairs with 7E; feeds 7C and 7D]
+        │     └── 7C (enriched.* layer)    [feeds Phase 5]
+        │     └── 7D (Sponsor agent v2)    [also depends on Phase 6E]
+        └── 7E (Reference source versioning)  [independent; pairs with 7B]
+        │
+      Phase 5 (Automation)       [after 7A–7C + 7E to avoid raw-coupling / repro hazards]
 ```
 
-**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2D → 4 → 6 → 5
+**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2D → 4 → 6 → **7A → (7B + 7E) → 7C → 7D** → 5
 
 ## Action Items
 
 1. ~~**Register AACT account**~~ ✅ Done
-2. **Apply for UMLS license** — 1-3 day approval, needed for the QuickUMLS tool in Phase 6 (applied, pending)
+2. ~~**Apply for UMLS license**~~ ✅ Approved 2026-04-13; QuickUMLS index built 2026-04-14 (Phase 6D)
 3. ~~**Download MeSH XML**~~ — not needed for Phase 2A (ancestor-name approach used instead); may be needed for Phase 2C
 4. ~~**Bookmark NBK611886 TA mapping table**~~ ✅ Used as starting point for `data/reference/therapeutic_area_mapping.json`
 
@@ -360,4 +514,5 @@ After each phase, the corresponding notebook serves as the verification step:
 - Phase 2B → `03_design_classification.ipynb` ✅ (precision spot-checks)
 - Phase 3A → `04_innovation_by_therapeutic_area.ipynb` ✅ (the core analysis, R kernel)
 - Phase 2D → `05_drug_normalization.ipynb` (coverage rates, top unmatched)
+- Phase 4 → `06_views_validation.ipynb` ✅ (row count parity, column nulls, spot-checks)
 - Phase 6 → `apps/review/app.R` (Shiny review UI) + golden eval (`tests/test_enrichment_agent.py`) + coverage deltas in notebooks 02 and 05 after a promotion batch
