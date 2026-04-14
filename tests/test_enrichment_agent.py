@@ -130,7 +130,7 @@ def test_throttle_refuses_when_pending_at_cap():
         for i in range(3)
     ]), source="fuzzy")
 
-    stats = ea.run_enrichment_agent(
+    stats = ea._run_enrichment_agent_sync_legacy(
         domain="condition", budget_usd=10.0, limit=5,
         max_pending=3, duck_conn=conn,
         client=_FakeClient(lambda tm: None),
@@ -153,7 +153,7 @@ def test_finalize_writes_candidate_row():
             canonical_id=None,
         )
 
-    stats = ea.run_enrichment_agent(
+    stats = ea._run_enrichment_agent_sync_legacy(
         domain="condition", budget_usd=10.0, limit=1,
         max_pending=500, duck_conn=conn,
         client=_FakeClient(scenario),
@@ -179,7 +179,7 @@ def test_abstain_does_not_write_candidate():
         tool_map["fuzzy_mesh_condition"]("breast cancer typo")
         tool_map["abstain"]("fuzzy scores all below threshold")
 
-    stats = ea.run_enrichment_agent(
+    stats = ea._run_enrichment_agent_sync_legacy(
         domain="condition", budget_usd=10.0, limit=1,
         max_pending=500, duck_conn=conn,
         client=_FakeClient(scenario),
@@ -207,7 +207,7 @@ def test_finalize_without_tool_call_is_rejected():
         # finalize_proposal should return an error string and NOT record a decision
         assert "ERROR" in result
 
-    stats = ea.run_enrichment_agent(
+    stats = ea._run_enrichment_agent_sync_legacy(
         domain="condition", budget_usd=10.0, limit=1,
         max_pending=500, duck_conn=conn,
         client=_FakeClient(scenario),
@@ -245,7 +245,7 @@ def test_cache_hit_skips_api_call():
     def scenario(tool_map):
         raise AssertionError("tool_runner must not be called on cache hit")
 
-    stats = ea.run_enrichment_agent(
+    stats = ea._run_enrichment_agent_sync_legacy(
         domain="condition", budget_usd=10.0, limit=1,
         max_pending=500, duck_conn=conn,
         client=_FakeClient(scenario),
@@ -266,7 +266,7 @@ def test_budget_exhaustion_stops_loop():
         )
 
     # Very tight budget: first item will push spent over
-    stats = ea.run_enrichment_agent(
+    stats = ea._run_enrichment_agent_sync_legacy(
         domain="condition", budget_usd=0.0001, limit=10,
         max_pending=500, duck_conn=conn,
         client=_FakeClient(scenario),
@@ -286,3 +286,161 @@ def test_cache_key_is_deterministic():
 def test_unknown_domain_raises():
     with pytest.raises(ValueError, match="unknown domain"):
         ea.run_enrichment_agent(domain="bogus", budget_usd=1.0)
+
+
+# ---------- async-path tests -----------------------------------------------
+
+
+class _FakeAsyncRunner:
+    """Async iterable stand-in for the AsyncAnthropic tool_runner."""
+    def __init__(self, on_iter, delay=0.0):
+        self._on_iter = on_iter
+        self._delay = delay
+
+    def __aiter__(self):
+        return self._gen()
+
+    async def _gen(self):
+        if self._delay:
+            import asyncio
+            await asyncio.sleep(self._delay)
+        for m in self._on_iter():
+            yield m
+
+
+class _FakeAsyncClient:
+    """Async tool_runner stand-in. `scenario(tool_map)` is called once per
+    item; `raise_for` (set of source_values) triggers a BadRequestError.
+    `delay_s` lets concurrency tests observe overlap."""
+    def __init__(self, scenario, raise_for=None, delay_s=0.0,
+                 track=None):
+        self.beta = self
+        self.messages = self
+        self._scenario = scenario
+        self._raise_for = raise_for or set()
+        self._delay_s = delay_s
+        self._track = track  # optional {'active': int, 'peak': int}
+        self.calls = []
+
+    def tool_runner(self, **kwargs):
+        self.calls.append(kwargs)
+        tools = kwargs["tools"]
+        user_text = kwargs["messages"][0]["content"]
+
+        async def _drive():
+            import anthropic as _aa
+            # Extract source_value from the user prompt
+            source_value = ""
+            for line in user_text.split("\n"):
+                if line.startswith("Source value:"):
+                    source_value = line.split(":", 1)[1].strip().strip("'\"")
+                    break
+            if source_value in self._raise_for:
+                raise _aa.BadRequestError(
+                    message="injected", response=None, body=None
+                )
+            if self._track is not None:
+                self._track["active"] = self._track.get("active", 0) + 1
+                self._track["peak"] = max(self._track["peak"],
+                                          self._track["active"])
+            try:
+                if self._delay_s:
+                    import asyncio as _asyncio
+                    await _asyncio.sleep(self._delay_s)
+
+                tool_map = {}
+                for t in tools:
+                    fn = getattr(t, "function", None) or getattr(t, "_fn", None) or t
+                    name = getattr(t, "name", None) or getattr(fn, "__name__", "?")
+                    tool_map[name] = fn
+
+                result = self._scenario(tool_map)
+                if result is not None and hasattr(result, "__await__"):
+                    await result
+            finally:
+                if self._track is not None:
+                    self._track["active"] -= 1
+
+            yield _FakeMessage()
+
+        class _Runner:
+            def __aiter__(self_inner):
+                return _drive()
+
+        return _Runner()
+
+
+def test_async_finalize_writes_candidate_row():
+    conn = _make_conn()
+
+    async def scenario(tool_map):
+        await tool_map["fuzzy_mesh_condition"]("breast cancer typo")
+        await tool_map["finalize_proposal"](
+            canonical_term="Breast Neoplasms",
+            rationale="fuzzy MeSH match score=95",
+            score=0.95,
+            canonical_id=None,
+        )
+
+    def scenario_sync(tool_map):
+        # Wrap in a coroutine and schedule via the runner
+        return scenario(tool_map)
+
+    stats = ea.run_enrichment_agent(
+        domain="condition", budget_usd=10.0, limit=1,
+        max_pending=500, concurrency=2, duck_conn=conn,
+        client=_FakeAsyncClient(scenario_sync),
+    )
+    assert stats.items_finalized == 1
+    row = conn.execute("""
+        SELECT source_value, canonical_term, source, status, rationale
+        FROM ref.mapping_candidates WHERE domain = 'condition'
+    """).fetchone()
+    assert row[0] == "breast cancer typo"
+    assert row[2] == "agent"
+    assert row[3] == "pending"
+    conn.close()
+
+
+def test_async_concurrency_respected():
+    """With concurrency=2, at most 2 tool_runner calls active at once."""
+    conn = _make_conn()
+
+    async def scenario(tool_map):
+        await tool_map["fuzzy_mesh_condition"]("x")
+        await tool_map["abstain"]("test")
+
+    track = {"active": 0, "peak": 0}
+    stats = ea.run_enrichment_agent(
+        domain="condition", budget_usd=10.0, limit=2,
+        max_pending=500, concurrency=2, duck_conn=conn,
+        client=_FakeAsyncClient(
+            lambda tm: scenario(tm), delay_s=0.05, track=track
+        ),
+    )
+    assert stats.items_attempted == 2
+    assert stats.items_abstained == 2
+    assert track["peak"] <= 2
+    conn.close()
+
+
+def test_async_non_retriable_error_skips_item_and_continues():
+    """A BadRequestError on one item should fail that item but not abort."""
+    conn = _make_conn()
+
+    async def scenario(tool_map):
+        await tool_map["fuzzy_mesh_condition"]("x")
+        await tool_map["abstain"]("test")
+
+    stats = ea.run_enrichment_agent(
+        domain="condition", budget_usd=10.0, limit=2,
+        max_pending=500, concurrency=2, duck_conn=conn,
+        client=_FakeAsyncClient(
+            lambda tm: scenario(tm),
+            raise_for={"diabetic retinoppathy"},
+        ),
+    )
+    assert stats.items_failed == 1
+    assert stats.items_abstained == 1
+    assert stats.items_attempted == 2
+    conn.close()

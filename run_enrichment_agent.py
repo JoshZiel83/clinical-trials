@@ -9,6 +9,7 @@ Usage:
 import argparse
 
 from config.settings import (
+    AGENT_DEFAULT_CONCURRENCY,
     AGENT_DEFAULT_MAX_PENDING,
     AGENT_DEFAULT_MODEL,
 )
@@ -23,7 +24,9 @@ def main():
     )
     ap.add_argument(
         "--budget", type=float, required=True,
-        help="USD cap for this run; agent stops when exceeded.",
+        help="USD cap for this run; agent stops scheduling new items when "
+             "exceeded. In-flight items may push total spend slightly above "
+             "(≤ concurrency × per-item cost).",
     )
     ap.add_argument(
         "--limit", type=int, default=500,
@@ -33,6 +36,10 @@ def main():
         "--max-pending", type=int, default=AGENT_DEFAULT_MAX_PENDING,
         help="Per-domain reviewer queue cap; agent refuses to run if already at cap "
              "and stops emitting once it reaches it.",
+    )
+    ap.add_argument(
+        "--concurrency", type=int, default=AGENT_DEFAULT_CONCURRENCY,
+        help="Max in-flight Claude API calls. Higher = faster but more bursty.",
     )
     ap.add_argument(
         "--model", default=AGENT_DEFAULT_MODEL,
@@ -47,11 +54,13 @@ def main():
         limit=args.limit,
         max_pending=args.max_pending,
         model=args.model,
+        concurrency=args.concurrency,
     )
     print(
         f"\nResults: finalized={stats.items_finalized}, "
         f"abstained={stats.items_abstained}, "
         f"cache_hits={stats.items_cache_hit}, "
+        f"failed={stats.items_failed}, "
         f"spent=${stats.spent_usd:.4f}"
     )
 

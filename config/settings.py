@@ -24,6 +24,8 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 AGENT_DEFAULT_MODEL = os.environ.get("AGENT_DEFAULT_MODEL", "claude-opus-4-6")
 AGENT_MAX_TOKENS = int(os.environ.get("AGENT_MAX_TOKENS", "4096"))
 AGENT_DEFAULT_MAX_PENDING = int(os.environ.get("AGENT_DEFAULT_MAX_PENDING", "500"))
+AGENT_DEFAULT_CONCURRENCY = int(os.environ.get("AGENT_DEFAULT_CONCURRENCY", "4"))
+AGENT_SDK_MAX_RETRIES = int(os.environ.get("AGENT_SDK_MAX_RETRIES", "5"))
 AGENT_SYSTEM_PROMPT_VERSION = "v1"  # bump to invalidate cache on prompt changes
 
 # Status filter for active/planned trials
