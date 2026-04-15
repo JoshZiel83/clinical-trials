@@ -296,9 +296,9 @@ Originally planned as a standalone fuzzy-dedup module. Same rationale as 2C: the
 
 ---
 
-## Phase 7: Data Model Hardening (deferred)
+## Phase 7: Data Model Hardening
 
-**Added 2026-04-14 from first-use observations during Phase 6F review.** Four architectural concerns surfaced after running the HITL app against live data. None blocks today's pipeline, but each compounds with scale and with Phase 5 (refresh automation). Scheduled *before* Phase 5 — re-running on top of a raw-coupled view + inconsistent rejection semantics is a footgun.
+**Added 2026-04-14 from first-use observations during Phase 6F review.** Four architectural concerns surfaced after running the HITL app against live data. Phase 7A, 7B, and 7E are shipped; 7C and 7D remain deferred.
 
 ### Sequencing rationale
 
@@ -312,42 +312,66 @@ Each slice is independently valuable and ordered by dependency:
 
 Only after 7A–7C (and ideally 7E) land should Phase 5 (refresh automation) ship.
 
-### Phase 7A: Unify rejection semantics
+### Phase 7A: Unify rejection semantics ✅
 
-**Symptom**: Rejected mappings can regenerate, and behavior is inconsistent across domains:
+**Completed 2026-04-15.**
 
-| Domain | Current behavior | Location |
-|---|---|---|
-| `condition` | Over-aggressive: any rejected `source_value` is banned from *all* future proposals | `src/normalize_conditions.py:319` — `WHERE status IN ('approved','rejected')` |
-| `drug` | Weak: only exact `(source_value, canonical_term, source)` triples are deduped | `src/hitl.py:111-127` + `generate_drug_fuzzy_candidates` has no source-level filter |
-| `sponsor` | Same as drug | `generate_sponsor_fuzzy_candidates` has no source-level filter |
+**Symptom** (before): Rejected mappings regenerated inconsistently across domains — conditions over-aggressively banned any rejected `source_value` wholesale; drugs and sponsors only deduped exact `(source_value, canonical_term)` triples.
 
-**Root cause**: Rejection semantics were never specified; each domain's generator shipped with different filters.
+**Landed**:
+- `src/hitl/candidates.py` centralizes the throttle. `REJECT_THROTTLE = 2`: after 2 distinct canonicals rejected for the same `(source_value, source)`, future candidates for that source are skipped.
+- `insert_candidates()` enforces the throttle uniformly; generators no longer each reinvent the filter.
+- New `hidden` decision status suppresses a `(source_value, source)` entirely, regardless of canonical. Shiny app adds a **"Hide source"** button with confirmation modal.
+- Decision log parquet schema accepts `decision ∈ {approved, rejected, hidden}`; `import_decision_log` maps all three to `ref.mapping_candidates.status`.
+- Removed the over-aggressive `WHERE status IN (approved,rejected)` `NOT IN` filter from `src/transform/normalize_conditions.py`.
 
-**Proposed direction**: Define *reject* as "this specific `(source_value → canonical_term)` mapping is wrong" — different canonicals for the same source *may* reappear. Layer on a count-based throttle: after N (default 2) rejections of distinct canonicals for a given `source_value`, skip that source_value for that `source` type. An explicit "hide" action in the Shiny app (distinct from reject) handles the case where the reviewer wants to suppress a source entirely. Align all three domains to this behavior, remove the condition-domain's `NOT IN` filter, and add the throttle to `src/hitl.py` so generators don't each reinvent it.
+**Tests**: 4 new tests in `tests/hitl/test_hitl.py` (throttle at N=2, single-rejection still open, hidden blocks source, decision-log hidden). Full suite stayed green.
 
-**Status**: deferred — tracked, not scheduled.
+### Phase 7B: Canonical entity tables ✅ + Phase 7E: Reference source versioning ✅
 
-### Phase 7B: Canonical entity tables
+**Completed 2026-04-15 (shipped together — schema migrations touched adjacent tables).**
 
-**Symptom**: `ref.condition_dictionary.canonical_term` is a free-text MeSH string; `ref.drug_dictionary.canonical_name` is free text despite having `canonical_id` (ChEMBL); `ref.sponsor_dictionary.canonical_name` is pure free text. Downstream `norm.*` and `views.*` key on these strings.
+**Symptom** (before): `ref.condition_dictionary.canonical_term` was a free-text MeSH string; `ref.drug_dictionary.canonical_name` was free text despite having `canonical_id` (ChEMBL); `ref.sponsor_dictionary.canonical_name` was pure free text. Downstream `norm.*` and `views.*` keyed on these strings. External reference data (ChEMBL, UMLS, MeSH TA mapping) was loaded from hardcoded paths with no version metadata.
 
-**Root cause**: The pipeline grew domain by domain without a shared entity model. Each dictionary carries labels, not identities.
+**Landed — 7B**:
+- New `entities` schema with BIGINT surrogate PKs and external-ID crosswalks:
+  - `entities.condition(condition_id, origin, mesh_descriptor_id UNIQUE, umls_cui UNIQUE, canonical_term, source_versions)` — seeded with all ~31k MeSH descriptors via `scripts/load_mesh_descriptors.py` (streams `desc2026.xml`, ~5s).
+  - `entities.drug(drug_id, origin, canonical_name, chembl_id UNIQUE, mesh_descriptor_id, unii, source_versions)` — seeded from ChEMBL 36 parquet (47,960 pref_names).
+  - `entities.sponsor(sponsor_id, origin, canonical_name UNIQUE, ror_id UNIQUE, ringgold_id, source_versions)` — seeded from deterministic `normalize_sponsor_name()` output on `raw.sponsors`.
+- `origin` column on all three tables (`mesh | chembl | aact | manual | …`) answers *where* an identity came from, independently of version provenance.
+- Dictionary tables rewritten to FK into entities: `ref.condition_dictionary(condition_name PK, condition_id, …)`, `ref.drug_dictionary(source_name PK, drug_id, …)`, `ref.sponsor_dictionary(source_name PK, sponsor_id, …)`.
+- `norm.*` re-keyed: `norm.study_conditions.condition_id`, `norm.study_drugs.drug_id`, `norm.study_sponsors.sponsor_id`, `norm.study_therapeutic_areas.condition_id`.
+- `views.study_summary` joins through `entities.*` for labels; output schema unchanged (`canonical_conditions`, `canonical_drugs`, `chembl_ids`, `lead_sponsor_name`, `collaborator_names`).
+- `src/hitl/candidates.py::promote_candidates` refactored to resolve/create entities via `entities.upsert_{condition,drug,sponsor}` then insert the dictionary row with `*_id`. HITL-promoted entities are stamped `origin='manual'`.
 
-**Proposed direction**: Introduce an `entities` schema with stable surrogate IDs:
-- `entities.condition(condition_id BIGINT PK, canonical_term VARCHAR NOT NULL UNIQUE, mesh_descriptor_id VARCHAR, umls_cui VARCHAR, …)`
-- `entities.drug(drug_id BIGINT PK, canonical_name VARCHAR NOT NULL UNIQUE, chembl_id VARCHAR, mesh_descriptor_id VARCHAR, unii VARCHAR, …)`
-- `entities.sponsor(sponsor_id BIGINT PK, canonical_name VARCHAR NOT NULL UNIQUE, ror_id VARCHAR, ringgold_id VARCHAR, …)`
+**Landed — 7E**:
+- `meta.reference_sources(source_name, version, acquired_at, built_at, path, checksum, is_active, notes, PK (source_name, version))`. `src/reference_sources.py` exposes `ensure_table`, `register_source`, `get_active_path`, `get_active_version`, `active_versions_snapshot`, `compute_checksum`.
+- Directory reorg: `data/reference/{chembl/36/synonyms.parquet, umls/2025AB/quickumls_index/, mesh_ta_mapping/v1/mapping.json, mesh/2026/desc.xml}`. One-time move via `scripts/bootstrap_reference_sources.py`.
+- Loaders now resolve paths via `reference_sources.get_active_path(...)` — `src/transform/normalize_drugs.py` (ChEMBL), `src/agent/quickumls_tool.py` (UMLS index), `src/transform/therapeutic_areas.py` (TA mapping), `scripts/load_mesh_descriptors.py` (MeSH).
+- Entity rows stamp `source_versions` JSON (e.g. `{"chembl": "36"}`, `{"mesh": "2026"}`) at creation for row-level provenance.
 
-Dictionary tables reference `*_id` via FK instead of repeating strings; `norm.*` and `views.study_summary` join via IDs. Renames are safe (update one label row, not thousands of joins). Multi-ID crosswalks (MeSH D-code, UMLS CUI, ChEMBL, RxCUI, UNII, ROR, Ringgold) get a durable home.
+**Invariant**: *entities come only from trusted external vocabularies (MeSH, ChEMBL) or from approved HITL decisions — never from unresolved candidates.* `ref.mapping_candidates` stays keyed on canonical_term/canonical_id strings; `promote_candidates` resolves/creates the entity at approve time. This aligns the "unresolved → identified" gate with the idempotency boundary of each normalize script.
 
-**Migration effort**: rewrite three dictionaries; re-key four `norm.*` tables and the view. Adds one new schema. No new external data sources required — current columns are repurposed as the seed for `entities.*`.
+**Regenerate results (2026-04-15, 119,753 studies)**:
+- `entities.condition`: 31,505 rows (31,110 MeSH seed + 395 cancer-synonym-invented), all `origin='mesh'`.
+- `entities.drug`: 50,125 rows (47,960 chembl + 2,149 mesh + 16 manual).
+- `entities.sponsor`: 37,755 rows, all `origin='aact'`.
+- Dictionary FK integrity: **zero orphan FKs** across all three tables.
+- `norm.study_conditions`: 171,222 mapped / 253,711 total (67%); 84.7% of studies have ≥1 canonical condition.
+- `norm.study_drugs`: 47,454 mapped / 82,334 total (57.6%); 20.6% of studies have ≥1 mapped drug.
+- `norm.study_sponsors`: 209,621 rows, 100% mapped to `entities.sponsor`.
+- `norm.study_therapeutic_areas`: 93,606 distinct studies (78.2%).
+- `views.study_summary`: 119,753 rows — matches `raw.studies` exactly.
+- HITL replay: 29 decision-log parquets applied (17 approved / 19 rejected / 16 promoted to manual dict entries); 1 manual condition + 19 manual drug + 0 manual sponsor dictionary rows survived.
+- `meta.reference_sources`: 4 active rows — `chembl@36`, `mesh@2026`, `mesh_ta_mapping@v1`, `umls@2025AB`.
 
-**Status**: deferred — tracked, not scheduled.
+**Tests**: 211 passed, 1 skipped (up from 191 pre-7B). New modules tested end-to-end.
+
+**Not migrated intentionally** (deferred to 7C): `views.study_summary` still reads directly from `raw.studies`, `raw.interventions`, `raw.countries`, `raw.browse_conditions`. Entity-keyed FKs for drugs/conditions/sponsors flow through `norm.*`, but raw surrogates remain on the study/country/intervention side.
 
 ### Phase 7C: Decouple analytical view from `raw.*`
 
-**Symptom**: `src/views.py` reads directly from `raw.studies`, `raw.interventions`, `raw.countries`, `raw.browse_conditions`, `raw.sponsors` alongside the `class.*` / `norm.*` layers.
+**Symptom**: `src/transform/views.py` still reads directly from `raw.studies`, `raw.interventions`, `raw.countries`, `raw.browse_conditions` alongside the `class.*` / `norm.*` / `entities.*` layers. (Post-7B: sponsors and drugs flow through `entities.*`; the raw reads that remain are studies, interventions, countries, and browse_conditions.)
 
 **Root cause**: Phase 4 prioritized shipping the wide view over layering. The raw dependency was cheap because re-extraction happened manually and infrequently.
 
@@ -368,51 +392,15 @@ Dictionary tables reference `*_id` via FK instead of repeating strings; `norm.*`
 
 **Proposed direction**: Invert the search. Anchor on a curated set of high-frequency canonicals (top ~200 by `study_count`, optionally human-blessed). For each lower-frequency canonical, use the Phase 6E enrichment agent to ask "is this a variant of any anchor?" The agent can use industry knowledge plus evidence (co-occurring study metadata, MeSH pharma entries, shared city/country, ROR hierarchy if available) to propose or reject a merge with rationale. Deterministic `rapidfuzz` becomes a *coarse gate* that narrows the candidate set the agent sees — not the direct reviewer queue.
 
-**Depends on**: 7B (stable sponsor IDs make merge operations auditable) + Phase 6E (already shipped).
+**Depends on**: 7B ✅ (stable sponsor IDs make merge operations auditable — now available as `entities.sponsor.sponsor_id`) + Phase 6E ✅.
 
 **Status**: deferred — tracked, not scheduled.
 
-### Phase 7E: Reference source versioning
+### Phase 7E: Reference source versioning ✅
 
-**Symptom**: External reference data (ChEMBL 36 synonyms, UMLS 2025AB Metathesaurus, MeSH TA mapping) is loaded from hardcoded paths with no version metadata inside the DB. Derived tables (`ref.drug_dictionary`, `meta.agent_cache`, QuickUMLS outputs) can't be traced back to the specific reference version that produced them. If ChEMBL releases 37 next quarter and someone rebuilds, there's no audit trail.
+Shipped alongside 7B above. See combined "Phase 7B + 7E" section for details.
 
-**Root cause**: The reference datasets were added one at a time during Phase 2D and 6D with flat paths (`data/reference/chembl_synonyms.parquet`, `data/reference/umls/quickumls_index/`) and no in-DB registration. Reproducibility wasn't a goal until the pipeline started producing reviewed artifacts.
-
-**Why not load everything into DuckDB**: full UMLS MRCONSO is 2.2 GB uncompressed and QuickUMLS needs its own binary on-disk index either way — duplicating it into DuckDB just costs disk for no SQL-side win. ChEMBL synonyms *could* go in (only 2.4 MB), but keeping both references on the same "file + metadata row" pattern is easier to reason about than an asymmetric "ChEMBL in DB, UMLS on disk" split.
-
-**Proposed direction** — hybrid: metadata in DB, data stays on disk, provenance stamped on derived rows.
-
-1. **`meta.reference_sources` table** — single source of truth for "what's current, where it lives, when it was built":
-   ```
-   source_name  VARCHAR  (chembl | umls | mesh_ta_mapping | …)
-   version      VARCHAR  (36 | 2025AB | …)
-   acquired_at  TIMESTAMP
-   built_at     TIMESTAMP
-   path         VARCHAR  (e.g. data/reference/chembl/36/synonyms.parquet)
-   checksum     VARCHAR  (sha256 of the file or index manifest)
-   is_active    BOOLEAN  (exactly one true per source_name)
-   notes        VARCHAR  (license, URL, post-processing)
-   PRIMARY KEY (source_name, version)
-   ```
-
-2. **Directory convention: `data/reference/<source>/<version>/…`** instead of today's flatter layout. New version = new directory alongside the old; old stays for rollback until explicitly purged. One-time migration:
-   - `data/reference/chembl_synonyms.parquet → data/reference/chembl/36/synonyms.parquet`
-   - `data/reference/umls/quickumls_index → data/reference/umls/2025AB/quickumls_index`
-   - `data/reference/therapeutic_area_mapping.json → data/reference/mesh_ta_mapping/v1/mapping.json` (with a `version` bumped whenever the JSON is edited).
-
-3. **Loaders read the active version from `meta.reference_sources`**, not a hardcoded path. `CHEMBL_SYNONYMS_PATH` in `src/normalize_drugs.py` becomes a lookup; `DEFAULT_INDEX_PATH` in `src/quickumls_tool.py` likewise.
-
-4. **Provenance stamping on derived tables** — each dictionary entry and agent cache row records which reference versions it was built against. Two options, pick per table:
-   - Simplest: a `source_versions` JSON column on `ref.drug_dictionary` / `ref.condition_dictionary` / `meta.agent_cache` — e.g. `{"chembl": "36", "umls": "2025AB"}`.
-   - More normalized: a run-level `meta.reference_snapshot(run_id, source_name, version)` joined from `meta.pipeline_runs` once Phase 5 lands.
-
-5. **Retention policy** — ChEMBL is tiny; keep all versions indefinitely. UMLS indexes are ~5 GB each; policy-dependent, default to keeping the last two releases.
-
-**Limits** (worth being explicit about): this makes reproducibility *traceable* ("this mapping came from ChEMBL 36 + UMLS 2025AB") but not *automatic*. You can't re-run last quarter's extraction against last quarter's references unless you retained those directories. Automatic rollback would require keeping the old versions around — policy, not code.
-
-**Depends on**: nothing hard. Pairs naturally with 7B (entity tables want `chembl_release` / `umls_release` on the row level once the entity `*_id` scheme is in place), so ideally run 7B and 7E together — the schema migrations touch adjacent tables.
-
-**Status**: deferred — tracked, not scheduled.
+**Limits** (preserved from original plan): reproducibility is *traceable* ("this mapping came from ChEMBL 36 + UMLS 2025AB") but not *automatic* — re-running last quarter's extraction against last quarter's references requires retaining those directories on disk. That's policy, not code.
 
 ---
 
@@ -468,17 +456,17 @@ Phase 1 (Raw Extract) ✅
         │
       Phase 6 (HITL Platform) ✅  [unifies candidate + review workflows]
         │
-      Phase 7 (Data Model Hardening)  — DEFERRED, scheduled before 5
-        ├── 7A (Rejection persistence)     [independent]
-        ├── 7B (Canonical entity tables)   [pairs with 7E; feeds 7C and 7D]
-        │     └── 7C (enriched.* layer)    [feeds Phase 5]
-        │     └── 7D (Sponsor agent v2)    [also depends on Phase 6E]
-        └── 7E (Reference source versioning)  [independent; pairs with 7B]
+      Phase 7 (Data Model Hardening) — partially shipped
+        ├── 7A (Rejection persistence)     ✅ [independent]
+        ├── 7B (Canonical entity tables)   ✅ [shipped with 7E; feeds 7C and 7D]
+        │     └── 7C (enriched.* layer)    [feeds Phase 5 — deferred]
+        │     └── 7D (Sponsor agent v2)    [also depends on Phase 6E — deferred]
+        └── 7E (Reference source versioning)  ✅ [shipped with 7B]
         │
-      Phase 5 (Automation)       [after 7A–7C + 7E to avoid raw-coupling / repro hazards]
+      Phase 5 (Automation)       [after 7C to avoid raw-coupling / repro hazards]
 ```
 
-**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2D → 4 → 6 → **7A → (7B + 7E) → 7C → 7D** → 5
+**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2D → 4 → 6 → **7A ✅ → (7B + 7E) ✅ → 7C → 7D** → 5
 
 ## Action Items
 
@@ -494,16 +482,26 @@ Phase 1 (Raw Extract) ✅
 - `resources/ctti_schema_documentation.md` — join conventions, data caveats
 - `config/settings.py` — AACT connection, DuckDB path, constants
 - `config/tables.py` — extraction table list, status filters
-- `src/extract.py` — extraction pipeline
+- `src/extract/aact.py` — extraction pipeline (AACT → `raw.*`)
 - `src/logging_config.py` — centralized logging
-- `src/normalize_conditions.py` — condition dictionary building + study conditions
-- `src/therapeutic_areas.py` — TA reference table + study TA assignment
-- `data/reference/therapeutic_area_mapping.json` — hand-curated MeSH ancestor → TA mapping (21 entries)
-- `src/classify_design.py` — study design classification (L1/L2/L4/L5)
-- `src/innovative_features.py` — innovative feature detection (L3, regex NLP) + AI mention flag
+- `src/entities.py` — canonical entity schema + `upsert_{condition,drug,sponsor}` helpers (Phase 7B)
+- `src/reference_sources.py` — `meta.reference_sources` register/lookup (Phase 7E)
+- `src/transform/normalize_conditions.py` — condition dictionary + study conditions
+- `src/transform/therapeutic_areas.py` — TA reference table + study TA assignment
+- `data/reference/mesh_ta_mapping/v1/mapping.json` — hand-curated MeSH ancestor → TA mapping (21 entries)
+- `src/transform/classify_design.py` — study design classification (L1/L2/L4/L5)
+- `src/transform/innovative_features.py` — innovative feature detection (L3, regex NLP) + AI mention flag
 - `resources/Innovative & Emerging Clinical Trial Designs.md` — reference catalog of innovative/emerging trial designs
-- `src/normalize_drugs.py` — drug dictionary building + study drugs (3 layers: control mapping, MeSH exact, ChEMBL local)
-- `data/reference/chembl_synonyms.parquet` — 128K ChEMBL synonyms extracted from ChEMBL 36 SQLite (2.4MB)
+- `src/transform/normalize_drugs.py` — drug dictionary + study drugs (3 layers: control mapping, MeSH exact, ChEMBL local)
+- `src/transform/normalize_sponsors.py` — sponsor dictionary + fuzzy merger candidates
+- `src/transform/views.py` — `views.study_summary` (joins through `entities.*`)
+- `src/hitl/candidates.py` — `ref.mapping_candidates` plumbing, throttle, `promote_candidates` (Phase 7A + 7B)
+- `src/agent/enrichment_agent.py`, `src/agent/enrichment_tools.py`, `src/agent/quickumls_tool.py` — Phase 6E agent + its tools
+- `scripts/load_mesh_descriptors.py` — MeSH XML → `entities.condition` bulk loader (Phase 7B)
+- `scripts/bootstrap_reference_sources.py` — one-time reference-directory reorg + `meta.reference_sources` seed (Phase 7E)
+- `data/reference/chembl/36/synonyms.parquet` — 128K ChEMBL 36 synonyms (2.4 MB)
+- `data/reference/mesh/2026/desc.xml` — MeSH 2026 descriptor file (313 MB, ~31k descriptors)
+- `data/reference/umls/2025AB/quickumls_index/` — UMLS 2025AB QuickUMLS index (5 GB)
 - `data/DATABASE_SCHEMA.md` — DuckDB schema documentation
 
 ## Verification

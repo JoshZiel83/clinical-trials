@@ -70,7 +70,7 @@ domain_tab <- function(dom) {
     value = dom,
     fluidRow(
       column(3, selectInput(paste0(dom, "_status"), "Status",
-                            c("pending", "approved", "rejected", "all"),
+                            c("pending", "approved", "rejected", "hidden", "all"),
                             selected = "pending")),
       column(3, selectInput(paste0(dom, "_source"), "Source",
                             c("all", "fuzzy", "quickumls", "agent", "co-occurrence"),
@@ -85,6 +85,7 @@ domain_tab <- function(dom) {
       column(12,
         actionButton(paste0(dom, "_approve"), "Approve selected", class = "btn-success"),
         actionButton(paste0(dom, "_reject"), "Reject selected", class = "btn-danger"),
+        actionButton(paste0(dom, "_hide"), "Hide source", class = "btn-warning"),
         span(style = "margin-left: 20px;", textOutput(paste0(dom, "_count"), inline = TRUE)),
         span(style = "margin-left: 20px;", textOutput(paste0(dom, "_pending_pool"), inline = TRUE))
       )
@@ -132,8 +133,10 @@ server <- function(input, output, session) {
       decs <- rv$decisions[[d]]
       n_app <- sum(decs == "approved")
       n_rej <- sum(decs == "rejected")
-      if (n_app + n_rej == 0) return(NA_character_)
-      sprintf("%s: %d approved / %d rejected", tools::toTitleCase(d), n_app, n_rej)
+      n_hid <- sum(decs == "hidden")
+      if (n_app + n_rej + n_hid == 0) return(NA_character_)
+      sprintf("%s: %d approved / %d rejected / %d hidden",
+              tools::toTitleCase(d), n_app, n_rej, n_hid)
     }, character(1))
     parts <- parts[!is.na(parts)]
     if (length(parts) == 0) {
@@ -200,8 +203,9 @@ server <- function(input, output, session) {
             "status",
             target = "row",
             backgroundColor = styleEqual(
-              c("approved* (this session)", "rejected* (this session)"),
-              c("#d4edda", "#f8d7da")
+              c("approved* (this session)", "rejected* (this session)",
+                "hidden* (this session)"),
+              c("#d4edda", "#f8d7da", "#fff3cd")
             )
           )
       })
@@ -284,6 +288,28 @@ server <- function(input, output, session) {
       })
       observeEvent(input[[paste0(d, "_reject")]], {
         record_decision("rejected")
+      })
+      observeEvent(input[[paste0(d, "_hide")]], {
+        sel <- input[[paste0(d, "_table_rows_selected")]]
+        if (length(sel) == 0) {
+          showNotification("Select at least one row first.",
+                           type = "warning", duration = 4)
+          return()
+        }
+        showModal(modalDialog(
+          title = "Hide source?",
+          sprintf("This will suppress the selected %d source_value(s) from ALL future %s candidate generation, regardless of canonical. Continue?",
+                  length(sel), d),
+          footer = tagList(
+            modalButton("Cancel"),
+            actionButton(paste0(d, "_hide_confirm"), "Hide", class = "btn-warning")
+          ),
+          easyClose = TRUE
+        ))
+      })
+      observeEvent(input[[paste0(d, "_hide_confirm")]], {
+        removeModal()
+        record_decision("hidden")
       })
     })
   }

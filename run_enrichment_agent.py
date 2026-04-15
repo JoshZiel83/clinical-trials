@@ -13,7 +13,7 @@ from config.settings import (
     AGENT_DEFAULT_MAX_PENDING,
     AGENT_DEFAULT_MODEL,
 )
-from src.enrichment_agent import run_enrichment_agent
+from src.agent.enrichment_agent import run_enrichment_agent
 from src.logging_config import setup_logging
 
 

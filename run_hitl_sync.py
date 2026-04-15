@@ -65,20 +65,20 @@ def _rebuild_downstream(conn, domains_touched):
     then rebuild `views.study_summary` so the analytical view reflects the
     new manual entries."""
     if "condition" in domains_touched:
-        from src.normalize_conditions import create_study_conditions
+        from src.transform.normalize_conditions import create_study_conditions
         logger.info("[sync] rebuilding norm.study_conditions")
         create_study_conditions(conn)
     if "drug" in domains_touched:
-        from src.normalize_drugs import create_study_drugs
+        from src.transform.normalize_drugs import create_study_drugs
         logger.info("[sync] rebuilding norm.study_drugs")
         create_study_drugs(conn)
     if "sponsor" in domains_touched:
-        from src.normalize_sponsors import create_study_sponsors
+        from src.transform.normalize_sponsors import create_study_sponsors
         logger.info("[sync] rebuilding norm.study_sponsors")
         create_study_sponsors(conn)
     # Views always get refreshed since any dict change may ripple through.
     try:
-        from src.views import build_study_summary
+        from src.transform.views import build_study_summary
         logger.info("[sync] rebuilding views.study_summary")
         build_study_summary(conn)
     except Exception as exc:

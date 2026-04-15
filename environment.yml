@@ -3,15 +3,35 @@ channels:
   - conda-forge
 dependencies:
   - python=3.11
-  - r-base
-  - r-essentials
+  # Python runtime + tooling
   - python-dotenv
   - pytest
   - pandas
   - psycopg2
   - duckdb
   - jupyter
+  - ipywidgets
   - pyarrow
   - matplotlib
+  - rapidfuzz
+  # R runtime for apps/review Shiny app
+  - r-base
+  - r-essentials
+  - r-shiny
+  - r-dt
+  - r-dplyr
+  - r-jsonlite
   - r-arrow
   - r-janitor
+  - r-duckdb
+  # Pip-only packages (no conda-forge build)
+  - pip
+  - pip:
+      - anthropic
+      - quickumls
+      - quickumls-simstring
+# NOTE: after `conda env create`, run the libiconv relink step documented
+# in CLAUDE.md to get quickumls_simstring working on macOS:
+#   install_name_tool -change /usr/lib/libiconv.2.dylib \
+#     $CONDA_PREFIX/lib/libiconv.2.dylib \
+#     $CONDA_PREFIX/lib/python3.11/site-packages/quickumls_simstring/_simstring.so

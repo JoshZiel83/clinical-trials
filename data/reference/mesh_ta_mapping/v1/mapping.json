@@ -1,0 +1,23 @@
+[
+    {"mesh_ancestor": "Infections", "therapeutic_area": "Infectious Disease"},
+    {"mesh_ancestor": "Neoplasms", "therapeutic_area": "Oncology"},
+    {"mesh_ancestor": "Musculoskeletal Diseases", "therapeutic_area": "Musculoskeletal"},
+    {"mesh_ancestor": "Digestive System Diseases", "therapeutic_area": "Gastroenterology"},
+    {"mesh_ancestor": "Respiratory Tract Diseases", "therapeutic_area": "Respiratory"},
+    {"mesh_ancestor": "Nervous System Diseases", "therapeutic_area": "Neurology"},
+    {"mesh_ancestor": "Eye Diseases", "therapeutic_area": "Ophthalmology"},
+    {"mesh_ancestor": "Male Urogenital Diseases", "therapeutic_area": "Urology/Nephrology"},
+    {"mesh_ancestor": "Female Urogenital Diseases and Pregnancy Complications", "therapeutic_area": "Obstetrics/Gynecology"},
+    {"mesh_ancestor": "Cardiovascular Diseases", "therapeutic_area": "Cardiovascular"},
+    {"mesh_ancestor": "Hemic and Lymphatic Diseases", "therapeutic_area": "Hematology"},
+    {"mesh_ancestor": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities", "therapeutic_area": "Rare/Genetic Disease"},
+    {"mesh_ancestor": "Skin and Connective Tissue Diseases", "therapeutic_area": "Dermatology/Rheumatology"},
+    {"mesh_ancestor": "Nutritional and Metabolic Diseases", "therapeutic_area": "Metabolic/Endocrine"},
+    {"mesh_ancestor": "Endocrine System Diseases", "therapeutic_area": "Metabolic/Endocrine"},
+    {"mesh_ancestor": "Immune System Diseases", "therapeutic_area": "Immunology"},
+    {"mesh_ancestor": "Mental Disorders", "therapeutic_area": "Psychiatry"},
+    {"mesh_ancestor": "Wounds and Injuries", "therapeutic_area": "Trauma/Emergency"},
+    {"mesh_ancestor": "Pathological Conditions, Signs and Symptoms", "therapeutic_area": "General/Symptoms"},
+    {"mesh_ancestor": "Behavior", "therapeutic_area": "Behavioral/Lifestyle"},
+    {"mesh_ancestor": "Stomatognathic Diseases", "therapeutic_area": "Dentistry/Oral Health"}
+]

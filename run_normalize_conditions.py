@@ -2,8 +2,8 @@
 
 from config.settings import get_duckdb_connection
 from src.logging_config import setup_logging
-from src.normalize_conditions import get_coverage_stats, run_normalization_pipeline
-from src.therapeutic_areas import run_ta_pipeline
+from src.transform.normalize_conditions import get_coverage_stats, run_normalization_pipeline
+from src.transform.therapeutic_areas import run_ta_pipeline
 
 if __name__ == "__main__":
     setup_logging()

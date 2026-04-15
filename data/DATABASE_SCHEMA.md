@@ -1,7 +1,7 @@
 # DuckDB Schema Documentation
 
 **Database**: `data/clinical_trials.duckdb`
-**Last updated**: 2026-04-09
+**Last updated**: 2026-04-15 (Phase 7A + 7B + 7E)
 
 ---
 
@@ -10,17 +10,20 @@
 | Schema | Purpose | Tables |
 |--------|---------|--------|
 | `raw` | Direct mirrors of AACT tables, filtered to active/planned studies. No transformations. | 14 tables |
-| `ref` | Reference/lookup tables for normalization. Hand-curated or derived. | 4 tables |
-| `norm` | Normalized entities with provenance tracking. | 3 tables |
-| `class` | Study design classification and innovative feature detection. | 2 tables |
-| `meta` | Pipeline metadata (extraction logs, run statistics). | 1 table |
+| `entities` | Canonical entity tables with stable surrogate IDs + external-ID crosswalks (Phase 7B). | 3 tables |
+| `ref` | Reference/lookup tables for normalization. Dictionaries FK into `entities.*`. | 5 tables |
+| `norm` | Normalized entities with provenance tracking. FK into `entities.*`. | 4 tables |
+| `class` | Study design classification and innovative feature detection. | 3 tables |
+| `meta` | Pipeline metadata (reference-source provenance, extraction logs, HITL sync). | 4 tables |
 | `views` | Denormalized analytical views (query-ready). | 1 table |
+
+**Identity invariant (Phase 7B)**: entity rows (`entities.*`) come only from trusted external vocabularies (MeSH, ChEMBL) or from approved HITL decisions — never from unresolved candidates. Dictionaries and `norm.*` FK into surrogate IDs; labels are resolved at query/view time.
 
 ---
 
 ## `raw` Schema
 
-All tables are extracted from AACT via `src/extract.py`. Filtered to studies where `overall_status IN ('RECRUITING', 'NOT_YET_RECRUITING', 'ACTIVE_NOT_RECRUITING', 'ENROLLING_BY_INVITATION', 'AVAILABLE')`. Child tables are filtered via `INNER JOIN` to `studies` on `nct_id`.
+All tables are extracted from AACT via `src/extract/aact.py`. Filtered to studies where `overall_status IN ('RECRUITING', 'NOT_YET_RECRUITING', 'ACTIVE_NOT_RECRUITING', 'ENROLLING_BY_INVITATION', 'AVAILABLE')`. Child tables are filtered via `INNER JOIN` to `studies` on `nct_id`.
 
 ### `raw.studies`
 The anchor table. One row per clinical trial.
@@ -146,17 +149,70 @@ Countries where trial sites are located.
 
 ---
 
-## `ref` Schema
+## `entities` Schema (Phase 7B)
 
-Reference and lookup tables used by the normalization pipeline.
+Canonical identity tables. One row = one distinct concept with a stable surrogate BIGINT primary key. External identifiers (MeSH D-code, ChEMBL ID, UMLS CUI, ROR ID) live as crosswalk columns, not as identity — concepts can exist without any particular external ID and can accumulate additional external IDs over time.
 
-### `ref.condition_dictionary`
-Maps free-text condition names to canonical MeSH terms. Built by `src/normalize_conditions.py`. Extensible: manual entries added here are automatically picked up on the next pipeline run.
+Every entity row carries an `origin` column (`mesh | chembl | aact | umls | manual | …`) answering *which vocabulary claimed this identity*, and an optional `source_versions` JSON stamping the reference release (e.g. `{"chembl": "36"}`). The version dimension is tracked separately in `meta.reference_sources`.
+
+**Invariant** — entity rows come from trusted external vocabularies during pipeline runs, or from approved HITL decisions via `src/hitl/candidates.py::promote_candidates`. Never from unresolved candidates.
+
+### `entities.condition`
+Seeded from MeSH descriptor XML via `scripts/load_mesh_descriptors.py`. One row per MeSH descriptor; HITL promotions or cancer-synonym layer may add rows with other origins.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| `condition_name` | VARCHAR | NOT NULL | Lowercase condition name (e.g., "breast cancer") |
-| `canonical_term` | VARCHAR | NOT NULL | Canonical MeSH term (e.g., "Breast Neoplasms") |
+| `condition_id` | BIGINT | NOT NULL (PK) | Surrogate identity. From `entities.condition_id_seq`. |
+| `origin` | VARCHAR | NOT NULL | `mesh` \| `umls` \| `manual` |
+| `mesh_descriptor_id` | VARCHAR | UNIQUE | MeSH D-code (e.g., `D001943`) |
+| `umls_cui` | VARCHAR | UNIQUE | UMLS concept unique identifier |
+| `canonical_term` | VARCHAR | NOT NULL | Human-readable canonical label |
+| `source_versions` | JSON | YES | Per-source release stamp, e.g. `{"mesh": "2026"}` |
+
+**31,505 rows** (31,110 MeSH 2026 seed + 395 cancer-synonym-invented). All current rows `origin='mesh'`.
+
+### `entities.drug`
+Seeded from ChEMBL 36 synonyms parquet (one row per distinct `chembl_id`). MeSH-only drugs and HITL-promoted drugs add more rows.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `drug_id` | BIGINT | NOT NULL (PK) | Surrogate identity. From `entities.drug_id_seq`. |
+| `origin` | VARCHAR | NOT NULL | `chembl` \| `mesh` \| `manual` |
+| `canonical_name` | VARCHAR | NOT NULL | ChEMBL pref_name, MeSH label, or HITL-approved string |
+| `chembl_id` | VARCHAR | UNIQUE | `CHEMBLnnn` (NULL for non-ChEMBL drugs) |
+| `mesh_descriptor_id` | VARCHAR | YES | MeSH D-code for drug-class entries |
+| `unii` | VARCHAR | YES | FDA UNII — reserved; not yet populated |
+| `source_versions` | JSON | YES | E.g. `{"chembl": "36"}` |
+
+**50,125 rows** (47,960 chembl + 2,149 mesh + 16 manual).
+
+### `entities.sponsor`
+Seeded from `normalize_sponsor_name()` output on distinct `raw.sponsors.name` strings. No external vocabulary today; 7D will backfill ROR IDs.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `sponsor_id` | BIGINT | NOT NULL (PK) | Surrogate identity. From `entities.sponsor_id_seq`. |
+| `origin` | VARCHAR | NOT NULL | `aact` \| `ror` \| `manual` |
+| `canonical_name` | VARCHAR | NOT NULL, UNIQUE | Canonical organization name |
+| `ror_id` | VARCHAR | UNIQUE | ROR identifier (reserved for 7D) |
+| `ringgold_id` | VARCHAR | YES | Ringgold identifier (reserved) |
+| `source_versions` | JSON | YES | |
+
+**37,755 rows** — all `origin='aact'`.
+
+---
+
+## `ref` Schema
+
+Reference and lookup tables used by the normalization pipeline. Dictionaries FK into `entities.*`; canonical labels live on the entity row, not the dictionary.
+
+### `ref.condition_dictionary`
+Maps free-text condition names to canonical entity IDs. Built by `src/transform/normalize_conditions.py`. Extensible: manual entries added here are automatically picked up on the next pipeline run.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `condition_name` | VARCHAR | NOT NULL (PK) | Lowercase condition name (e.g., "breast cancer") |
+| `condition_id` | BIGINT | NOT NULL | FK → `entities.condition.condition_id` |
 | `mapping_method` | VARCHAR | NOT NULL | How the mapping was derived (see below) |
 | `confidence` | VARCHAR | NOT NULL | `high` or `medium` |
 
@@ -166,34 +222,72 @@ Maps free-text condition names to canonical MeSH terms. Built by `src/normalize_
 - `co-occurrence` — condition and MeSH term co-occur dominantly across studies (≥3 studies, ≥2x the runner-up)
 - `cancer-synonym` — `[Site] Cancer` → `[Site] Neoplasms` pattern matching
 - `manual` — hand-curated entries, including reviewed fuzzy candidates; preserved across automated rebuilds
-- `quickumls` — QuickUMLS mapping (future Phase 2C; preserved across automated rebuilds)
+- `quickumls` — QuickUMLS mapping (Phase 6D); preserved across automated rebuilds
 
-**14,572 rows** (3,247 exact + 8,263 1:1-study + 2,712 co-occurrence + 350 cancer-synonym)
+**14,117 rows** post-7B regen (3,247 exact + 8,263 1:1-study + 2,712 co-occurrence + 350 cancer-synonym + manual).
+
+### `ref.drug_dictionary`
+Maps normalized intervention names to canonical drug entity IDs. Built by `src/transform/normalize_drugs.py`. Manual entries are preserved across automated rebuilds.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `source_name` | VARCHAR | NOT NULL (PK) | Normalized intervention name (lowercase, dosage/route stripped) |
+| `drug_id` | BIGINT | NOT NULL | FK → `entities.drug.drug_id` |
+| `mapping_method` | VARCHAR | NOT NULL | How the mapping was derived (see below) |
+| `confidence` | VARCHAR | NOT NULL | `high` or `medium` |
+
+**Mapping methods** (in priority order):
+- `control-map` — regex-based mapping of placebo, vehicle, saline, standard-of-care, and other control terms
+- `mesh-exact` — normalized name exactly matches `browse_interventions.downcase_mesh_term` within the same study
+- `chembl-synonym` — exact match against the active ChEMBL synonym Parquet (path resolved via `meta.reference_sources`)
+- `manual` — hand-curated entries; preserved across automated rebuilds
+
+**6,227 rows** post-7B regen.
+
+### `ref.sponsor_dictionary`
+Maps raw sponsor names to canonical sponsor entity IDs. Built by `src/transform/normalize_sponsors.py`. Manual entries are preserved across rebuilds.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `source_name` | VARCHAR | NOT NULL (PK) | Lowercased raw sponsor name |
+| `sponsor_id` | BIGINT | NOT NULL | FK → `entities.sponsor.sponsor_id` |
+| `mapping_method` | VARCHAR | NOT NULL | `exact-after-normalize` \| `manual` |
+| `confidence` | VARCHAR | NOT NULL | `high` \| `medium` |
+
+`exact-after-normalize` groups raw names by `normalize_sponsor_name()` (case-fold, strip legal suffixes `Inc`/`Ltd`/`LLC`/`GmbH`/`S.A.`/..., strip leading `The`); canonical_name is the most-frequent original form per group (alphabetical tiebreak). Fuzzy near-duplicate mergers beyond that layer are proposed via `generate_sponsor_fuzzy_candidates` → `ref.mapping_candidates(domain='sponsor')` for HITL review.
+
+**38,021 rows** post-7B regen.
 
 ### `ref.mapping_candidates`
-Shared staging table for mapping proposals awaiting human review, across all HITL domains (`condition`, `drug`, `sponsor`). Populated by domain-specific generators (`generate_fuzzy_candidates` in `src/normalize_conditions.py`, future drug/sponsor generators in Phase 6, and the Claude enrichment agent). Approved candidates are promoted to the target dictionary (`ref.condition_dictionary`, `ref.drug_dictionary`, or `ref.sponsor_dictionary`) as `manual` entries via `src/hitl.promote_candidates` or the Shiny decision-log sync.
+Shared staging table for mapping proposals awaiting human review, across all HITL domains (`condition`, `drug`, `sponsor`). Populated by domain-specific generators (fuzzy in `src/transform/normalize_*.py`, and the Claude enrichment agent in `src/agent/enrichment_agent.py`). Approved candidates are promoted via `src/hitl/candidates.py::promote_candidates`, which resolves/creates the `entities.*` row (origin=`manual`) and inserts the dictionary FK.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `domain` | VARCHAR | NOT NULL | `condition` \| `drug` \| `sponsor` |
 | `source_value` | VARCHAR | NOT NULL | Input string being mapped (lowercased / domain-normalized) |
 | `canonical_term` | VARCHAR | NOT NULL | Proposed canonical label |
-| `canonical_id` | VARCHAR | YES | Optional external ID (ChEMBL ID, UMLS CUI, etc.) |
+| `canonical_id` | VARCHAR | YES | Optional external ID (ChEMBL ID, etc.) |
 | `score` | FLOAT | NOT NULL | Match score (rapidfuzz, QuickUMLS sim, or agent confidence) |
 | `study_count` | INTEGER | NOT NULL | Impact — studies touched by the source_value |
 | `source` | VARCHAR | NOT NULL | `fuzzy` \| `quickumls` \| `co-occurrence` \| `agent` \| ... |
 | `rationale` | VARCHAR | YES | Agent-supplied justification (NULL for non-agent sources) |
 | `tool_trace` | JSON | YES | Agent tool-call trace (NULL for non-agent sources) |
-| `status` | VARCHAR | NOT NULL | `pending`, `approved`, or `rejected` |
+| `status` | VARCHAR | NOT NULL | `pending` \| `approved` \| `rejected` \| `hidden` |
 | `created_at` | TIMESTAMP | | When the candidate was generated |
 | PRIMARY KEY | | | (`domain`, `source_value`, `canonical_term`, `source`) |
 
-Approved/rejected decisions persist across regenerations — only `pending` rows for the active `(domain, source)` pair are cleared when candidates are regenerated.
+Approved/rejected/hidden decisions persist across regenerations — only `pending` rows for the active `(domain, source)` pair are cleared when candidates are regenerated.
 
-Supersedes the previous `ref.condition_candidates` (migrated via `scripts/migrate_condition_candidates.py`).
+**Phase 7A rejection throttle (`src/hitl/candidates.py::REJECT_THROTTLE = 2`)**: `insert_candidates` skips a row when its `(domain, source_value, source)` has ≥ 2 distinct rejected canonicals, or any `hidden` decision. This terminates regeneration for a source that's been definitively ruled unmappable, without the over-aggressive "first rejection bans the source" behavior that previously lived in the condition normalizer.
+
+**Decision statuses**:
+- `pending` — proposed, awaiting reviewer
+- `approved` — reviewer accepted; promoted to dictionary on next HITL sync
+- `rejected` — reviewer said this specific `(source_value → canonical_term)` mapping is wrong. Alternate canonicals may still be proposed for the same source_value until the throttle triggers.
+- `hidden` — reviewer suppressed this `(source_value, source)` entirely. No future candidates for this source regardless of canonical. Set via the Shiny app's "Hide source" button (confirmation modal).
 
 ### `ref.therapeutic_areas`
-Hand-curated mapping from MeSH ancestor names to therapeutic areas. Source: `data/reference/therapeutic_area_mapping.json`.
+Hand-curated mapping from MeSH ancestor names to therapeutic areas. Source: `data/reference/mesh_ta_mapping/v1/mapping.json` (path resolved via `meta.reference_sources`).
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -202,96 +296,69 @@ Hand-curated mapping from MeSH ancestor names to therapeutic areas. Source: `dat
 
 **21 rows** — maps to 21 therapeutic areas. Multiple ancestors can map to the same TA (e.g., "Endocrine System Diseases" and "Nutritional and Metabolic Diseases" both → "Metabolic/Endocrine").
 
-### `ref.sponsor_dictionary`
-Maps raw sponsor names to canonical names. Built by `src/normalize_sponsors.py`. Manual entries are preserved across rebuilds.
-
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `source_name` | VARCHAR | NOT NULL | Lowercased raw sponsor name |
-| `canonical_name` | VARCHAR | NOT NULL | Canonical (pretty) form |
-| `canonical_id` | VARCHAR | YES | Optional external ID (e.g., future Ringgold / ROR) |
-| `mapping_method` | VARCHAR | NOT NULL | `exact-after-normalize` \| `manual` |
-| `confidence` | VARCHAR | NOT NULL | `high` \| `medium` |
-
-`exact-after-normalize` groups raw names by `normalize_sponsor_name()` (case-fold, strip legal suffixes `Inc`/`Ltd`/`LLC`/`GmbH`/`S.A.`/..., strip leading `The`); canonical_name is the most-frequent original form per group (alphabetical tiebreak). Fuzzy near-duplicate mergers beyond that layer are proposed via `generate_sponsor_fuzzy_candidates` → `ref.mapping_candidates(domain='sponsor')` for HITL review.
-
-### `ref.drug_dictionary`
-Maps normalized intervention names to canonical drug identifiers. Built by `src/normalize_drugs.py`. Manual entries are preserved across automated rebuilds.
-
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| `source_name` | VARCHAR | NOT NULL | Normalized intervention name (lowercase, dosage/route stripped) |
-| `canonical_name` | VARCHAR | NOT NULL | Canonical drug name (MeSH term or ChEMBL pref_name) |
-| `canonical_id` | VARCHAR | YES | ChEMBL ID (NULL for MeSH-only matches) |
-| `mapping_method` | VARCHAR | NOT NULL | How the mapping was derived (see below) |
-| `confidence` | VARCHAR | NOT NULL | `high` or `medium` |
-
-**Mapping methods** (in priority order):
-- `control-map` — regex-based mapping of placebo, vehicle, saline, standard-of-care, and other control terms
-- `mesh-exact` — normalized name exactly matches `browse_interventions.downcase_mesh_term` within the same study
-- `chembl-synonym` — exact match against local ChEMBL 36 synonym Parquet file (128K synonyms)
-- `manual` — hand-curated entries; preserved across automated rebuilds
-
 ---
 
 ## `norm` Schema
 
-Normalized entity tables with provenance tracking.
+Normalized entity tables with provenance tracking. After Phase 7B, all keyed on `entities.*` surrogate IDs; canonical labels are resolved at view time.
 
 ### `norm.study_conditions`
-Every row from `raw.conditions`, enriched with canonical MeSH term from the condition dictionary. Unmapped conditions have NULL values.
+Every row from `raw.conditions`, linked to the matching `entities.condition` via dictionary lookup. Unmapped conditions have NULL `condition_id`.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `nct_id` | VARCHAR | | Study identifier |
 | `condition_name` | VARCHAR | | Original condition name from `raw.conditions` |
-| `canonical_term` | VARCHAR | YES | Canonical MeSH term (NULL if unmapped) |
+| `condition_id` | BIGINT | YES | FK → `entities.condition.condition_id` (NULL if unmapped) |
 | `mapping_method` | VARCHAR | YES | From dictionary: exact, 1:1-study, co-occurrence, manual, etc. |
 | `confidence` | VARCHAR | YES | From dictionary: high, medium |
 
-**316,463 rows** — same as `raw.conditions` plus joined `raw.conditions` entries with multiple rows. 84.5% of studies have ≥1 mapped condition.
+**253,711 rows** — one per `raw.conditions` row. 171,222 mapped (67%); 84.7% of studies have ≥1 mapped condition.
 
 ### `norm.study_therapeutic_areas`
 Study-level therapeutic area assignments derived from `raw.browse_conditions` MeSH ancestors joined to `ref.therapeutic_areas`. Multi-label: a study can have multiple TAs.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `nct_id` | VARCHAR | Study identifier |
-| `matched_ancestor` | VARCHAR | The MeSH ancestor/term that matched a TA |
-| `therapeutic_area` | VARCHAR | Therapeutic area label |
-| `match_source` | VARCHAR | `mesh-ancestor` or `mesh-list` |
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `nct_id` | VARCHAR | | Study identifier |
+| `condition_id` | BIGINT | YES | FK → `entities.condition.condition_id` (NULL if the ancestor MeSH term isn't in `entities.condition`) |
+| `therapeutic_area` | VARCHAR | | Therapeutic area label |
+| `match_source` | VARCHAR | | `mesh-ancestor` or `mesh-list` |
 
-**202,132 rows** — 93,606 distinct studies (78.2% coverage)
+**~202k rows** — 93,606 distinct studies (78.2% coverage).
 
 ### `norm.study_sponsors`
-Raw sponsor rows joined to the canonical name from `ref.sponsor_dictionary`. One row per `raw.sponsors` row. Replaces the raw-string interim that the view previously carried.
+Raw sponsor rows linked to the canonical sponsor entity via `ref.sponsor_dictionary`. One row per `raw.sponsors` row.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `nct_id` | VARCHAR | | Study identifier |
 | `original_name` | VARCHAR | | Original name from `raw.sponsors.name` |
-| `canonical_name` | VARCHAR | | Canonical name (falls back to `original_name` if no dict hit) |
+| `sponsor_id` | BIGINT | YES | FK → `entities.sponsor.sponsor_id` (rare NULL on unmatched names) |
 | `agency_class` | VARCHAR | | `Industry` / `NIH` / `FED` / `OTHER` |
 | `lead_or_collaborator` | VARCHAR | | `lead` / `collaborator` |
 
+**209,621 rows** — 100% mapped to `entities.sponsor`.
+
 ### `norm.study_drugs`
-Drug/Biological interventions enriched with canonical drug name from the drug dictionary. Only includes Drug and Biological intervention types. Unmapped drugs have NULL canonical fields.
+Drug/Biological interventions linked to `entities.drug` via `ref.drug_dictionary`. Only includes Drug and Biological intervention types. Unmapped drugs have NULL `drug_id`.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `nct_id` | VARCHAR | | Study identifier |
 | `intervention_type` | VARCHAR | | DRUG or BIOLOGICAL |
 | `intervention_name` | VARCHAR | | Original name from `raw.interventions` |
-| `canonical_name` | VARCHAR | YES | Canonical drug name (NULL if unmapped) |
-| `canonical_id` | VARCHAR | YES | ChEMBL ID (NULL if MeSH-only or unmapped) |
+| `drug_id` | BIGINT | YES | FK → `entities.drug.drug_id` (NULL if unmapped) |
 | `mapping_method` | VARCHAR | | control-map, mesh-exact, chembl-synonym, manual, or unmatched |
 | `confidence` | VARCHAR | YES | high, medium, or NULL (if unmatched) |
+
+**82,334 rows** — 47,454 mapped (57.6%); 60.3% of studies have ≥1 mapped drug.
 
 ---
 
 ## `class` Schema
 
-Study design classification and innovative feature detection. Created by `src/classify_design.py` and `src/innovative_features.py`.
+Study design classification and innovative feature detection. Created by `src/transform/classify_design.py` and `src/transform/innovative_features.py`.
 
 ### `class.study_design`
 One row per study with 4 classification levels derived from structured AACT fields.
@@ -323,6 +390,25 @@ Multi-label innovative design feature detection via regex NLP on free-text field
 ---
 
 ## `meta` Schema
+
+### `meta.reference_sources` (Phase 7E)
+Single source of truth for active versions of external reference datasets (ChEMBL synonyms, UMLS index, MeSH descriptor XML, MeSH→TA mapping). Loaders resolve their file paths via `src/reference_sources.py::get_active_path(source_name)` instead of hardcoded constants.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `source_name` | VARCHAR | NOT NULL | `chembl` \| `umls` \| `mesh` \| `mesh_ta_mapping` |
+| `version` | VARCHAR | NOT NULL | `36` \| `2025AB` \| `2026` \| `v1` \| … |
+| `acquired_at` | TIMESTAMP | YES | When the file was downloaded/obtained |
+| `built_at` | TIMESTAMP | | When registered (defaults to `current_timestamp`) |
+| `path` | VARCHAR | NOT NULL | Filesystem path under `data/reference/<source>/<version>/...` |
+| `checksum` | VARCHAR | YES | SHA-256 of the file, or a manifest hash for directory indexes |
+| `is_active` | BOOLEAN | NOT NULL | Exactly one TRUE per `source_name` |
+| `notes` | VARCHAR | YES | License, URL, post-processing notes |
+| PRIMARY KEY | | | (`source_name`, `version`) |
+
+**Current rows (4 active)**: `chembl@36`, `mesh@2026`, `mesh_ta_mapping@v1`, `umls@2025AB`.
+
+Entity rows carry a `source_versions` JSON column stamped at creation time (e.g. `{"chembl": "36"}`, `{"mesh": "2026"}`) for row-level reference provenance.
 
 ### `meta.agent_cache`
 Phase 6E per-item SHA cache for the Claude enrichment agent. Keyed by `(domain, normalized source_value, model, prompt_version)`; re-runs on unchanged inputs are served from cache with zero API cost.
@@ -367,11 +453,11 @@ Records metadata for each table extraction from AACT.
 
 ## `views` Schema
 
-Denormalized, query-ready analytical views built by `src/views.py`.
+Denormalized, query-ready analytical views built by `src/transform/views.py`.
 
 ### `views.study_summary`
 
-One row per study (`nct_id`). Joins `raw.studies` + `class.study_design` + `class.innovative_features` + `class.ai_mentions` + `norm.study_therapeutic_areas` + `norm.study_conditions` + `norm.study_drugs` + `raw.countries` + `raw.sponsors`. Multi-valued dimensions are aggregated into DuckDB `LIST` (VARCHAR[]) columns plus convenience scalars/flags.
+One row per study (`nct_id`). Joins `raw.studies` + `class.study_design` + `class.innovative_features` + `class.ai_mentions` + `norm.study_therapeutic_areas` + `norm.study_conditions` + `norm.study_drugs` + `norm.study_sponsors` + `raw.interventions` + `raw.countries`, with label lookups through `entities.condition` / `entities.drug` / `entities.sponsor`. Multi-valued dimensions are aggregated into DuckDB `LIST` (VARCHAR[]) columns plus convenience scalars/flags. Output schema is identical to the pre-7B view — only the underlying joins changed.
 
 | Column group | Columns |
 |---|---|
@@ -386,35 +472,48 @@ One row per study (`nct_id`). Joins `raw.studies` + `class.study_design` + `clas
 | Countries | `countries` (LIST, `removed=TRUE` excluded), `country_count` |
 | Sponsors | `lead_sponsor_name`, `lead_sponsor_agency_class`, `collaborator_names` (LIST) |
 
-**119,753 rows** (matches `raw.studies` exactly). Coverage: 78.2% ≥1 TA, 20.5% ≥1 mapped drug, 3.9% innovative feature, 2.2% AI mention, 100% lead sponsor.
+**119,753 rows** (matches `raw.studies` exactly, post-7B regen). Coverage: 78.2% ≥1 TA, 20.6% ≥1 mapped drug, 3.9% innovative feature, 2.2% AI mention, 100% lead sponsor.
 
-`lead_sponsor_name` and `collaborator_names` carry canonical names sourced from `norm.study_sponsors` (Phase 6B — deterministic `exact-after-normalize` layer). Near-duplicates beyond that layer are candidates in `ref.mapping_candidates(domain='sponsor')` awaiting HITL review.
+`lead_sponsor_name` and `collaborator_names` carry canonical names sourced from `norm.study_sponsors → entities.sponsor` (Phase 6B — deterministic `exact-after-normalize` layer). Near-duplicates beyond that layer are candidates in `ref.mapping_candidates(domain='sponsor')` awaiting HITL review.
+
+`chembl_ids` is now authoritative: it sources from `entities.drug.chembl_id`, which is UNIQUE and populated from ChEMBL at seed time — not the best-effort backfill that lived in the pre-7B drug dictionary.
 
 ---
 
 ## Relationships
 
 ```
-raw.studies (nct_id)
-  ├── raw.conditions (nct_id)
-  │     └── norm.study_conditions (condition_name → ref.condition_dictionary)
-  ├── raw.browse_conditions (nct_id)
-  │     └── norm.study_therapeutic_areas (mesh_term → ref.therapeutic_areas)
-  ├── raw.designs (nct_id)
-  │     └── class.study_design (nct_id — joined with raw.studies)
-  ├── raw.studies + raw.detailed_descriptions + raw.keywords
-  │     └── class.innovative_features (regex NLP on free-text fields)
-  ├── raw.interventions (nct_id)
-  │     └── norm.study_drugs (intervention_name → ref.drug_dictionary)
-  ├── raw.browse_interventions (nct_id)
-  ├── raw.sponsors (nct_id)
-  ├── raw.countries (nct_id)
-  ├── raw.keywords (nct_id)
-  ├── raw.eligibilities (nct_id)
-  ├── raw.brief_summaries (nct_id)
-  ├── raw.detailed_descriptions (nct_id)
-  ├── raw.design_groups (nct_id)
-  └── raw.calculated_values (nct_id)
+                              entities.condition ─┐
+                              entities.drug      ─┤  (surrogate PKs;
+                              entities.sponsor   ─┘   external-ID crosswalks)
+                                    ▲
+                                    │ FK
+                                    │
+raw.studies (nct_id)          ref.condition_dictionary ─┐
+  ├── raw.conditions          ref.drug_dictionary      ─┤ (source_name → *_id)
+  │     └── norm.study_conditions ────(condition_id)────┘
+  ├── raw.browse_conditions
+  │     └── norm.study_therapeutic_areas ──(condition_id)─→ entities.condition
+  ├── raw.designs
+  │     └── class.study_design
+  ├── raw.studies + detailed_descriptions + keywords
+  │     └── class.innovative_features (regex NLP)
+  │     └── class.ai_mentions
+  ├── raw.interventions
+  │     └── norm.study_drugs ──(drug_id)──→ entities.drug
+  ├── raw.browse_interventions
+  ├── raw.sponsors
+  │     └── norm.study_sponsors ──(sponsor_id)──→ entities.sponsor
+  ├── raw.countries
+  ├── raw.keywords
+  ├── raw.eligibilities
+  ├── raw.brief_summaries
+  ├── raw.detailed_descriptions
+  ├── raw.design_groups
+  └── raw.calculated_values
+
+views.study_summary ← raw.studies × class.* × norm.* × entities.*
+                      (labels looked up through entities at view time)
 ```
 
-All child tables join to `raw.studies` on `nct_id`. The `norm` tables provide enriched views with provenance for downstream analysis.
+All child tables join to `raw.studies` on `nct_id`. `norm.*` tables FK into `entities.*` via surrogate IDs; dictionaries in `ref.*` provide the `source_value → *_id` lookup layer. `views.study_summary` resolves canonical labels (`canonical_conditions`, `canonical_drugs`, `chembl_ids`, `lead_sponsor_name`) at query time via joins through `entities.*`.

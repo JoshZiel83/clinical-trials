@@ -3,6 +3,7 @@ data/raw/
 data/logs/
 data/reviews/
 data/reference/umls/
+data/reference/mesh/
 data/*.duckdb
 data/*.zip
 

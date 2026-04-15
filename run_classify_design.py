@@ -2,8 +2,8 @@
 
 from config.settings import get_duckdb_connection
 from src.logging_config import setup_logging
-from src.classify_design import classify_study_design
-from src.innovative_features import detect_innovative_features, detect_ai_mentions
+from src.transform.classify_design import classify_study_design
+from src.transform.innovative_features import detect_innovative_features, detect_ai_mentions
 
 if __name__ == "__main__":
     setup_logging()
