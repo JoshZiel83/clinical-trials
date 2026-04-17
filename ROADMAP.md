@@ -298,7 +298,7 @@ Originally planned as a standalone fuzzy-dedup module. Same rationale as 2C: the
 
 ## Phase 7: Data Model Hardening
 
-**Added 2026-04-14 from first-use observations during Phase 6F review.** Four architectural concerns surfaced after running the HITL app against live data. Phase 7A, 7B, and 7E are shipped; 7C and 7D remain deferred.
+**Added 2026-04-14 from first-use observations during Phase 6F review.** Four architectural concerns surfaced after running the HITL app against live data. Phase 7A, 7B, 7C, and 7E are shipped; 7D remains deferred.
 
 ### Sequencing rationale
 
@@ -369,20 +369,26 @@ Only after 7A–7C (and ideally 7E) land should Phase 5 (refresh automation) shi
 
 **Not migrated intentionally** (deferred to 7C): `views.study_summary` still reads directly from `raw.studies`, `raw.interventions`, `raw.countries`, `raw.browse_conditions`. Entity-keyed FKs for drugs/conditions/sponsors flow through `norm.*`, but raw surrogates remain on the study/country/intervention side.
 
-### Phase 7C: Decouple analytical view from `raw.*`
+### Phase 7C: Decouple analytical view from `raw.*` ✅
 
-**Symptom**: `src/transform/views.py` still reads directly from `raw.studies`, `raw.interventions`, `raw.countries`, `raw.browse_conditions` alongside the `class.*` / `norm.*` / `entities.*` layers. (Post-7B: sponsors and drugs flow through `entities.*`; the raw reads that remain are studies, interventions, countries, and browse_conditions.)
+**Completed 2026-04-17.**
 
-**Root cause**: Phase 4 prioritized shipping the wide view over layering. The raw dependency was cheap because re-extraction happened manually and infrequently.
+**Symptom** (before): `src/transform/views.py` read directly from `raw.studies`, `raw.interventions`, and `raw.countries` alongside the `class.*` / `norm.*` / `entities.*` layers. Cheap while re-extraction was manual and infrequent, but a hazard for Phase 5 automation: a re-extract could transiently expose partial data to mart consumers, and mart output had no way to pin itself to a specific upstream snapshot. (The roadmap originally listed `raw.browse_conditions` too; spot-check confirmed it already flowed through `norm.study_therapeutic_areas`.)
 
-**Risk on re-run** (Phase 5):
-- During an extraction the view transiently points at stale/partial data.
-- `raw.interventions.id`, `raw.sponsors.id` etc. are surrogate keys that are *not* stable across extractions — nothing depends on them today, but any future snapshot/audit work would break.
-- Downstream analytical snapshots keyed to `views.study_summary` get silently redefined on each re-extract with no versioning.
+**Design principle** (from discussion): promote only where the transformation has real cross-consumer value or where the schema boundary itself is load-bearing. Don't rote-mirror `norm.*` / `class.*` — they're already stable analytical inputs. Do promote the raw reads so the single-rule contract ("the mart reads zero `raw.*`") is enforceable and extract-safe.
 
-**Proposed direction**: Introduce an `enriched.*` schema as the stable intermediate layer. `views.study_summary` reads only from `enriched.*` + `entities.*` (7B). Population from `raw.*` into `enriched.*` lives in a narrow "projection" module run at the tail of Phase 1/2; only those modules see `raw.*`. Enables snapshotting (`enriched.study_YYYYMMDD` tables) and extraction-diffing to make Phase 5 safer.
+**Landed**:
+- New `enriched` schema with three row-level tables. `src/transform/promote.py::promote_to_enriched()` is the narrow projection module; `run_promote_enriched.py` is the entry point.
+  - `enriched.studies` (119,753 rows) — anchor columns + derived `start_year = YEAR(start_date)`. Only columns the mart consumes today; future columns added when a concrete consumer appears.
+  - `enriched.interventions` (207,891 rows) — row-level projection; aggregation stays mart-side.
+  - `enriched.countries` (164,068 rows) — `removed = FALSE OR removed IS NULL` filter applied once upstream, instead of being re-asserted in every consumer query.
+- `meta.enriched_tables` registry: one row per enriched table stamped on each projection run with `last_built_at` (wall clock), `extraction_date` (pulled from `MAX(meta.extraction_log.extract_date)`), `source_expression`, `row_count`, `notes`. Answers *when was this rebuilt?* and *which raw extract does it reflect?*
+- `src/transform/views.py` rewritten to read `enriched.studies` / `enriched.interventions` / `enriched.countries` instead of raw. The `start_year` derivation and the `removed` filter moved upstream with them. `grep -n "raw\." src/transform/views.py` returns zero matches.
+- Output contract preserved: `views.study_summary` remains 119,753 rows with identical coverage (78.2% ≥1 TA, 20.6% ≥1 mapped drug, 3.9% innovative, 2.2% AI, 100% lead sponsor).
 
-**Status**: deferred — tracked, not scheduled. Prerequisite for Phase 5.
+**Not migrated intentionally**: `norm.*` and `class.*` continue to read directly from `raw.*` — they *produce* derived data one abstraction below the mart, and fronting them with enriched mirrors would add a maintenance surface for no contract value. Per-row `source_extracted_at` stamps on enriched tables are also deferred; the table-level stamp is enough until longitudinal analysis actually needs it.
+
+**Tests**: 219 passed, 1 skipped (up from 211 pre-7C). New `tests/transform/test_promote.py` covers schema creation, `start_year` derivation, removed filter, registry provenance, and idempotency. `tests/transform/test_views.py` fixtures retargeted to `enriched.*` (the `test_countries_excludes_removed` contract migrated to `test_promote.py` where it now belongs).
 
 ### Phase 7D: Sponsor dedup v2 — anchor-driven agent
 
@@ -459,14 +465,14 @@ Phase 1 (Raw Extract) ✅
       Phase 7 (Data Model Hardening) — partially shipped
         ├── 7A (Rejection persistence)     ✅ [independent]
         ├── 7B (Canonical entity tables)   ✅ [shipped with 7E; feeds 7C and 7D]
-        │     └── 7C (enriched.* layer)    [feeds Phase 5 — deferred]
+        │     └── 7C (enriched.* layer)    ✅ [feeds Phase 5]
         │     └── 7D (Sponsor agent v2)    [also depends on Phase 6E — deferred]
         └── 7E (Reference source versioning)  ✅ [shipped with 7B]
         │
       Phase 5 (Automation)       [after 7C to avoid raw-coupling / repro hazards]
 ```
 
-**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2D → 4 → 6 → **7A ✅ → (7B + 7E) ✅ → 7C → 7D** → 5
+**Recommended solo-developer order**: 0 → 1 → 2A → **2A.1** → 2B → 3A → 2D → 4 → 6 → **7A ✅ → (7B + 7E) ✅ → 7C ✅ → 7D** → 5
 
 ## Action Items
 

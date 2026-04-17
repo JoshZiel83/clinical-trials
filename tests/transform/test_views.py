@@ -18,29 +18,32 @@ def _setup_views_test_db():
     from src import entities
 
     conn = duckdb.connect(":memory:")
-    for schema in ("raw", "class", "norm", "views"):
+    for schema in ("raw", "enriched", "class", "norm", "views"):
         conn.execute(f"CREATE SCHEMA {schema}")
     entities.ensure_schema(conn)
 
+    # Phase 7C: views now reads enriched.studies (with precomputed start_year)
+    # instead of raw.studies.
     conn.execute("""
-        CREATE TABLE raw.studies AS SELECT * FROM (VALUES
+        CREATE TABLE enriched.studies AS SELECT * FROM (VALUES
             ('NCT001', 'RECRUITING', 'INTERVENTIONAL', 'PHASE3',
              'Trial 1', 'Full Trial 1', 100.0, DATE '2024-01-15',
-             DATE '2026-01-15', 'Sponsor A'),
+             DATE '2026-01-15', 'Sponsor A', 2024),
             ('NCT002', 'RECRUITING', 'OBSERVATIONAL', NULL,
              'Trial 2', 'Full Trial 2', 50.0, DATE '2023-06-01',
-             DATE '2025-06-01', 'Sponsor B'),
+             DATE '2025-06-01', 'Sponsor B', 2023),
             ('NCT003', 'ACTIVE_NOT_RECRUITING', 'INTERVENTIONAL', 'PHASE2',
              'Trial 3', 'Full Trial 3', NULL, DATE '2022-01-01',
-             NULL, 'Sponsor C'),
+             NULL, 'Sponsor C', 2022),
             ('NCT004', 'RECRUITING', 'INTERVENTIONAL', 'PHASE1',
              'Trial 4', 'Full Trial 4', 20.0, DATE '2025-03-01',
-             DATE '2027-03-01', 'Sponsor D'),
+             DATE '2027-03-01', 'Sponsor D', 2025),
             ('NCT005', 'RECRUITING', 'INTERVENTIONAL', 'PHASE3',
              'Trial 5', 'Full Trial 5', 300.0, DATE '2024-09-01',
-             DATE '2028-09-01', 'Sponsor E')
+             DATE '2028-09-01', 'Sponsor E', 2024)
         ) AS t(nct_id, overall_status, study_type, phase, brief_title,
-               official_title, enrollment, start_date, completion_date, source)
+               official_title, enrollment, start_date, completion_date, source,
+               start_year)
     """)
 
     conn.execute("""
@@ -105,26 +108,28 @@ def _setup_views_test_db():
         ) AS t(nct_id, intervention_type, intervention_name, drug_id, mapping_method, confidence)
     """)
 
+    # Phase 7C: views now reads enriched.interventions and enriched.countries
+    # (row-level projections; removed-country filter is applied upstream in promote.py).
     conn.execute("""
-        CREATE TABLE raw.interventions AS SELECT * FROM (VALUES
-            (1, 'NCT001', 'DRUG', 'aspirin 100mg'),
-            (2, 'NCT001', 'DRUG', 'placebo'),
-            (3, 'NCT001', 'BEHAVIORAL', 'diet counseling'),
-            (4, 'NCT002', 'OBSERVATIONAL', 'blood draw'),
-            (5, 'NCT004', 'DEVICE', 'sensor'),
-            (6, 'NCT005', 'BIOLOGICAL', 'mystery biologic'),
-            (7, 'NCT005', 'PROCEDURE', 'surgery')
-        ) AS t(id, nct_id, intervention_type, name)
+        CREATE TABLE enriched.interventions AS SELECT * FROM (VALUES
+            ('NCT001', 'DRUG'),
+            ('NCT001', 'DRUG'),
+            ('NCT001', 'BEHAVIORAL'),
+            ('NCT002', 'OBSERVATIONAL'),
+            ('NCT004', 'DEVICE'),
+            ('NCT005', 'BIOLOGICAL'),
+            ('NCT005', 'PROCEDURE')
+        ) AS t(nct_id, intervention_type)
     """)
 
+    # Japan (NCT005) was removed=TRUE upstream; it does not appear here.
     conn.execute("""
-        CREATE TABLE raw.countries AS SELECT * FROM (VALUES
-            (1, 'NCT001', 'United States', FALSE),
-            (2, 'NCT001', 'Canada', FALSE),
-            (3, 'NCT002', 'Germany', FALSE),
-            (4, 'NCT005', 'France', FALSE),
-            (5, 'NCT005', 'Japan', TRUE)
-        ) AS t(id, nct_id, name, removed)
+        CREATE TABLE enriched.countries AS SELECT * FROM (VALUES
+            ('NCT001', 'United States'),
+            ('NCT001', 'Canada'),
+            ('NCT002', 'Germany'),
+            ('NCT005', 'France')
+        ) AS t(nct_id, name)
     """)
 
     conn.execute("""
@@ -161,7 +166,7 @@ def _setup_views_test_db():
 def test_row_count_matches_studies():
     conn = _setup_views_test_db()
     build_study_summary(conn)
-    study_count = conn.execute("SELECT COUNT(*) FROM raw.studies").fetchone()[0]
+    study_count = conn.execute("SELECT COUNT(*) FROM enriched.studies").fetchone()[0]
     view_count = conn.execute("SELECT COUNT(*) FROM views.study_summary").fetchone()[0]
     assert view_count == study_count == 5
     conn.close()
@@ -294,19 +299,6 @@ def test_drugs_aggregation():
     assert row[1] == ['CHEMBL25']  # placebo has no ChEMBL ID
     assert row[2] == 2
     assert row[3] == 2
-    conn.close()
-
-
-def test_countries_excludes_removed():
-    conn = _setup_views_test_db()
-    build_study_summary(conn)
-    row = conn.execute("""
-        SELECT countries, country_count
-        FROM views.study_summary WHERE nct_id = 'NCT005'
-    """).fetchone()
-    # Japan is removed=TRUE; only France should remain
-    assert row[0] == ['France']
-    assert row[1] == 1
     conn.close()
 
 

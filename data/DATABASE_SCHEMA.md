@@ -1,7 +1,7 @@
 # DuckDB Schema Documentation
 
 **Database**: `data/clinical_trials.duckdb`
-**Last updated**: 2026-04-15 (Phase 7A + 7B + 7E)
+**Last updated**: 2026-04-17 (Phase 7C)
 
 ---
 
@@ -14,7 +14,8 @@
 | `ref` | Reference/lookup tables for normalization. Dictionaries FK into `entities.*`. | 5 tables |
 | `norm` | Normalized entities with provenance tracking. FK into `entities.*`. | 4 tables |
 | `class` | Study design classification and innovative feature detection. | 3 tables |
-| `meta` | Pipeline metadata (reference-source provenance, extraction logs, HITL sync). | 4 tables |
+| `enriched` | Stable analytical inputs promoted from `raw.*` with table-level provenance (Phase 7C). The mart reads these instead of `raw.*`. | 3 tables |
+| `meta` | Pipeline metadata (reference-source provenance, extraction logs, HITL sync, enriched-table registry). | 5 tables |
 | `views` | Denormalized analytical views (query-ready). | 1 table |
 
 **Identity invariant (Phase 7B)**: entity rows (`entities.*`) come only from trusted external vocabularies (MeSH, ChEMBL) or from approved HITL decisions — never from unresolved candidates. Dictionaries and `norm.*` FK into surrogate IDs; labels are resolved at query/view time.
@@ -389,6 +390,53 @@ Multi-label innovative design feature detection via regex NLP on free-text field
 
 ---
 
+## `enriched` Schema
+
+Stable analytical inputs promoted from `raw.*` by `src/transform/promote.py` (Phase 7C). `views.study_summary` reads only from `enriched.*` + `norm.*` + `class.*` + `entities.*` — never from `raw.*` directly. Each promoted table is stamped in `meta.enriched_tables` with when it was rebuilt and which raw extract it reflects.
+
+**Promotion discipline**: tables are promoted only when they have real cross-consumer utility or carry a transformation worth centralizing (not rote mirrors of raw).
+
+### `enriched.studies`
+Anchor table for the mart. Only the columns currently consumed by the mart are promoted; other raw.studies columns stay in `raw` until a concrete downstream consumer appears.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `nct_id` | VARCHAR | ClinicalTrials.gov identifier |
+| `overall_status` | VARCHAR | Recruitment status |
+| `study_type` | VARCHAR | Interventional / Observational / Expanded Access |
+| `phase` | VARCHAR | PHASE1, PHASE2, ... |
+| `brief_title` | VARCHAR | Short public title |
+| `official_title` | VARCHAR | Full scientific title |
+| `enrollment` | DOUBLE | Target/actual enrollment count |
+| `start_date` | DATE | Study start date |
+| `completion_date` | DATE | Study completion date |
+| `source` | VARCHAR | Submitting organization |
+| `start_year` | INTEGER | `YEAR(start_date)` — derived; NULL if `start_date IS NULL` |
+
+**119,753 rows** (one per study).
+
+### `enriched.interventions`
+Row-level projection of `raw.interventions`. Aggregation stays in `views.study_summary` (mart-specific).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `nct_id` | VARCHAR | FK → studies |
+| `intervention_type` | VARCHAR | DRUG, BIOLOGICAL, BEHAVIORAL, DEVICE, PROCEDURE, OBSERVATIONAL, ... |
+
+**207,891 rows**.
+
+### `enriched.countries`
+Row-level projection of `raw.countries` with the `removed != TRUE` filter applied once upstream. Consumers no longer need to re-apply the filter.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `nct_id` | VARCHAR | FK → studies |
+| `name` | VARCHAR | Country name |
+
+**164,068 rows** (filter drops `removed = TRUE` rows from the raw total).
+
+---
+
 ## `meta` Schema
 
 ### `meta.reference_sources` (Phase 7E)
@@ -433,6 +481,20 @@ Phase 6F — tracks which `data/reviews/decisions_*.parquet` files have been app
 | `applied_at` | TIMESTAMP | |
 | `approved` / `rejected` / `promoted` | INTEGER | Counts from that log |
 
+### `meta.enriched_tables` (Phase 7C)
+One row per table in the `enriched.*` schema. Refreshed on every `promote_to_enriched()` run. Answers two questions: *when was this layer last rebuilt?* and *which raw extract does it reflect?*
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `table_name` | VARCHAR | Fully-qualified enriched table (PK, e.g. `enriched.countries`) |
+| `last_built_at` | TIMESTAMP | Wall-clock time of the last projection run |
+| `extraction_date` | DATE | `MAX(meta.extraction_log.extract_date)` at the time of the projection — pins enriched to a specific raw snapshot |
+| `source_expression` | VARCHAR | Human-readable origin of the rows (e.g. `raw.countries WHERE removed != TRUE`) |
+| `row_count` | INTEGER | Row count after projection |
+| `notes` | VARCHAR | Free-text promotion rationale — the decision to promote lives in data, not just roadmap prose |
+
+**3 rows** (one per enriched table).
+
 ### `meta.extraction_log`
 Records metadata for each table extraction from AACT.
 
@@ -457,7 +519,7 @@ Denormalized, query-ready analytical views built by `src/transform/views.py`.
 
 ### `views.study_summary`
 
-One row per study (`nct_id`). Joins `raw.studies` + `class.study_design` + `class.innovative_features` + `class.ai_mentions` + `norm.study_therapeutic_areas` + `norm.study_conditions` + `norm.study_drugs` + `norm.study_sponsors` + `raw.interventions` + `raw.countries`, with label lookups through `entities.condition` / `entities.drug` / `entities.sponsor`. Multi-valued dimensions are aggregated into DuckDB `LIST` (VARCHAR[]) columns plus convenience scalars/flags. Output schema is identical to the pre-7B view — only the underlying joins changed.
+One row per study (`nct_id`). Joins `enriched.studies` + `class.study_design` + `class.innovative_features` + `class.ai_mentions` + `norm.study_therapeutic_areas` + `norm.study_conditions` + `norm.study_drugs` + `norm.study_sponsors` + `enriched.interventions` + `enriched.countries`, with label lookups through `entities.condition` / `entities.drug` / `entities.sponsor`. Multi-valued dimensions are aggregated into DuckDB `LIST` (VARCHAR[]) columns plus convenience scalars/flags. Phase 7C moved the three remaining `raw.*` reads behind `enriched.*`, so the mart is fully decoupled from raw.
 
 | Column group | Columns |
 |---|---|

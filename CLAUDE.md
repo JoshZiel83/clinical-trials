@@ -26,6 +26,7 @@ install_name_tool -change /usr/lib/libiconv.2.dylib \
 - `run_normalize_sponsors.py` — Phase 6B: sponsor normalization + fuzzy merger candidates
 - `run_enrichment_agent.py` — Phase 6E: Claude enrichment agent (`--domain`, `--budget`, `--limit`, `--max-pending`)
 - `run_hitl_sync.py` — Phase 6F: apply Shiny decision logs; rebuild affected `norm.*` + views
+- `run_promote_enriched.py` — Phase 7C: project `raw.*` → `enriched.*` (stable inputs for the mart); stamps `meta.enriched_tables`
 - `run_views.py` — Phase 4: denormalized analytical views (`views.study_summary`)
 
 # R/Shiny apps

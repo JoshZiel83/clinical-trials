@@ -127,7 +127,7 @@ def build_study_summary(duck_conn):
                 nct_id,
                 LIST(DISTINCT intervention_type) AS intervention_types,
                 COUNT(*) AS intervention_count
-            FROM raw.interventions
+            FROM enriched.interventions
             GROUP BY nct_id
         ),
         countries_agg AS (
@@ -135,8 +135,7 @@ def build_study_summary(duck_conn):
                 nct_id,
                 LIST(DISTINCT name) AS countries,
                 COUNT(DISTINCT name) AS country_count
-            FROM raw.countries
-            WHERE removed = FALSE OR removed IS NULL
+            FROM enriched.countries
             GROUP BY nct_id
         ),
         lead_sponsor AS (
@@ -172,7 +171,7 @@ def build_study_summary(duck_conn):
             s.enrollment,
             s.start_date,
             s.completion_date,
-            YEAR(s.start_date) AS start_year,
+            s.start_year,
             s.source,
 
             -- Design classification
@@ -220,7 +219,7 @@ def build_study_summary(duck_conn):
             ls.lead_sponsor_agency_class,
             COALESCE(cb.collaborator_names, []::VARCHAR[]) AS collaborator_names
 
-        FROM raw.studies s
+        FROM enriched.studies s
         LEFT JOIN class.study_design d ON s.nct_id = d.nct_id
         LEFT JOIN features_agg f ON s.nct_id = f.nct_id
         LEFT JOIN ai_agg a ON s.nct_id = a.nct_id
