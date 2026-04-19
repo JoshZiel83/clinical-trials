@@ -213,13 +213,15 @@ def create_study_sponsors(duck_conn):
 
 
 def generate_sponsor_fuzzy_candidates(duck_conn, score_cutoff=88, top_n=2000):
-    """Propose near-duplicate sponsor mergers via rapidfuzz.
+    """DEPRECATED (Phase 7D): replaced by the anchor-driven enrichment agent.
 
-    To stay tractable at scale (~38K canonicals → 1.4B pairs at full N²),
-    we only compare the top `top_n` canonicals by study impact. This
-    captures the high-value merges; long-tail dupes can be handled by
-    the enrichment agent. Pushes non-self score ≥ cutoff matches into
-    `ref.mapping_candidates` with domain='sponsor', source='fuzzy'.
+    Retained for one release so external callers have time to migrate. No
+    longer invoked by run_sponsor_pipeline. Will be removed after 2026-05-15.
+
+    Legacy behavior: proposes near-duplicate sponsor mergers via rapidfuzz,
+    comparing the top `top_n` canonicals by study impact and writing matches
+    with score ≥ cutoff into `ref.mapping_candidates` as source='fuzzy'. The
+    high FP rate of this approach is what motivated Phase 7D.
     """
     from rapidfuzz import fuzz, process
 
@@ -280,7 +282,12 @@ def run_sponsor_pipeline(duck_conn=None):
     try:
         build_sponsor_dictionary(duck_conn)
         create_study_sponsors(duck_conn)
-        generate_sponsor_fuzzy_candidates(duck_conn)
+        # Phase 7D: the anchor-driven agent replaces the fuzzy candidate
+        # generator. Build the anchor set after study_sponsors so top-N can
+        # be computed against fresh data, and register for provenance.
+        from src.transform import sponsor_anchors
+        sponsor_anchors.build_anchor_set(duck_conn)
+        sponsor_anchors.register_anchor_set(duck_conn)
         return duck_conn
     finally:
         if close_conn:

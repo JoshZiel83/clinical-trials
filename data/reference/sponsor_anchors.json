@@ -1,0 +1,13 @@
+{
+  "top_n": 200,
+  "include": [
+    "Novartis",
+    "Johnson & Johnson",
+    "Merck & Co., Inc.",
+    "Merck KGaA, Darmstadt, Germany"
+  ],
+  "exclude": [
+    "Merck & Company"
+  ],
+  "notes": "Phase 7D curation overrides on top of auto-picked top-N by study_count. `include` forces canonical_names into the anchor set (must already exist in entities.sponsor — otherwise skipped with a warning). `exclude` removes auto-picks. Curated entries here: (1) 'Novartis' is the corporate parent but has only ~118 studies vs 408 for 'Novartis Pharmaceuticals' — curated so merges flow into the parent name. (2) 'Johnson & Johnson' has only 21 studies vs ~367 across Janssen subsidiaries; curated so J&J is the anchor. (3) 'Merck & Co., Inc.' is the true US Merck parent; inserted via scripts/seed_curated_anchors.py (doesn't exist cleanly in AACT-derived data). (4) 'Merck KGaA, Darmstadt, Germany' is the German Merck — kept as its own anchor to prevent US/German Merck confusion. Exclude 'Merck & Company' — malformed 1-study variant."
+}

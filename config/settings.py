@@ -26,7 +26,16 @@ AGENT_MAX_TOKENS = int(os.environ.get("AGENT_MAX_TOKENS", "4096"))
 AGENT_DEFAULT_MAX_PENDING = int(os.environ.get("AGENT_DEFAULT_MAX_PENDING", "500"))
 AGENT_DEFAULT_CONCURRENCY = int(os.environ.get("AGENT_DEFAULT_CONCURRENCY", "4"))
 AGENT_SDK_MAX_RETRIES = int(os.environ.get("AGENT_SDK_MAX_RETRIES", "5"))
-AGENT_SYSTEM_PROMPT_VERSION = "v1"  # bump to invalidate cache on prompt changes
+AGENT_SYSTEM_PROMPT_VERSION = "v2"  # bump to invalidate cache on prompt changes
+
+# Phase 7D: sponsor anchor-driven agent.
+# When false, DOMAIN_TOOLS["sponsor"] is limited to fuzzy_sponsor and
+# promote_candidates rejects merge paths. Enables incremental rollout.
+SPONSOR_AGENT_V2_ENABLED = os.environ.get(
+    "SPONSOR_AGENT_V2_ENABLED", "false"
+).lower() == "true"
+ROR_API_BASE = os.environ.get("ROR_API_BASE", "https://api.ror.org")
+ROR_CACHE_TTL_DAYS = int(os.environ.get("ROR_CACHE_TTL_DAYS", "30"))
 
 # Status filter for active/planned trials
 ACTIVE_STATUSES = (

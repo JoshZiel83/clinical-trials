@@ -65,6 +65,51 @@ def ensure_schema(duck_conn):
         )
     """)
 
+    # Phase 7D: merge lineage for sponsor entities. NULL for un-merged rows;
+    # populated by entities.merge_sponsor when a reviewer collapses a variant
+    # into an anchor. Views resolve the effective sponsor via
+    # entities.sponsor_resolved.
+    duck_conn.execute(
+        "ALTER TABLE entities.sponsor ADD COLUMN IF NOT EXISTS merged_into_id BIGINT"
+    )
+    duck_conn.execute(
+        "ALTER TABLE entities.sponsor ADD COLUMN IF NOT EXISTS merged_at TIMESTAMP"
+    )
+    duck_conn.execute(
+        "ALTER TABLE entities.sponsor ADD COLUMN IF NOT EXISTS merge_rationale JSON"
+    )
+
+    create_or_replace_sponsor_resolved_view(duck_conn)
+
+
+def create_or_replace_sponsor_resolved_view(duck_conn):
+    """Recursive resolver view: map each sponsor_id to its effective (post-merge) id.
+
+    For un-merged rows effective_sponsor_id == sponsor_id, chain_depth == 0.
+    `hop < 10` guards against accidental cycles; merge_sponsor's write-time
+    validation also prevents them.
+    """
+    duck_conn.execute("""
+        CREATE OR REPLACE VIEW entities.sponsor_resolved AS
+        WITH RECURSIVE chain(sponsor_id, hop, head_id) AS (
+            SELECT sponsor_id, 0, sponsor_id FROM entities.sponsor
+          UNION ALL
+            SELECT c.sponsor_id, c.hop + 1, s.merged_into_id
+            FROM chain c
+            JOIN entities.sponsor s ON c.head_id = s.sponsor_id
+            WHERE s.merged_into_id IS NOT NULL AND c.hop < 10
+        )
+        SELECT
+            sponsor_id,
+            LAST_VALUE(head_id) OVER (
+                PARTITION BY sponsor_id
+                ORDER BY hop
+                ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+            ) AS effective_sponsor_id,
+            MAX(hop) OVER (PARTITION BY sponsor_id) AS chain_depth
+        FROM chain
+    """)
+
 
 def seed_drugs_from_chembl(duck_conn):
     """Bulk-seed entities.drug from the active ChEMBL synonyms parquet.
@@ -170,20 +215,24 @@ def upsert_sponsor(duck_conn, canonical_name, origin, ror_id=None,
     1. If ror_id is provided, lookup by ror_id. Found → return.
     2. Else lookup by canonical_name (UNIQUE). Found → return.
     3. Else insert a new row with the given origin.
+
+    Phase 7D flatten guard: if a resolved row has merged_into_id set, return
+    the parent's sponsor_id (one hop) so ETL seeders never re-point
+    dictionary entries at merged-away children.
     """
     if ror_id:
         row = duck_conn.execute(
-            "SELECT sponsor_id FROM entities.sponsor WHERE ror_id = ?",
+            "SELECT sponsor_id, merged_into_id FROM entities.sponsor WHERE ror_id = ?",
             [ror_id],
         ).fetchone()
         if row:
-            return row[0]
+            return row[1] if row[1] is not None else row[0]
     row = duck_conn.execute(
-        "SELECT sponsor_id FROM entities.sponsor WHERE canonical_name = ?",
+        "SELECT sponsor_id, merged_into_id FROM entities.sponsor WHERE canonical_name = ?",
         [canonical_name],
     ).fetchone()
     if row:
-        return row[0]
+        return row[1] if row[1] is not None else row[0]
 
     sv = json.dumps(source_versions) if source_versions else None
     sponsor_id = duck_conn.execute(
@@ -196,6 +245,86 @@ def upsert_sponsor(duck_conn, canonical_name, origin, ror_id=None,
         [origin, canonical_name, ror_id, ringgold_id, sv],
     ).fetchone()[0]
     return sponsor_id
+
+
+def merge_sponsor(duck_conn, child_id, parent_id, rationale=None):
+    """Collapse child sponsor into parent. Idempotent. (Phase 7D.)
+
+    Writes merged_into_id, merged_at, merge_rationale on the child row and
+    re-points any ref.sponsor_dictionary entries at the parent so the next
+    create_study_sponsors rebuild lands fresh rows on the parent.
+
+    Raises ValueError on invalid inputs:
+      - either id missing
+      - child_id == parent_id
+      - child already merged into a DIFFERENT parent (prior merge must be
+        undone first)
+      - parent itself merged away (force reviewer to re-anchor)
+    """
+    if child_id == parent_id:
+        raise ValueError(f"merge_sponsor: cannot merge sponsor {child_id} into itself")
+
+    rows = duck_conn.execute(
+        "SELECT sponsor_id, merged_into_id FROM entities.sponsor "
+        "WHERE sponsor_id IN (?, ?)",
+        [child_id, parent_id],
+    ).fetchall()
+    by_id = {r[0]: r[1] for r in rows}
+    if child_id not in by_id:
+        raise ValueError(f"merge_sponsor: child sponsor_id {child_id} not found")
+    if parent_id not in by_id:
+        raise ValueError(f"merge_sponsor: parent sponsor_id {parent_id} not found")
+
+    child_merged_into = by_id[child_id]
+    parent_merged_into = by_id[parent_id]
+
+    if child_merged_into is not None:
+        if child_merged_into == parent_id:
+            # Idempotent no-op: already merged the same way.
+            return parent_id
+        raise ValueError(
+            f"merge_sponsor: child {child_id} already merged into "
+            f"{child_merged_into}; cannot re-merge into {parent_id} without "
+            f"explicit un-merge"
+        )
+    if parent_merged_into is not None:
+        raise ValueError(
+            f"merge_sponsor: parent {parent_id} is itself merged into "
+            f"{parent_merged_into}; re-anchor to the effective parent first"
+        )
+
+    rationale_json = json.dumps(rationale) if rationale is not None else None
+    duck_conn.execute(
+        """
+        UPDATE entities.sponsor
+        SET merged_into_id = ?,
+            merged_at = current_timestamp,
+            merge_rationale = ?
+        WHERE sponsor_id = ?
+        """,
+        [parent_id, rationale_json, child_id],
+    )
+
+    # Re-point dictionary entries so subsequent create_study_sponsors writes
+    # land on the parent directly. Existing norm.study_sponsors rows stay
+    # pointing at the child (audit trail); resolution happens at view layer.
+    try:
+        duck_conn.execute(
+            "UPDATE ref.sponsor_dictionary SET sponsor_id = ? WHERE sponsor_id = ?",
+            [parent_id, child_id],
+        )
+    except Exception as exc:
+        # Dictionary table may not exist in some test fixtures — merge
+        # itself is done either way; warn but don't fail.
+        logger.warning(
+            f"merge_sponsor: could not update ref.sponsor_dictionary "
+            f"({type(exc).__name__}: {exc})"
+        )
+
+    logger.info(
+        f"merged entities.sponsor {child_id} → {parent_id}"
+    )
+    return parent_id
 
 
 def upsert_drug(duck_conn, canonical_name, origin, chembl_id=None,

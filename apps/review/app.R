@@ -27,15 +27,28 @@ PROJECT_ROOT <- normalizePath(
   Sys.getenv("CLINICAL_TRIALS_ROOT", file.path(APP_DIR, "..", "..")),
   mustWork = FALSE
 )
-DB_PATH <- file.path(PROJECT_ROOT, "data", "clinical_trials.duckdb")
-REVIEWS_DIR <- file.path(PROJECT_ROOT, "data", "reviews")
+# CLINICAL_TRIALS_DB_PATH lets you point the app at a scratch / demo DB
+# without overriding PROJECT_ROOT (which also controls REVIEWS_DIR).
+DB_PATH <- Sys.getenv(
+  "CLINICAL_TRIALS_DB_PATH",
+  file.path(PROJECT_ROOT, "data", "clinical_trials.duckdb")
+)
+REVIEWS_DIR <- Sys.getenv(
+  "CLINICAL_TRIALS_REVIEWS_DIR",
+  file.path(PROJECT_ROOT, "data", "reviews")
+)
 if (!file.exists(DB_PATH)) {
   stop(sprintf(
-    "DuckDB not found at %s. Either launch with `shiny::runApp(\"apps/review\")` from the project root, or set CLINICAL_TRIALS_ROOT.",
+    "DuckDB not found at %s. Either launch with `shiny::runApp(\"apps/review\")` from the project root, or set CLINICAL_TRIALS_ROOT / CLINICAL_TRIALS_DB_PATH.",
     DB_PATH
   ))
 }
 dir.create(REVIEWS_DIR, showWarnings = FALSE, recursive = TRUE)
+
+# Emit the resolved paths on startup so it's obvious which DB the app is
+# attached to — especially useful when running against a scratch / demo DB.
+message(sprintf("HITL review app — DB: %s", DB_PATH))
+message(sprintf("HITL review app — reviews dir: %s", REVIEWS_DIR))
 
 DOMAINS <- c("condition", "drug", "sponsor")
 
@@ -46,7 +59,7 @@ load_candidates <- function(domain) {
   dbGetQuery(con, sprintf("
     SELECT domain, source_value, canonical_term, canonical_id,
            score, study_count, source, rationale, tool_trace,
-           status, created_at
+           anchor_sponsor_id, status, created_at
     FROM ref.mapping_candidates
     WHERE domain = '%s'
     ORDER BY study_count DESC, score DESC
@@ -103,6 +116,8 @@ ui <- fluidPage(
     "Read-only view of ref.mapping_candidates. Approve/reject writes to data/reviews/*.parquet; ",
     tags$code("python run_hitl_sync.py"), " applies the decisions."
   )),
+  tags$p(style = "font-size: 11px; color: #666;",
+         tags$strong("DB: "), tags$code(DB_PATH)),
   div(style = "padding: 8px; background: #f4f6fa; border-left: 4px solid #4a90e2; margin-bottom: 10px;",
       strong("Session activity: "),
       textOutput("session_summary", inline = TRUE)),
@@ -189,6 +204,36 @@ server <- function(input, output, session) {
 
       output[[paste0(d, "_table")]] <- renderDT({
         df <- filtered()
+        # Phase 7D: surface anchor_sponsor_id on the sponsor tab so reviewers
+        # can tell merge proposals from plain mappings at a glance.
+        if (d == "sponsor") {
+          display <- df[, c("source_value", "canonical_term", "anchor_sponsor_id",
+                            "canonical_id", "score", "study_count", "source",
+                            "effective_status")]
+          names(display)[8] <- "status"
+          dt <- datatable(
+            display,
+            selection = "multiple",
+            options = list(pageLength = 20, order = list(list(5, "desc"))),
+            rownames = FALSE,
+          ) |>
+            formatRound("score", digits = 2) |>
+            formatStyle(
+              "anchor_sponsor_id",
+              fontWeight = styleInterval(0, c("normal", "bold")),
+              backgroundColor = styleInterval(0, c("transparent", "#e8f0fe"))
+            ) |>
+            formatStyle(
+              "status",
+              target = "row",
+              backgroundColor = styleEqual(
+                c("approved* (this session)", "rejected* (this session)",
+                  "hidden* (this session)"),
+                c("#d4edda", "#f8d7da", "#fff3cd")
+              )
+            )
+          return(dt)
+        }
         display <- df[, c("source_value", "canonical_term", "canonical_id",
                           "score", "study_count", "source", "effective_status")]
         names(display)[7] <- "status"
@@ -209,6 +254,32 @@ server <- function(input, output, session) {
             )
           )
       })
+
+      # Phase 7D: reactive approve-button label — for the sponsor tab, reflect
+      # whether the selected rows represent merges, mappings, or a mix.
+      if (d == "sponsor") {
+        observe({
+          df <- filtered()
+          sel <- input[[paste0(d, "_table_rows_selected")]]
+          btn_id <- paste0(d, "_approve")
+          if (length(sel) == 0) {
+            updateActionButton(session, btn_id, label = "Approve selected")
+            return()
+          }
+          anchors <- df$anchor_sponsor_id[sel]
+          has_anchor <- !is.na(anchors)
+          if (all(has_anchor)) {
+            updateActionButton(session, btn_id, label = "Merge into anchor")
+          } else if (!any(has_anchor)) {
+            updateActionButton(session, btn_id, label = "Approve mapping")
+          } else {
+            updateActionButton(
+              session, btn_id,
+              label = "Mixed selection — split merges from mappings"
+            )
+          }
+        })
+      }
 
       output[[paste0(d, "_count")]] <- renderText({
         df <- filtered()
@@ -253,8 +324,14 @@ server <- function(input, output, session) {
                            type = "warning", duration = 4)
           return()
         }
-        rows <- df[sel, c("domain", "source_value", "canonical_term",
-                          "canonical_id", "source")]
+        decision_cols <- c("domain", "source_value", "canonical_term",
+                           "canonical_id", "source")
+        # Phase 7D: sponsor decisions carry anchor_sponsor_id so the
+        # run_hitl_sync step can execute merges.
+        if (d == "sponsor" && "anchor_sponsor_id" %in% names(df)) {
+          decision_cols <- c(decision_cols, "anchor_sponsor_id")
+        }
+        rows <- df[sel, decision_cols]
         rows$decision <- decision
         rows$reviewer <- input$reviewer
         rows$decided_at <- format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")

@@ -444,3 +444,68 @@ def test_async_non_retriable_error_skips_item_and_continues():
     assert stats.items_abstained == 1
     assert stats.items_attempted == 2
     conn.close()
+
+
+def test_select_pending_inputs_sponsor_excludes_anchors():
+    """Phase 7D: canonicals in meta.sponsor_anchor_set must not be fed to
+    the sponsor agent as merge inputs."""
+    from src import entities
+    conn = duckdb.connect(":memory:")
+    for s in ("raw", "ref", "norm", "meta"):
+        conn.execute(f"CREATE SCHEMA {s}")
+    entities.ensure_schema(conn)
+    ea._ensure_agent_tables(conn)
+
+    # Two sponsors: one is an anchor, one is a candidate.
+    anchor_id = entities.upsert_sponsor(conn, canonical_name="Novartis", origin="aact")
+    variant_id = entities.upsert_sponsor(
+        conn, canonical_name="Some Variant Org", origin="aact"
+    )
+
+    conn.execute("""
+        CREATE TABLE ref.sponsor_dictionary (
+            source_name     VARCHAR PRIMARY KEY,
+            sponsor_id      BIGINT NOT NULL,
+            mapping_method  VARCHAR NOT NULL,
+            confidence      VARCHAR NOT NULL
+        )
+    """)
+    conn.execute(
+        "INSERT INTO ref.sponsor_dictionary VALUES "
+        "('novartis', ?, 'exact-after-normalize', 'high'), "
+        "('some variant org', ?, 'exact-after-normalize', 'high')",
+        [anchor_id, variant_id],
+    )
+    conn.execute("""
+        CREATE TABLE raw.sponsors (
+            id INTEGER, nct_id VARCHAR, agency_class VARCHAR,
+            lead_or_collaborator VARCHAR, name VARCHAR
+        )
+    """)
+    conn.execute(
+        "INSERT INTO raw.sponsors VALUES "
+        "(1, 'NCT001', 'Industry', 'Lead', 'Novartis'), "
+        "(2, 'NCT002', 'Industry', 'Lead', 'Some Variant Org')"
+    )
+    # Mark Novartis as an anchor.
+    conn.execute(
+        "INSERT INTO meta.sponsor_anchor_set "
+        "(sponsor_id, canonical_name, study_count, origin) "
+        "VALUES (?, 'Novartis', 1, 'auto')",
+        [anchor_id],
+    )
+    # Need ref.mapping_candidates to exist for the NOT IN subquery.
+    conn.execute("""
+        CREATE TABLE ref.mapping_candidates (
+            domain VARCHAR, source_value VARCHAR, canonical_term VARCHAR,
+            canonical_id VARCHAR, score FLOAT, study_count INTEGER,
+            source VARCHAR, rationale VARCHAR, tool_trace JSON,
+            anchor_sponsor_id BIGINT, status VARCHAR, created_at TIMESTAMP
+        )
+    """)
+
+    df = ea._select_pending_inputs(conn, "sponsor", limit=10)
+    source_values = set(df["source_value"])
+    assert "Some Variant Org" in source_values
+    assert "Novartis" not in source_values  # excluded because it's an anchor
+    conn.close()

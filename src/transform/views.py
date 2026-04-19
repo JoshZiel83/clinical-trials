@@ -139,6 +139,9 @@ def build_study_summary(duck_conn):
             GROUP BY nct_id
         ),
         lead_sponsor AS (
+            -- Resolve through entities.sponsor_resolved (Phase 7D): when a
+            -- sponsor has been merged into an anchor, views surface the
+            -- effective parent's canonical name. Un-merged rows pass through.
             SELECT nct_id, lead_sponsor_name, lead_sponsor_agency_class
             FROM (
                 SELECT
@@ -147,7 +150,8 @@ def build_study_summary(duck_conn):
                     ss.agency_class   AS lead_sponsor_agency_class,
                     ROW_NUMBER() OVER (PARTITION BY ss.nct_id ORDER BY ss.nct_id) AS rn
                 FROM norm.study_sponsors ss
-                LEFT JOIN entities.sponsor es ON ss.sponsor_id = es.sponsor_id
+                LEFT JOIN entities.sponsor_resolved r ON ss.sponsor_id = r.sponsor_id
+                LEFT JOIN entities.sponsor es ON r.effective_sponsor_id = es.sponsor_id
                 WHERE LOWER(ss.lead_or_collaborator) = 'lead'
             )
             WHERE rn = 1
@@ -157,7 +161,8 @@ def build_study_summary(duck_conn):
                 ss.nct_id,
                 LIST(DISTINCT es.canonical_name) AS collaborator_names
             FROM norm.study_sponsors ss
-            LEFT JOIN entities.sponsor es ON ss.sponsor_id = es.sponsor_id
+            LEFT JOIN entities.sponsor_resolved r ON ss.sponsor_id = r.sponsor_id
+            LEFT JOIN entities.sponsor es ON r.effective_sponsor_id = es.sponsor_id
             WHERE LOWER(ss.lead_or_collaborator) = 'collaborator'
             GROUP BY ss.nct_id
         )

@@ -73,7 +73,17 @@ RULES
 4. When no tool returns a trustworthy match (e.g., fuzzy scores all < 0.7, no QuickUMLS hit), call `abstain` with a brief reason. Do NOT guess.
 5. Prefer canonical forms that already exist in the dictionary (via `lookup_*_dictionary`). When a dictionary hit confirms an existing mapping, that's usually the right answer.
 6. For drugs, if the input is a control/placebo term, abstain — those are handled by a separate rule-based layer.
-7. Be concise. One finalize_proposal OR one abstain per item."""
+7. Be concise. One finalize_proposal OR one abstain per item.
+
+SPONSOR DOMAIN RULES (when domain == 'sponsor'):
+8. Prefer existing anchors (via `sponsor_anchor_lookup`) over novel canonicals. The anchor set captures the high-frequency targets we intend to merge into.
+9. Treat ROR (`sponsor_ror_api`) as authoritative for parent/subsidiary relationships. If ROR returns a `parent` field, use it.
+10. Do NOT propose a merge unless at least ONE of these is true:
+    (a) ROR confirms the input is a child/alias of the anchor,
+    (b) `sponsor_co_occurrence` shows ≥5 shared studies with the anchor,
+    (c) well-known corporate parent/subsidiary relationship (e.g. "Novartis Pharmaceuticals" is a subsidiary of "Novartis") — name the evidence explicitly in rationale.
+11. When proposing a merge, pass `anchor_sponsor_id` (the integer sponsor_id of the matched anchor from `sponsor_anchor_lookup`) to `finalize_proposal`. This signals the reviewer to execute a merge instead of a mapping.
+12. If no anchor matches AND no ROR evidence AND no clear industry-knowledge parent, abstain. Distinct institutions with similar names (e.g. different hospitals in the same city) must not be merged."""
 
 
 @dataclass
@@ -98,6 +108,9 @@ class Proposal:
     score: float
     rationale: str
     tool_trace: list[dict] = field(default_factory=list)
+    # Phase 7D: when set (sponsor domain only), the reviewer's approval will
+    # execute a merge (child → anchor) instead of inserting a dictionary row.
+    anchor_sponsor_id: Optional[int] = None
 
 
 def _ensure_agent_tables(duck_conn):
@@ -112,6 +125,17 @@ def _ensure_agent_tables(duck_conn):
             response_json   JSON    NOT NULL,
             cost_usd        DOUBLE  NOT NULL,
             created_at      TIMESTAMP DEFAULT current_timestamp
+        )
+    """)
+    # Phase 7D: belt-and-suspenders — guarantee the anchor-set table exists
+    # so _select_pending_inputs' LEFT JOIN doesn't fail on fresh installs.
+    duck_conn.execute("""
+        CREATE TABLE IF NOT EXISTS meta.sponsor_anchor_set (
+            sponsor_id      BIGINT  PRIMARY KEY,
+            canonical_name  VARCHAR NOT NULL,
+            study_count     INTEGER NOT NULL,
+            origin          VARCHAR NOT NULL,
+            built_at        TIMESTAMP DEFAULT current_timestamp
         )
     """)
 
@@ -168,13 +192,19 @@ def _select_pending_inputs(duck_conn, domain: str, limit: int) -> pd.DataFrame:
             LIMIT ?
         """, [limit]).fetchdf()
     if domain == "sponsor":
+        # Phase 7D: skip canonicals that are themselves anchors (the agent
+        # should propose children→anchor, not anchor→anchor). A LEFT JOIN on
+        # meta.sponsor_anchor_set with IS NULL tolerates the table's absence
+        # on installs predating Phase 7D.
         return duck_conn.execute("""
             SELECT e.canonical_name AS source_value,
                    COUNT(DISTINCT s.nct_id) AS study_count
             FROM ref.sponsor_dictionary d
             JOIN entities.sponsor e ON d.sponsor_id = e.sponsor_id
             LEFT JOIN raw.sponsors s ON d.source_name = LOWER(s.name)
+            LEFT JOIN meta.sponsor_anchor_set a ON d.sponsor_id = a.sponsor_id
             WHERE d.mapping_method = 'exact-after-normalize'
+              AND a.sponsor_id IS NULL
               AND e.canonical_name NOT IN (
                   SELECT source_value FROM ref.mapping_candidates
                   WHERE domain = 'sponsor' AND source = 'agent'
@@ -255,15 +285,19 @@ def _build_tools_for_agent(ctx: ToolContext, domain: str, proposal_slot: dict,
 
         wrapped_tools.append(_make_wrapper(fn))
 
+    finalize_description = (
+        "Record a canonical mapping proposal for the current source_value. "
+        "Rationale must cite specific tool returns. For sponsor-domain merge "
+        "proposals, pass anchor_sponsor_id (the integer sponsor_id of the "
+        "target anchor from sponsor_anchor_lookup)."
+    )
+
     if use_async:
-        @_tool_dec(
-            name="finalize_proposal",
-            description=("Record a canonical mapping proposal for the current "
-                         "source_value. Rationale must cite specific tool returns."),
-        )
+        @_tool_dec(name="finalize_proposal", description=finalize_description)
         async def finalize_proposal(canonical_term: str, rationale: str,
                                     score: float,
-                                    canonical_id: Optional[str] = None) -> str:
+                                    canonical_id: Optional[str] = None,
+                                    anchor_sponsor_id: Optional[int] = None) -> str:
             if not proposal_slot.get("trace"):
                 return ("ERROR: you must call at least one investigation tool "
                         "before finalizing a proposal.")
@@ -273,6 +307,7 @@ def _build_tools_for_agent(ctx: ToolContext, domain: str, proposal_slot: dict,
                 score=float(score),
                 rationale=rationale,
                 tool_trace=proposal_slot.get("trace", []),
+                anchor_sponsor_id=anchor_sponsor_id,
             )
             return "Proposal recorded. You may stop."
 
@@ -283,14 +318,11 @@ def _build_tools_for_agent(ctx: ToolContext, domain: str, proposal_slot: dict,
             proposal_slot["abstain_reason"] = reason
             return "Abstention recorded. You may stop."
     else:
-        @_tool_dec(
-            name="finalize_proposal",
-            description=("Record a canonical mapping proposal for the current "
-                         "source_value. Rationale must cite specific tool returns."),
-        )
+        @_tool_dec(name="finalize_proposal", description=finalize_description)
         def finalize_proposal(canonical_term: str, rationale: str,
                               score: float,
-                              canonical_id: Optional[str] = None) -> str:
+                              canonical_id: Optional[str] = None,
+                              anchor_sponsor_id: Optional[int] = None) -> str:
             if not proposal_slot.get("trace"):
                 return ("ERROR: you must call at least one investigation tool "
                         "before finalizing a proposal.")
@@ -300,6 +332,7 @@ def _build_tools_for_agent(ctx: ToolContext, domain: str, proposal_slot: dict,
                 score=float(score),
                 rationale=rationale,
                 tool_trace=proposal_slot.get("trace", []),
+                anchor_sponsor_id=anchor_sponsor_id,
             )
             return "Proposal recorded. You may stop."
 
@@ -359,6 +392,7 @@ def _payload_from_slot(proposal_slot: dict) -> dict:
             "score": decision.score,
             "rationale": decision.rationale,
             "tool_trace": trace,
+            "anchor_sponsor_id": decision.anchor_sponsor_id,
         }
     if decision == "abstain":
         return {
@@ -415,6 +449,7 @@ def _write_candidate(duck_conn, domain: str, source_value: str,
         "study_count": int(study_count),
         "rationale": payload.get("rationale"),
         "tool_trace": json.dumps(payload.get("tool_trace", []), default=str),
+        "anchor_sponsor_id": payload.get("anchor_sponsor_id"),
     }])
     hitl.insert_candidates(duck_conn, domain, df, source="agent")
     return True

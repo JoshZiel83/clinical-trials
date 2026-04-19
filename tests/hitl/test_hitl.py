@@ -340,3 +340,174 @@ def test_unknown_domain_raises():
         assert "bogus" in str(e)
     else:
         raise AssertionError("expected ValueError")
+
+
+def test_candidates_table_has_anchor_sponsor_id_column():
+    """Phase 7D: ref.mapping_candidates carries anchor_sponsor_id for merges."""
+    conn = _fresh_conn()
+    hitl.ensure_candidates_table(conn)
+    cols = {
+        r[0]
+        for r in conn.execute(
+            "SELECT column_name FROM information_schema.columns "
+            "WHERE table_schema = 'ref' AND table_name = 'mapping_candidates'"
+        ).fetchall()
+    }
+    assert "anchor_sponsor_id" in cols
+
+
+def test_insert_candidates_roundtrips_anchor_sponsor_id():
+    conn = _fresh_conn()
+    df = _cand_df([
+        {"source_value": "novartis pharmaceuticals",
+         "canonical_term": "Novartis",
+         "score": 95.0, "study_count": 12,
+         "anchor_sponsor_id": 42},
+        {"source_value": "some distinct hospital",
+         "canonical_term": "Some Distinct Hospital",
+         "score": 80.0, "study_count": 3,
+         "anchor_sponsor_id": None},
+    ])
+    n = hitl.insert_candidates(conn, "sponsor", df, source="agent")
+    assert n == 2
+    rows = conn.execute("""
+        SELECT source_value, anchor_sponsor_id FROM ref.mapping_candidates
+        WHERE domain = 'sponsor' ORDER BY source_value
+    """).fetchall()
+    assert rows == [
+        ("novartis pharmaceuticals", 42),
+        ("some distinct hospital", None),
+    ]
+
+
+def test_import_decision_log_carries_anchor_sponsor_id(tmp_path):
+    """Decision log with anchor_sponsor_id flows through to promote_candidates."""
+    conn = _fresh_conn()
+    # Seed a pending candidate with an anchor_sponsor_id set.
+    df = _cand_df([
+        {"source_value": "novartis ag", "canonical_term": "Novartis",
+         "score": 95.0, "study_count": 10, "anchor_sponsor_id": 42},
+    ])
+    hitl.insert_candidates(conn, "sponsor", df, source="agent")
+
+    # Write a decision log approving the row, carrying anchor_sponsor_id.
+    decisions = pd.DataFrame([
+        {"domain": "sponsor", "source_value": "novartis ag",
+         "canonical_term": "Novartis", "source": "agent",
+         "decision": "approved", "canonical_id": None,
+         "anchor_sponsor_id": 42},
+    ])
+    path = tmp_path / "decisions.parquet"
+    decisions.to_parquet(path)
+
+    # With no SPONSOR_AGENT_V2_ENABLED flag set, promote_candidates falls
+    # through to the existing mapping path. We only assert the column
+    # plumbing works end-to-end — the merge branch is tested in
+    # test_promote_candidates_sponsor_executes_merge below.
+    result = hitl.import_decision_log(conn, str(path))
+    assert result["approved"] == 1
+
+
+def test_promote_candidates_sponsor_executes_merge(monkeypatch):
+    """Phase 7D: when flag is on and anchor_sponsor_id is set, approval
+    triggers entities.merge_sponsor instead of a dictionary insert."""
+    from src import entities
+
+    monkeypatch.setattr("config.settings.SPONSOR_AGENT_V2_ENABLED", True)
+
+    conn = _fresh_conn()
+    # Set up: parent + child entities, child has a dictionary entry.
+    parent_id = entities.upsert_sponsor(conn, canonical_name="Novartis", origin="aact")
+    child_id = entities.upsert_sponsor(
+        conn, canonical_name="novartis pharmaceuticals", origin="aact"
+    )
+    conn.execute(
+        "INSERT INTO ref.sponsor_dictionary "
+        "(source_name, sponsor_id, mapping_method, confidence) "
+        "VALUES ('novartis pharmaceuticals', ?, 'exact-after-normalize', 'high')",
+        [child_id],
+    )
+    # Seed the pending candidate that the reviewer approved.
+    df = _cand_df([
+        {"source_value": "novartis pharmaceuticals",
+         "canonical_term": "Novartis",
+         "score": 95.0, "study_count": 8,
+         "anchor_sponsor_id": parent_id},
+    ])
+    hitl.insert_candidates(conn, "sponsor", df, source="agent")
+
+    # Promote the approval.
+    approved = _cand_df([
+        {"source_value": "novartis pharmaceuticals",
+         "canonical_term": "Novartis",
+         "anchor_sponsor_id": parent_id,
+         "rationale": "ROR parent hierarchy confirmed"},
+    ])
+    n = hitl.promote_candidates(conn, "sponsor", approved)
+    assert n == 1
+
+    # Child entity should now have merged_into_id set; dictionary re-pointed.
+    merged_row = conn.execute(
+        "SELECT merged_into_id FROM entities.sponsor WHERE sponsor_id = ?",
+        [child_id],
+    ).fetchone()
+    assert merged_row[0] == parent_id
+
+    dict_row = conn.execute(
+        "SELECT sponsor_id FROM ref.sponsor_dictionary "
+        "WHERE source_name = 'novartis pharmaceuticals'"
+    ).fetchone()
+    assert dict_row[0] == parent_id
+
+    # Candidate status flipped to approved.
+    status = conn.execute(
+        "SELECT status FROM ref.mapping_candidates "
+        "WHERE domain = 'sponsor' AND source_value = 'novartis pharmaceuticals'"
+    ).fetchone()[0]
+    assert status == "approved"
+
+
+def test_promote_candidates_sponsor_mapping_when_no_anchor(monkeypatch):
+    """With flag on but anchor_sponsor_id missing, falls through to mapping."""
+    monkeypatch.setattr("config.settings.SPONSOR_AGENT_V2_ENABLED", True)
+
+    conn = _fresh_conn()
+    approved = _cand_df([
+        {"source_value": "some lab co", "canonical_term": "Some Lab Co",
+         "anchor_sponsor_id": None},
+    ])
+    n = hitl.promote_candidates(conn, "sponsor", approved)
+    assert n == 1
+    row = conn.execute(
+        "SELECT source_name FROM ref.sponsor_dictionary "
+        "WHERE source_name = 'some lab co'"
+    ).fetchone()
+    assert row is not None
+
+
+def test_promote_candidates_sponsor_merge_noop_when_flag_off(monkeypatch):
+    """With flag off, anchor_sponsor_id is ignored; mapping path runs."""
+    monkeypatch.setattr("config.settings.SPONSOR_AGENT_V2_ENABLED", False)
+    from src import entities
+
+    conn = _fresh_conn()
+    parent_id = entities.upsert_sponsor(conn, canonical_name="Novartis", origin="aact")
+
+    approved = _cand_df([
+        {"source_value": "variant co", "canonical_term": "Novartis",
+         "anchor_sponsor_id": parent_id},
+    ])
+    n = hitl.promote_candidates(conn, "sponsor", approved)
+    assert n == 1
+    # With flag off, a dictionary row should exist; no merge should happen.
+    # "Novartis" is resolved via upsert_sponsor → same parent_id.
+    dict_row = conn.execute(
+        "SELECT sponsor_id FROM ref.sponsor_dictionary WHERE source_name = 'variant co'"
+    ).fetchone()
+    assert dict_row is not None and dict_row[0] == parent_id
+    # No merge — parent's merged_into_id stays NULL.
+    parent_row = conn.execute(
+        "SELECT merged_into_id FROM entities.sponsor WHERE sponsor_id = ?",
+        [parent_id],
+    ).fetchone()
+    assert parent_row[0] is None

@@ -392,15 +392,160 @@ Only after 7A–7C (and ideally 7E) land should Phase 5 (refresh automation) shi
 
 ### Phase 7D: Sponsor dedup v2 — anchor-driven agent
 
-**Symptom**: `src/normalize_sponsors.py::generate_sponsor_fuzzy_candidates` produces a queue with high false-positive rate. Spot-check of live data: legitimately distinct institutions collide on `rapidfuzz.WRatio` (e.g. `Hunan Provincial People's Hospital` vs `Hunan Cancer Hospital`), while parent/subsidiary variants that SHOULD merge (e.g. `Novartis` vs `Novartis Pharmaceuticals`) look identical in score space to those false positives. Reviewer burden is high and signal is low.
+**Symptom**: `src/transform/normalize_sponsors.py::generate_sponsor_fuzzy_candidates` produces a queue with high false-positive rate. Spot-check of live data: legitimately distinct institutions collide on `rapidfuzz.WRatio` (e.g. `Hunan Provincial People's Hospital` vs `Hunan Cancer Hospital`), while parent/subsidiary variants that SHOULD merge (e.g. `Novartis` vs `Novartis Pharmaceuticals`) look identical in score space to those false positives. Reviewer burden is high and signal is low.
 
-**Root cause**: String similarity doesn't encode org identity. Pharma parent/subsidiary, university/hospital-system, and acronym-vs-full-name relationships all need semantic reasoning.
+**Root cause**: String similarity doesn't encode org identity. Pharma parent/subsidiary, university/hospital-system, and acronym-vs-full-name relationships all need semantic reasoning — and the existing sponsor flow only produces "variant → canonical" mappings; two `sponsor_id`s never actually merge.
 
-**Proposed direction**: Invert the search. Anchor on a curated set of high-frequency canonicals (top ~200 by `study_count`, optionally human-blessed). For each lower-frequency canonical, use the Phase 6E enrichment agent to ask "is this a variant of any anchor?" The agent can use industry knowledge plus evidence (co-occurring study metadata, MeSH pharma entries, shared city/country, ROR hierarchy if available) to propose or reject a merge with rationale. Deterministic `rapidfuzz` becomes a *coarse gate* that narrows the candidate set the agent sees — not the direct reviewer queue.
+**Approach**: Invert the search. Anchor on a curated set of high-frequency canonicals (top ~200 by `study_count`). For each lower-frequency canonical, the Phase 6E enrichment agent asks "is this a variant of any anchor?" using industry knowledge plus tool evidence (anchor fuzzy lookup, co-occurrence signal, ROR registry hierarchy). `rapidfuzz` becomes a coarse gate feeding the agent's input set, not the reviewer queue. Approved proposals execute a **true merge** of the child `sponsor_id` into the anchor, preserving both rows for audit.
 
-**Depends on**: 7B ✅ (stable sponsor IDs make merge operations auditable — now available as `entities.sponsor.sponsor_id`) + Phase 6E ✅.
+**Depends on**: 7B ✅ (stable `entities.sponsor.sponsor_id`), 7E ✅ (reference versioning for the anchor set), 6E ✅.
 
-**Status**: deferred — tracked, not scheduled.
+#### Design decisions
+
+- **Merge model**: self-FK `merged_into_id` on `entities.sponsor`. Child row preserved with its original `canonical_name` (audit + reversibility); `UNIQUE(canonical_name)` stays load-bearing since parent and child names differ by construction.
+- **Anchor set**: auto top-N by `study_count` (N=200) plus curated override file `data/reference/sponsor_anchors.json` with `include` / `exclude` arrays. Regenerated per refresh; registered in `meta.reference_sources` as `sponsor_anchors@<checksum>`.
+- **Agent tools** (additions to `DOMAIN_TOOLS["sponsor"]` beyond existing `fuzzy_sponsor`): `sponsor_anchor_lookup` (rapidfuzz ≥70 against anchor set, cached on ToolContext), `sponsor_co_occurrence` (canonicals that frequently co-sponsor with the input — strong parent/subsidiary signal), `sponsor_ror_api` (ror.org public API with 30-day cache + backoff). MeSH pharma skipped (ROR covers same ground with better recall). Claude's domain knowledge invited via system-prompt update; no separate tool.
+- **Branch scope**: all variants merge into their parent (`Pfizer Germany` → `Pfizer`). Geographic fidelity lives natively in `raw.countries` at per-study-site level.
+- **`norm.study_sponsors` is not rewritten on merge** — the `sponsor_id` keeps pointing at the raw-observed child for audit. Resolution happens at the view layer.
+
+#### Architecture
+
+**1. `entities.sponsor` schema changes** (`src/entities.py::ensure_schema`):
+
+```sql
+ALTER TABLE entities.sponsor ADD COLUMN IF NOT EXISTS merged_into_id BIGINT;
+ALTER TABLE entities.sponsor ADD COLUMN IF NOT EXISTS merged_at TIMESTAMP;
+ALTER TABLE entities.sponsor ADD COLUMN IF NOT EXISTS merge_rationale JSON;
+```
+
+`upsert_sponsor` gets a defensive one-hop flatten: if a resolved row has `merged_into_id IS NOT NULL`, return the parent's `sponsor_id`. Prevents ETL seeders from reintroducing merged rows.
+
+**2. `merge_sponsor` helper** (`src/entities.py`):
+
+New function `merge_sponsor(duck_conn, child_id, parent_id, rationale) -> parent_id`:
+1. Validate: both rows exist; neither already merged; not merging into self; parent is not itself merged (reject and force reviewer to re-anchor rather than auto-flatten at write time).
+2. `UPDATE entities.sponsor SET merged_into_id, merged_at, merge_rationale WHERE sponsor_id = child_id`.
+3. `UPDATE ref.sponsor_dictionary SET sponsor_id = parent_id WHERE sponsor_id = child_id` — ensures the next `create_study_sponsors` rebuild lands fresh rows on the parent.
+4. Idempotent: repeating a completed merge is a no-op.
+
+**3. Three new agent tools** (`src/agent/enrichment_tools.py`):
+
+- `sponsor_anchor_lookup(ctx, text, limit=10)`: `rapidfuzz.WRatio ≥ 70` of `normalize_sponsor_name(text)` against the active anchor set. Anchor set cached lazily on `ToolContext` via `_anchor_set` property reading `meta.reference_sources` → the active JSON path. Returns `[{canonical_term, sponsor_id, score, study_count}, ...]`.
+- `sponsor_co_occurrence(ctx, text, limit=5)`: SQL over `norm.study_sponsors` joined to itself on `nct_id`, surfacing canonicals that co-sponsor ≥1 study with `text`. Returns `[{canonical_name, sponsor_id, shared_studies}, ...]`.
+- `sponsor_ror_api(ctx, text, limit=5)`: new module `src/agent/ror_tool.py`. `GET https://api.ror.org/organizations?query=<text>` with exponential backoff on 429/5xx (max 3 attempts, User-Agent `clinical-trials-etl/0.1`). Cache in new `meta.ror_cache(query_sha PK, response_json, fetched_at)` (distinct from `meta.agent_cache`, which is per-agent-item, not per-query). 30-day TTL, lazy refresh. Returns `[{canonical_name, ror_id, country, aliases, parent, score}, ...]`. Error shape `{"error": "...", "results": []}` — a proposal citing only an error-trace fails `finalize_proposal` grounding, unchanged.
+
+System prompt bumped (`AGENT_SYSTEM_PROMPT_VERSION`) with a sponsor-specific paragraph: prefer anchor matches over novel canonicals; treat ROR as ground truth for parent/subsidiary calls; require either a ROR hit or ≥5 co-occurring studies before proposing a merge.
+
+**4. `Proposal` and `ref.mapping_candidates` schema**:
+
+Add nullable `anchor_sponsor_id BIGINT` column to `ref.mapping_candidates`, `Proposal` dataclass, and decision-log parquets. Merge-vs-mapping distinction is **implicit in `anchor_sponsor_id IS NOT NULL`** — no new enum, no downstream branching beyond the promote path.
+
+**5. Anchor set generation** — new module `src/transform/sponsor_anchors.py`:
+
+- `build_anchor_set(duck_conn, top_n=200)`: top-N by distinct study impact from `ref.sponsor_dictionary` + `norm.study_sponsors`, filtered against the curated `include`/`exclude` arrays in `data/reference/sponsor_anchors.json`. Curated includes must already resolve to an `entities.sponsor` row (log + skip otherwise). Writes `meta.sponsor_anchor_set(sponsor_id PK, canonical_name, study_count, origin ∈ {auto, curated_include})`.
+- `register_anchor_set`: bumps `meta.reference_sources` with version = checksum of the JSON + `top_n`.
+- Invoked from `run_normalize_sponsors.py` after `build_sponsor_dictionary`, before the agent runs.
+
+**6. Views merge resolution** (`src/entities.py` + `src/transform/views.py`):
+
+New recursive view `entities.sponsor_resolved(sponsor_id, effective_sponsor_id)` flattens chains:
+
+```sql
+CREATE OR REPLACE VIEW entities.sponsor_resolved AS
+WITH RECURSIVE chain(sponsor_id, hop, head_id) AS (
+    SELECT sponsor_id, 0, sponsor_id FROM entities.sponsor
+  UNION ALL
+    SELECT c.sponsor_id, c.hop + 1, s.merged_into_id
+    FROM chain c JOIN entities.sponsor s ON c.head_id = s.sponsor_id
+    WHERE s.merged_into_id IS NOT NULL AND c.hop < 10
+)
+SELECT sponsor_id,
+       last_value(head_id) OVER (PARTITION BY sponsor_id ORDER BY hop
+                                 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)
+         AS effective_sponsor_id
+FROM chain;
+```
+
+`views.study_summary` swaps `LEFT JOIN entities.sponsor` for a two-hop join through `sponsor_resolved`. Both joins are indexed PK lookups. `hop < 10` guards against cycles (belt and suspenders; `merge_sponsor` validation already prevents them).
+
+**7. Promote path** (`src/hitl/candidates.py`):
+
+In `promote_candidates` for `domain='sponsor'`, branch on `anchor_sponsor_id`:
+- Present → call `merge_sponsor(child=resolve_by_name(source_value), parent=anchor_sponsor_id, rationale=row.rationale)`. Skip dictionary insert (merge_sponsor already rewrote).
+- Absent → existing mapping path, unchanged.
+
+**8. Shiny UI** (`apps/review/app.R`, sponsor tab):
+
+Minimum viable:
+- Surface `anchor_sponsor_id` column in the candidates DataFrame.
+- When present on a row, add a visible cue (bold canonical_term or a "merge" badge).
+- Reactive approve-button label: all rows have `anchor_sponsor_id` → "Merge into anchor"; none → "Approve mapping"; mixed → disable with tooltip. No new tab.
+- Decision-log writer adds `anchor_sponsor_id` to the parquet column set.
+
+**9. Legacy candidate disposition**:
+
+`generate_sponsor_fuzzy_candidates` demoted: removed from `run_sponsor_pipeline`; function kept with deprecation docstring for one release, then deleted. One-shot migration (gated by `meta.migration_log` row): `UPDATE ref.mapping_candidates SET status='hidden' WHERE domain='sponsor' AND source='fuzzy' AND status='pending'`. Previously approved/rejected fuzzy rows untouched. The agent will re-propose any merges still valid under anchor-driven scoring.
+
+**10. Agent input selection tweak** (`src/agent/enrichment_agent.py::_select_pending_inputs`):
+
+Sponsor query adds `AND sponsor_id NOT IN (SELECT sponsor_id FROM meta.sponsor_anchor_set)` — anchors never get proposed as merge targets of other anchors. If two anchors legitimately should merge, it's a curation-file decision, not an agent decision.
+
+#### Rollout
+
+1. Schema additions + `sponsor_resolved` view + `views.study_summary` join swap (behavior unchanged, all `merged_into_id` NULL). Unit-test coverage.
+2. Anchor set module + `meta.reference_sources` registration. Eyeball output JSON.
+3. Three new agent tools behind feature flag `SPONSOR_AGENT_V2_ENABLED` in `config/settings.py`. When false, sponsor domain uses only `fuzzy_sponsor` (existing behavior). Smoke run: 20 canonicals, $2 budget.
+4. `anchor_sponsor_id` wiring through `Proposal`, `ref.mapping_candidates`, decision log.
+5. Shiny UI update (after 4, so the column exists when read).
+6. `merge_sponsor` + `promote_candidates` branching. `promote_candidates` refuses merge paths if feature flag off.
+7. One-shot hide of legacy fuzzy candidates + remove `generate_sponsor_fuzzy_candidates` from the pipeline.
+8. Full production run: anchor regen → agent at $10 budget → reviewer session → promote.
+
+Per-step validation: `views.study_summary` row count unchanged; `lead_sponsor_name` null-rate non-increasing; `entities.sponsor` row count non-decreasing (we never delete).
+
+#### Risks + mitigations
+
+- **False-positive parent/subsidiary merge** (e.g. Pfizer vs. Pfizer CentreOne, a CDMO that is arguably distinct). Mitigation: system-prompt grounding requires either a ROR tool hit or ≥5 co-occurring studies before a merge proposal is admissible.
+- **ROR API reliability** — free endpoint, no SLA. Mitigation: 30-day cache, graceful empty-return on failure, never blocks other tools.
+- **Cost per item** — sponsor tier adds ROR round-trip (~1 extra tool call). Estimate ~$0.04/item on Haiku, ~$0.20/item on Sonnet. Default Haiku; escalate on high abstain rate.
+- **Merge-chain runaway** — `hop < 10` guard in resolved view + `merge_sponsor` rejects chain-into-merged-parent at write time.
+- **UNIQUE(canonical_name) on rollback** — non-issue; reversal zeroes out `merged_into_id`, name unchanged.
+
+#### Out of scope
+
+- Automatic un-merge UI (DB supports reversal; operator runs SQL if needed).
+- ROR-based seeding of `entities.sponsor` on fresh installs (future Phase 7F candidate).
+- Country-level sponsor-site aggregation tables (geographic fidelity already in `raw.countries`).
+- Ringgold ID population (column exists, remains unused).
+- Collaborator hierarchy beyond lead sponsor — `collaborator_names` in `views.study_summary` inherits the resolved name automatically via the same join swap.
+
+#### Modules + entry points
+
+**New**:
+- `src/agent/ror_tool.py` — ROR API client + `meta.ror_cache`.
+- `src/transform/sponsor_anchors.py` — `build_anchor_set`, `register_anchor_set`.
+- `data/reference/sponsor_anchors.json` — curated `include` / `exclude` override file.
+- `tests/test_sponsor_merge.py` — `merge_sponsor` happy paths + rejects + chain resolution.
+- Integration fixture extension in `tests/agent/test_enrichment_agent.py` — 3 anchors + 8 candidate canonicals covering merge, abstain, and true-negative cases.
+
+**Modified**:
+- `src/entities.py` — `merged_into_id` DDL, `merge_sponsor`, `sponsor_resolved` view, `upsert_sponsor` flatten guard.
+- `src/hitl/candidates.py` — `ref.mapping_candidates.anchor_sponsor_id` column; sponsor-domain promote branching.
+- `src/agent/enrichment_tools.py` — `sponsor_anchor_lookup`, `sponsor_co_occurrence`, register in `DOMAIN_TOOLS["sponsor"]`; `ToolContext._anchor_set` property.
+- `src/agent/enrichment_agent.py` — `Proposal.anchor_sponsor_id`, `_select_pending_inputs` anchor-exclusion, system-prompt sponsor paragraph, `AGENT_SYSTEM_PROMPT_VERSION` bump.
+- `src/transform/normalize_sponsors.py` — remove `generate_sponsor_fuzzy_candidates` from `run_sponsor_pipeline`; deprecation docstring.
+- `src/transform/views.py` — join swap to `entities.sponsor_resolved`.
+- `apps/review/app.R` — anchor column + reactive approve-button label + decision-log column.
+- `config/settings.py` — `SPONSOR_AGENT_V2_ENABLED` feature flag.
+- `run_normalize_sponsors.py` — invoke anchor-set build.
+
+#### Verification
+
+1. `pytest tests/` — new `test_sponsor_merge.py` covers schema, `merge_sponsor` invariants, `sponsor_resolved` chain depth 0/1/2 + cycle guard. Integration fixture exercises the full candidate → merge → view-resolution path.
+2. Feature-flagged smoke: `python run_enrichment_agent.py --domain sponsor --budget 2.00 --limit 20` with `SPONSOR_AGENT_V2_ENABLED=true` — eyeball the proposals' rationales + tool traces in Shiny.
+3. Anchor set eyeball: open `meta.sponsor_anchor_set` after first build; confirm top pharma + academic centers present, no surprising auto-picks, curated includes resolved.
+4. Promote a small batch (e.g., 5 high-confidence pharma subsidiaries) → `run_hitl_sync.py` → confirm `entities.sponsor.merged_into_id` set, `ref.sponsor_dictionary` re-pointed, `views.study_summary.lead_sponsor_name` collapses the child into the parent.
+5. Run `views.study_summary` row-count parity check post-merge (should equal `enriched.studies` row count). `collaborator_names` inherits the resolved name — spot check.
 
 ### Phase 7E: Reference source versioning ✅
 
@@ -412,32 +557,149 @@ Shipped alongside 7B above. See combined "Phase 7B + 7E" section for details.
 
 ## Phase 5: Refresh Automation
 
-**Goal**: Single-command weekly refresh.
+**Goals**:
+1. **Longitudinal change tracking.** The current extract filter (5 "active-ish" statuses) makes ~480K terminal-state trials invisible, so transitions (RECRUITING → COMPLETED, TERMINATED, WITHDRAWN) cannot be detected. Remove the filter, take full AACT snapshots, and emit per-trial change events so the dataset answers "what's new, what changed, what finished" run-over-run.
+2. **Progressive enrichment.** Every refresh cascades all HITL-approved mappings globally (via the existing `run_hitl_sync.py`) and runs the Phase 6E enrichment agent against each domain — bounded by the agent's existing `max_pending` + USD-budget throttles, so work naturally scales to reviewer throughput.
 
-- `run_pipeline.py` orchestrates all phases in order
-- Python `logging` for visibility
-- Retry logic for external API calls (ChEMBL)
-- Metadata table: `pipeline_runs(run_id, start_time, end_time, status, studies_extracted)`
+**Depends on**: 7A ✅, 7B ✅, 7C ✅ (mart decoupled from `raw.*`), 7E ✅. Requires the `enriched.*` projection layer so a re-extract doesn't transiently expose partial data to mart consumers.
 
-### Data evolution considerations
+### Design decisions
 
-The pipeline must handle two kinds of change over time:
+- **Status filter removed.** Extract all AACT studies (~600K, ~17M total rows across all extracted tables — roughly 5× current). Retains full-rebuild semantics downstream; `enriched.*` and `views.study_summary` CTAS remain seconds even at 5× scale. `config/settings.py::ACTIVE_STATUSES` is demoted to a documentation constant; downstream code must not use it for extraction.
+- **Event-log history model.** New `meta.trial_change_events` table; current snapshot continues to live in `enriched.studies`. The raw Parquet snapshots at `data/raw/YYYY-MM-DD/` (already retained per run) are the diff source — no new storage pattern.
+- **Tracked change surface**: `overall_status` transitions, key dates (`primary_completion_date`, `completion_date`, `results_first_submitted_date`), enrollment (`enrollment` + `enrollment_type`), and study content (conditions, interventions, sponsors, phase).
+- **Full rebuild, not incremental.** At 5× scale the full rebuild pattern still takes seconds-to-minutes end-to-end. Incremental normalization is deferred until profiling justifies it.
 
-**A. AACT data changes between extractions:**
-- New studies appear (recruiting starts), existing studies change status or update conditions/interventions
-- NLM may update `browse_conditions` MeSH mappings as their algorithms improve
-- The current full-rebuild approach (replace `raw.*`, re-derive `norm.*`) handles this correctly at today's scale (~120K studies, <60s total)
-- At larger scale or higher frequency, consider: extraction diffing (what changed since last run), incremental normalization (only process new/changed studies), and archiving prior snapshots for longitudinal analysis
+### Architecture
 
-**B. Accumulated mappings improve with more data:**
-- The condition dictionary's automated layers (exact, 1:1, co-occurrence, cancer-synonym) are re-derived each run — more studies = more co-occurrence evidence = better mappings
-- Manual/HITL curations persist across runs and are never overwritten by automated methods
-- Risk: a manual mapping could become stale if MeSH vocabulary is updated (unlikely but possible). Phase 5 should include a validation step that checks manual dictionary entries still reference valid MeSH terms in `browse_conditions`.
+**1. Orchestrator — `run_pipeline.py` + `src/pipeline/orchestrator.py`.** Direct Python imports (every existing entry point already exposes a callable). Orchestrator opens **one** `duck_conn` and threads it through every phase — DuckDB's single-writer lock makes multi-connection orchestration a foot-gun. Requires one small refactor: `src/extract/aact.py::run_extraction()` (currently opens/closes its own connection at `aact.py:140,179`) accepts an optional external `duck_conn`, matching the existing pattern in `src/transform/promote.py::promote_to_enriched(duck_conn)`. Failure handling writes `meta.pipeline_runs` with `status='failed'` + `failed_phase` and re-raises; every phase is idempotent drop-and-recreate, so mid-run failures leave a consistent state.
 
-**When to address:**
-- Current architecture (full rebuild + persistent manual entries) is sound through Phase 3A and likely through Phase 4
-- Phase 5 is the right time to formalize: extraction diffing, incremental processing, stale mapping detection, and run-over-run quality metrics
-- Until then, the key invariant to maintain: **automated dictionary layers are always re-derivable from raw data; manual entries are the only state that persists and must be protected**
+**CLI**: `python run_pipeline.py [--skip-extract] [--skip-agent] [--budget-per-domain 2.00] [--dry-run] [--cohort-expansion]`. `--dry-run` reuses the latest existing Parquet snapshot instead of hitting AACT. `--cohort-expansion` is an explicit flag for the one post-filter-removal run that suppresses the `first_seen` flood (see Edge cases).
+
+**2. Change-event detection — `src/transform/change_events.py`** (entry point `run_change_events.py`).
+
+`meta.trial_change_events` schema:
+```
+event_id                BIGINT PRIMARY KEY         -- from meta.change_events_seq
+run_id                  VARCHAR NOT NULL           -- links to meta.pipeline_runs
+nct_id                  VARCHAR NOT NULL
+extraction_date         DATE NOT NULL              -- current (newer) snapshot
+prior_extraction_date   DATE                       -- NULL for first_seen
+change_type             VARCHAR NOT NULL           -- enum below
+field                   VARCHAR                    -- NULL for first_seen / dropped
+from_value              VARCHAR                    -- JSON array for multi-valued
+to_value                VARCHAR
+detected_at             TIMESTAMP DEFAULT current_timestamp
+
+UNIQUE (run_id, nct_id, field, change_type)        -- retry-safe
+INDEX (nct_id, extraction_date)
+INDEX (change_type, extraction_date)
+```
+
+`change_type` enum: `first_seen`, `dropped`, `status_transition`, `date_changed`, `enrollment_changed`, `phase_changed`, `conditions_changed`, `interventions_changed`, `sponsors_changed`.
+
+Algorithm (`detect_and_record_changes(conn, run_id, current_extract_date)`):
+1. Resolve prior snapshot from `meta.extraction_log` (`MAX(extract_date) < current` for `table_name='studies'`). If none, emit nothing — this is the first run.
+2. Mount both snapshots via `read_parquet('data/raw/<date>/<table>.parquet')`. No dependency on prior `raw.*` tables still being live.
+3. **Cheap gate**: skip field-level diff for studies where `last_update_submitted_date` is unchanged. Appearance/disappearance diffs run unconditionally. Expected >80% skip rate on weekly cadence.
+4. Appearance: `current LEFT JOIN prior … WHERE prior IS NULL` → `first_seen`. Reverse → `dropped` (should be rare post-filter-removal; log loudly when observed).
+5. Scalar fields on `studies`: one `INSERT … SELECT` per field using `IS DISTINCT FROM`.
+6. Multi-valued content (conditions, interventions, sponsors): set-equality via `list_sort(array_agg(value))` grouped by nct_id; diff between snapshots; emit one event per changed study with from/to as JSON arrays (DuckDB `to_json`). No per-element diffs — noisy and analytically weaker than a "set changed" signal.
+7. Single transaction; return counts for `meta.pipeline_runs`.
+
+**3. Run audit — `meta.pipeline_runs`**:
+```
+run_id                  VARCHAR PRIMARY KEY   -- uuid4()
+started_at              TIMESTAMP NOT NULL
+completed_at            TIMESTAMP
+status                  VARCHAR NOT NULL      -- running | completed | failed
+failed_phase            VARCHAR
+extraction_id           VARCHAR               -- links to meta.extraction_log
+extract_date            DATE
+studies_extracted       INTEGER
+total_rows_extracted    BIGINT
+change_events_emitted   INTEGER
+decision_logs_applied   INTEGER
+hitl_approved           INTEGER
+hitl_rejected           INTEGER
+hitl_promoted           INTEGER
+agent_items_finalized   INTEGER
+agent_items_abstained   INTEGER
+agent_cache_hits        INTEGER
+agent_spent_usd         DOUBLE
+phase_durations         JSON                  -- {phase_name: seconds}
+notes                   VARCHAR               -- cohort-expansion flag, ref-version warnings
+```
+Row inserted at phase 1 with `status='running'`; updated in success and exception paths.
+
+**4. Canonical sequence**:
+```
+Open duck_conn; INSERT pipeline_runs(status='running')
+ 1. extract_aact              (src/extract/aact.run_extraction)
+ 2. hitl_sync                  (run_hitl_sync.apply_logs)
+ 3. normalize_conditions       ─┐
+ 4. normalize_drugs             │  sequential (single-writer)
+ 5. normalize_sponsors          ─┘
+ 6. classify_design             (norm.* → class.*)
+ 7. promote_enriched            (raw → enriched)
+ 8. build_views                 (views.study_summary)
+ 9. change_events               (diff current vs. prior parquet)
+10. agent_condition             ┐
+11. agent_drug                  │ queue + budget-bounded
+12. agent_sponsor               ┘
+UPDATE pipeline_runs SET status='completed', completed_at=...
+```
+- **hitl_sync before normalize**: sync already rebuilds domain `norm.*` internally; sequencing normalize after skips redundant rebuilds.
+- **change_events after promote/views, before agent**: diffs raw fields (user's scope), doesn't depend on agent output, keeps detection simple and interpretable.
+- **Agent after sync**: sync drains prior-cycle approvals into the dictionary; agent then refills the queue against the post-sync dictionary state.
+
+**5. Enrichment agent per refresh.** Default per-domain budgets (tunable via `--budget-per-domain`): `condition` $2.00 / limit 300; `drug` $3.00 / limit 300; `sponsor` $1.00 / limit 200 (kept minimal until Phase 7D ships). Reuses existing queue-aware guardrails in `src/agent/enrichment_agent.py` — refuses when `pending >= max_pending` (default 500), caps new candidates to remaining slots, stops at budget. No new throttling logic.
+
+### Edge cases
+
+- **First post-filter-removal run**: ~480K terminal-state trials become newly visible; without mitigation, the event log floods with `first_seen`. Mitigation: explicit `--cohort-expansion` flag; `change_events` skips emission that run and writes `notes='cohort_expansion_run'` to `meta.pipeline_runs`. Subsequent runs resume normal diffing.
+- **AACT metadata revisions** (NLM reclassifies MeSH ancestors, tweaks sponsor spelling): unavoidable false positives. `last_update_submitted_date` gate filters most; change-type granularity lets downstream consumers decide which to trust.
+- **Reference version bumps** (ChEMBL 36 → 37, etc.): orchestrator compares current vs. prior-run `meta.reference_sources` active versions; writes a warning to `meta.pipeline_runs.notes` if any advanced. No automatic retrigger — reviewer signal only.
+- **Parquet retention**: not deleted today. At 5× weekly cadence, ~15 GB/year — not immediate. Flagged as Phase 5.1 follow-up.
+- **Extract memory at 5×**: `eligibilities` and `detailed_descriptions` (~10 KB/row) are the fat tables; `pd.read_sql` loads them fully into pandas. Watch the first real run; switch those two to chunked reads if memory spikes. Known risk, not blocker.
+
+### Not in scope
+
+- Parallel normalize phases (single-writer contention outweighs speedup; revisit only on profiling).
+- Scheduler / cron / daemon (user wires their own cron around `run_pipeline.py`).
+- Slack/email notifications (notebook + logs suffice).
+- Derived-field change events (TA transitions, canonical-drug transitions) — raw-level is sufficient for longitudinal tracking today.
+- Backfill of historical parquets into the event log — begins at Phase 5 cutover.
+- Sponsor agent v2 (blocked on Phase 7D).
+- Parquet snapshot retention / GC.
+
+### Modules + entry points
+
+**New**:
+- `run_pipeline.py` — orchestrator CLI.
+- `src/pipeline/orchestrator.py` — phase sequencing + `meta.pipeline_runs` lifecycle + per-domain agent config.
+- `src/transform/change_events.py` — diff logic + event emission against prior Parquet snapshot.
+- `run_change_events.py` — thin wrapper for standalone use.
+- `notebooks/07_refresh_validation.ipynb` — verification dashboards.
+- `tests/transform/test_change_events.py`, `tests/pipeline/test_orchestrator.py`.
+- `tests/fixtures/snapshots/{day1,day2}/*.parquet`, `tests/fixtures/two_snapshot_db.py`.
+
+**Modified**:
+- `config/tables.py` — delete `STATUS_VALUES` / `STATUS_WHERE_CLAUSE`.
+- `src/extract/aact.py` — drop status filter; accept optional external `duck_conn`.
+- `src/extract/connection_test.py` — drop `STATUS_WHERE_CLAUSE` import.
+- `config/settings.py` — demote `ACTIVE_STATUSES` to documentation constant.
+- `tests/test_settings.py`, `tests/extract/test_tables.py` — update assertions.
+
+**Reused (no changes)**: `run_hitl_sync.py`, `src/hitl/candidates.py`, `src/agent/enrichment_agent.py`, `src/transform/promote.py`, `src/transform/views.py`, `src/transform/normalize_*.py`.
+
+### Verification
+
+1. `pytest tests/` — two-snapshot fixture exercises every `change_type` end-to-end; orchestrator mock test asserts call order and `meta.pipeline_runs` row shape.
+2. `python run_pipeline.py --dry-run` — confirms orchestrator wiring + `meta.pipeline_runs` lifecycle against latest existing Parquet without hitting AACT.
+3. `python run_pipeline.py --cohort-expansion` — first real filter-removed extract. Expected: `raw.studies` ≈ 600K, `meta.trial_change_events` empty, `meta.pipeline_runs.notes='cohort_expansion_run'`. Spot-check memory/timing on `eligibilities` and `detailed_descriptions`.
+4. `python run_pipeline.py` — second refresh, normal diffing. Expected: thousands of events (status transitions dominant), `views.study_summary` row count ≈ 600K, agent spend ≤ sum of per-domain budgets.
+5. `notebooks/07_refresh_validation.ipynb` — run-over-run deltas, change-event distribution, HITL queue depth vs. agent fill rate, agent cost + cache-hit ratio, reference-version warnings, stale manual-mapping audit.
 
 ---
 
@@ -466,7 +728,7 @@ Phase 1 (Raw Extract) ✅
         ├── 7A (Rejection persistence)     ✅ [independent]
         ├── 7B (Canonical entity tables)   ✅ [shipped with 7E; feeds 7C and 7D]
         │     └── 7C (enriched.* layer)    ✅ [feeds Phase 5]
-        │     └── 7D (Sponsor agent v2)    [also depends on Phase 6E — deferred]
+        │     └── 7D (Sponsor agent v2)    [planned; also depends on Phase 6E ✅]
         └── 7E (Reference source versioning)  ✅ [shipped with 7B]
         │
       Phase 5 (Automation)       [after 7C to avoid raw-coupling / repro hazards]

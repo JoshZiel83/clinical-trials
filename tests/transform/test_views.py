@@ -356,3 +356,55 @@ def test_idempotent_rebuild():
     count = conn.execute("SELECT COUNT(*) FROM views.study_summary").fetchone()[0]
     assert count == 5
     conn.close()
+
+
+def test_sponsor_resolution_passthrough_without_merges():
+    """Phase 7D: views route sponsor joins through entities.sponsor_resolved.
+    With no merges, output must equal the un-resolved canonical names."""
+    conn = _setup_views_test_db()
+    build_study_summary(conn)
+    row = conn.execute("""
+        SELECT lead_sponsor_name, collaborator_names
+        FROM views.study_summary WHERE nct_id = 'NCT001'
+    """).fetchone()
+    assert row[0] == 'Pharma Inc'
+    assert row[1] == ['University X']
+    conn.close()
+
+
+def test_sponsor_resolution_collapses_merged_children():
+    """After merge_sponsor(child → parent), views surface the parent's
+    canonical name for studies originally filed under the child."""
+    from src import entities
+
+    conn = _setup_views_test_db()
+    # Resolve ids for 'Pharma Inc' (lead on NCT001) and 'Big Pharma' (lead
+    # on NCT005) — we'll merge the NCT001 lead into the NCT005 lead.
+    child_id = conn.execute(
+        "SELECT sponsor_id FROM entities.sponsor WHERE canonical_name = 'Pharma Inc'"
+    ).fetchone()[0]
+    parent_id = conn.execute(
+        "SELECT sponsor_id FROM entities.sponsor WHERE canonical_name = 'Big Pharma'"
+    ).fetchone()[0]
+    entities.merge_sponsor(conn, child_id=child_id, parent_id=parent_id,
+                           rationale="test merge")
+
+    build_study_summary(conn)
+
+    # NCT001's lead sponsor was Pharma Inc; after merge, it should now
+    # surface as Big Pharma.
+    row = conn.execute("""
+        SELECT lead_sponsor_name FROM views.study_summary WHERE nct_id = 'NCT001'
+    """).fetchone()
+    assert row[0] == 'Big Pharma'
+
+    # NCT005's lead (Big Pharma itself) is unchanged.
+    row5 = conn.execute("""
+        SELECT lead_sponsor_name FROM views.study_summary WHERE nct_id = 'NCT005'
+    """).fetchone()
+    assert row5[0] == 'Big Pharma'
+
+    # Row count invariant: still one row per study.
+    count = conn.execute("SELECT COUNT(*) FROM views.study_summary").fetchone()[0]
+    assert count == 5
+    conn.close()

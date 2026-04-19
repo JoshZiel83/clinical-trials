@@ -80,20 +80,26 @@ def ensure_candidates_table(duck_conn):
     duck_conn.execute("CREATE SCHEMA IF NOT EXISTS ref")
     duck_conn.execute("""
         CREATE TABLE IF NOT EXISTS ref.mapping_candidates (
-            domain          VARCHAR   NOT NULL,
-            source_value    VARCHAR   NOT NULL,
-            canonical_term  VARCHAR   NOT NULL,
-            canonical_id    VARCHAR,
-            score           FLOAT     NOT NULL,
-            study_count     INTEGER   NOT NULL,
-            source          VARCHAR   NOT NULL,
-            rationale       VARCHAR,
-            tool_trace      JSON,
-            status          VARCHAR   NOT NULL DEFAULT 'pending',
-            created_at      TIMESTAMP DEFAULT current_timestamp,
+            domain             VARCHAR   NOT NULL,
+            source_value       VARCHAR   NOT NULL,
+            canonical_term     VARCHAR   NOT NULL,
+            canonical_id       VARCHAR,
+            score              FLOAT     NOT NULL,
+            study_count        INTEGER   NOT NULL,
+            source             VARCHAR   NOT NULL,
+            rationale          VARCHAR,
+            tool_trace         JSON,
+            anchor_sponsor_id  BIGINT,
+            status             VARCHAR   NOT NULL DEFAULT 'pending',
+            created_at         TIMESTAMP DEFAULT current_timestamp,
             PRIMARY KEY (domain, source_value, canonical_term, source)
         )
     """)
+    # Phase 7D idempotent add for existing installs predating anchor_sponsor_id.
+    duck_conn.execute(
+        "ALTER TABLE ref.mapping_candidates "
+        "ADD COLUMN IF NOT EXISTS anchor_sponsor_id BIGINT"
+    )
 
 
 def insert_candidates(duck_conn, domain, df, source):
@@ -129,7 +135,7 @@ def insert_candidates(duck_conn, domain, df, source):
     insert_df["domain"] = domain
     insert_df["source"] = source
     insert_df["status"] = insert_df.get("status", "pending")
-    for col in ("canonical_id", "rationale", "tool_trace"):
+    for col in ("canonical_id", "rationale", "tool_trace", "anchor_sponsor_id"):
         if col not in insert_df.columns:
             insert_df[col] = None
 
@@ -173,7 +179,8 @@ def insert_candidates(duck_conn, domain, df, source):
 
     cols = [
         "domain", "source_value", "canonical_term", "canonical_id",
-        "score", "study_count", "source", "rationale", "tool_trace", "status",
+        "score", "study_count", "source", "rationale", "tool_trace",
+        "anchor_sponsor_id", "status",
     ]
     insert_df = insert_df[cols]
 
@@ -199,9 +206,16 @@ def promote_candidates(duck_conn, domain, approved_df):
          mapping_method='manual', confidence='high').
     Rows whose source_value is already in the dictionary are skipped.
     approved_df columns: source_value, canonical_term. Optional: canonical_id.
-    Returns the number of dictionary entries added.
+
+    Phase 7D sponsor merge branch: when domain='sponsor', the feature flag is
+    on, and a row carries an `anchor_sponsor_id`, the approval executes a
+    merge (child → anchor) via entities.merge_sponsor instead of inserting
+    a dictionary row. The child dictionary entry is re-pointed at the parent
+    by merge_sponsor itself.
+
+    Returns the total count of rows acted on (dict inserts + merges).
     """
-    from src import entities  # noqa: F401  (ensures module importable)
+    from src import entities
 
     cfg = _target(domain)
     if approved_df is None or approved_df.empty:
@@ -211,15 +225,74 @@ def promote_candidates(duck_conn, domain, approved_df):
     entity_fk_col = cfg["entity_fk_col"]
     dict_table = cfg["dict_table"]
 
+    # Ensure the candidates table exists so status updates don't fail on
+    # fresh installs / unit-test fixtures that promote without inserting first.
+    ensure_candidates_table(duck_conn)
+
+    # ------- Phase 7D sponsor merge branch -------
+    merge_count = 0
+    map_df = approved_df
+    if (
+        domain == "sponsor"
+        and "anchor_sponsor_id" in approved_df.columns
+    ):
+        from config.settings import SPONSOR_AGENT_V2_ENABLED
+        if SPONSOR_AGENT_V2_ENABLED:
+            has_anchor = approved_df["anchor_sponsor_id"].notna()
+            merge_rows = approved_df[has_anchor].copy()
+            map_df = approved_df[~has_anchor].copy()
+            merged_source_values: list[str] = []
+            for _, row in merge_rows.iterrows():
+                source_value = row["source_value"]
+                parent_id = int(row["anchor_sponsor_id"])
+                rationale = row["rationale"] if "rationale" in row else None
+                child_id = _resolve_sponsor_child_id(duck_conn, source_value)
+                if child_id is None:
+                    logger.warning(
+                        f"[sponsor] promote_candidates: cannot resolve child "
+                        f"sponsor for source_value {source_value!r}; skipping "
+                        f"merge into anchor {parent_id}"
+                    )
+                    continue
+                try:
+                    entities.merge_sponsor(
+                        duck_conn, child_id=child_id, parent_id=parent_id,
+                        rationale=rationale,
+                    )
+                    merged_source_values.append(source_value)
+                    merge_count += 1
+                except ValueError as exc:
+                    logger.warning(
+                        f"[sponsor] merge rejected for {source_value!r} "
+                        f"→ {parent_id}: {exc}"
+                    )
+            if merged_source_values:
+                duck_conn.execute(
+                    """
+                    UPDATE ref.mapping_candidates
+                    SET status = 'approved'
+                    WHERE domain = 'sponsor'
+                      AND source_value IN (SELECT unnest(?))
+                    """,
+                    [merged_source_values],
+                )
+
+    # ------- Existing mapping path (all domains) -------
+    if map_df is None or map_df.empty:
+        if merge_count:
+            logger.info(f"[{domain}] merged {merge_count} sponsor rows")
+        return merge_count
+
     existing = duck_conn.execute(f"SELECT {key_col} FROM {dict_table}").fetchdf()
     existing_keys = set(existing[key_col]) if not existing.empty else set()
 
-    to_promote = approved_df[~approved_df["source_value"].isin(existing_keys)].copy()
+    to_promote = map_df[~map_df["source_value"].isin(existing_keys)].copy()
     if to_promote.empty:
-        logger.info(
-            f"[{domain}] no new candidates to promote (all already in {dict_table})"
-        )
-        return 0
+        if merge_count == 0:
+            logger.info(
+                f"[{domain}] no new candidates to promote (all already in {dict_table})"
+            )
+        return merge_count
 
     # Resolve each row to an entity id.
     has_canonical_id = "canonical_id" in to_promote.columns
@@ -251,8 +324,35 @@ def promote_candidates(duck_conn, domain, approved_df):
 
     logger.info(
         f"[{domain}] promoted {len(inserts):,} candidates to {dict_table}"
+        + (f"; merged {merge_count} sponsor rows" if merge_count else "")
     )
-    return len(inserts)
+    return len(inserts) + merge_count
+
+
+def _resolve_sponsor_child_id(duck_conn, source_value):
+    """Phase 7D: find the entities.sponsor row to use as the merge child.
+
+    Lookup order:
+      1. ref.sponsor_dictionary.source_name == lower(source_value) → sponsor_id
+      2. entities.sponsor.canonical_name == source_value            → sponsor_id
+
+    Returns None if neither resolves.
+    """
+    row = duck_conn.execute(
+        "SELECT sponsor_id FROM ref.sponsor_dictionary "
+        "WHERE source_name = LOWER(?)",
+        [source_value],
+    ).fetchone()
+    if row:
+        return int(row[0])
+    row = duck_conn.execute(
+        "SELECT sponsor_id FROM entities.sponsor "
+        "WHERE canonical_name = ?",
+        [source_value],
+    ).fetchone()
+    if row:
+        return int(row[0])
+    return None
 
 
 def export_candidates_csv(duck_conn, domain, output_path=None):
@@ -351,11 +451,14 @@ def import_decision_log(duck_conn, parquet_path):
     # Promote approvals per domain
     approved = df[df["decision"] == "approved"]
     for domain in approved["domain"].unique():
-        sub = approved[approved["domain"] == domain][
-            ["source_value", "canonical_term"]
-        ].copy()
+        domain_rows = approved[approved["domain"] == domain]
+        sub = domain_rows[["source_value", "canonical_term"]].copy()
         if "canonical_id" in approved.columns:
-            sub["canonical_id"] = approved[approved["domain"] == domain]["canonical_id"].values
+            sub["canonical_id"] = domain_rows["canonical_id"].values
+        if "anchor_sponsor_id" in approved.columns:
+            sub["anchor_sponsor_id"] = domain_rows["anchor_sponsor_id"].values
+        if "rationale" in approved.columns:
+            sub["rationale"] = domain_rows["rationale"].values
         n_promoted += promote_candidates(duck_conn, domain, sub)
 
     logger.info(
