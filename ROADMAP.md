@@ -553,6 +553,20 @@ Shipped alongside 7B above. See combined "Phase 7B + 7E" section for details.
 
 **Limits** (preserved from original plan): reproducibility is *traceable* ("this mapping came from ChEMBL 36 + UMLS 2025AB") but not *automatic* — re-running last quarter's extraction against last quarter's references requires retaining those directories on disk. That's policy, not code.
 
+### Phase 7F: Drug/intervention dedup v2 — agent-assisted
+
+**Symptom**: `generate_drug_fuzzy_candidates` (Phase 6C) produces a pending queue that is too noisy for direct HITL review. ~800 candidates currently sit in `ref.mapping_candidates` with `domain='drug'`, `source='fuzzy'`, `status='pending'`; a spot-check puts the majority as incorrect (e.g., dosage-form variants colliding with chemically distinct compounds, brand/generic misalignments, salt-form confusion).
+
+**Root cause** (same shape as Phase 7D sponsor problem): `rapidfuzz` string similarity doesn't encode chemical identity. Brand↔generic (e.g., Keytruda ↔ pembrolizumab), salt/ester variants (succinate, hydrochloride, fumarate, mesylate), combination products, and dose-form naming ("aspirin 81mg" vs "aspirin") all look either similar or dissimilar for wrong reasons in WRatio space.
+
+**Proposed direction** (mirrors 7D): demote fuzzy matching to a coarse gate that narrows the agent's input set rather than the reviewer's queue. The Phase 6E enrichment agent evaluates each candidate with tools that encode actual chemical identity — ChEMBL synonym + salt-parent lookup, MeSH intervention co-occurrence, potentially RxNorm or UNII crosswalks, drug-class/parent queries. Merge semantics would parallel `entities.sponsor.merged_into_id` (salt → parent compound, brand → generic), using a `merged_into_id` self-FK on `entities.drug`.
+
+**Depends on**: 7B ✅ (stable `entities.drug.drug_id`), 6E ✅, 7D ✅ (pattern + merge plumbing proven).
+
+**Proposed near-term steps** (before a full design): one-shot migration to hide the existing ~800 fuzzy drug candidates (`status='pending' → 'hidden'`, analogous to `scripts/migrate_sponsor_fuzzy_hidden.py`); remove `generate_drug_fuzzy_candidates` from the standard pipeline; keep the function as a deprecated gate. A design pass when Phase 5 is shipped.
+
+**Status**: deferred — tracked, not scheduled. Pending fuzzy drug queue should be treated as ignorable in its current form.
+
 ---
 
 ## Phase 5: Refresh Automation
@@ -729,6 +743,7 @@ Phase 1 (Raw Extract) ✅
         ├── 7B (Canonical entity tables)   ✅ [shipped with 7E; feeds 7C and 7D]
         │     └── 7C (enriched.* layer)    ✅ [feeds Phase 5]
         │     └── 7D (Sponsor agent v2)    [planned; also depends on Phase 6E ✅]
+        │     └── 7F (Drug agent v2)       [deferred; mirrors 7D — depends on 6E ✅, 7D]
         └── 7E (Reference source versioning)  ✅ [shipped with 7B]
         │
       Phase 5 (Automation)       [after 7C to avoid raw-coupling / repro hazards]
