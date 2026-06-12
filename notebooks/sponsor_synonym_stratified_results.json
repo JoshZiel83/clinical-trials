@@ -1,0 +1,8152 @@
+[
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 0,
+    "n_groups": 18,
+    "names_in_groups": 37,
+    "pairs": 20,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "arvinas estrogen receptor",
+        "arvinas"
+      ],
+      [
+        "everest medicines (beijing",
+        "everest medicines (china"
+      ],
+      [
+        "astellas pharma europe b.v",
+        "astellas pharma europe"
+      ],
+      [
+        "mibelle group biochemistry",
+        "mibelle"
+      ],
+      [
+        "nestle health science",
+        "nestl\u00e9 health science"
+      ],
+      [
+        "lumiradx uk",
+        "lumiradx"
+      ],
+      [
+        "ranok therapuetics",
+        "ranok therapeutics (hangzhou"
+      ],
+      [
+        "winclove b.v",
+        "winclove probiotics b.v"
+      ],
+      [
+        "roche diagnostics",
+        "roche diagnostics international",
+        "roche diagnostic"
+      ],
+      [
+        "archer-daniels-midland",
+        "archer daniels midland"
+      ],
+      [
+        "shanghai first song therapeutics",
+        "shanghai first song biotechnology"
+      ],
+      [
+        "shanghai bovax biotechnology",
+        "chongqing bovax biopharmaceutical"
+      ],
+      [
+        "opko health",
+        "modex therapeutics, an opko health"
+      ],
+      [
+        "avistone pharmaceutical\uff08ningbo\uff09",
+        "avistone biotechnology"
+      ],
+      [
+        "biofortis innovation services",
+        "biofortis, merieux nutrisciences"
+      ],
+      [
+        "pierre fabre",
+        "pierre fabre medicament"
+      ],
+      [
+        "laboratory corporation of america",
+        "labcorp corporation of america holdings"
+      ],
+      [
+        "acerand therapeutics (shanghai",
+        "acerand therapeutics (hong kong"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 1,
+    "n_groups": 43,
+    "names_in_groups": 111,
+    "pairs": 120,
+    "group_sizes": [
+      7,
+      3,
+      2,
+      8,
+      4,
+      3,
+      2,
+      2,
+      3,
+      3,
+      3,
+      2,
+      3,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "medtronic",
+        "medtronic france sas",
+        "medtronic cardiac ablation solutions",
+        "medtronic neurovascular clinical affairs",
+        "medtronic vascular",
+        "medtronic cardiac surgery",
+        "medtronic diabetes"
+      ],
+      [
+        "abbott",
+        "abbott diagnostics division",
+        "abbott diabetes care"
+      ],
+      [
+        "solventum",
+        "solventum us"
+      ],
+      [
+        "janssen",
+        "janssen medical affairs",
+        "janssen-cilag div. of johnson&johnson se",
+        "janssen cilag n.v",
+        "janssen pharmaceutica",
+        "xian-janssen pharmaceutical",
+        "janssen research & development",
+        "janssen cilag s.a.s"
+      ],
+      [
+        "johnson & johnson",
+        "depuy synthes products",
+        "ethicon endo-surgery",
+        "medos international sarl"
+      ],
+      [
+        "chengdu kanghong pharmaceutical group",
+        "chengdu kanghong biotech",
+        "beijing kanghong biopharmaceutical"
+      ],
+      [
+        "ibsa institut biochimique",
+        "ibsa farmaceutici italia srl"
+      ],
+      [
+        "minnesota health solutions",
+        "minnesota healthsolutions"
+      ],
+      [
+        "valeant canada",
+        "actavis",
+        "actelion"
+      ],
+      [
+        "quantel medical",
+        "lumibird medical (quantel medical, ellex medical, optotek",
+        "cynosurelutronic"
+      ],
+      [
+        "kyowa kirin",
+        "kyowa kirin pharmaceutical development",
+        "kyowa kirin korea"
+      ],
+      [
+        "fresenius kabi taiwan",
+        "fresenius kabi sino-swed pharmaceutical"
+      ],
+      [
+        "innovent biologics (suzhou",
+        "innovent biopharmaceutical technology (hangzhou",
+        "innovent biologics technology limited (shanghai r&d center"
+      ],
+      [
+        "b. braun melsungen",
+        "b. braun medical international trading"
+      ],
+      [
+        "biotronik japan",
+        "biotronik australia",
+        "biotronik france"
+      ],
+      [
+        "shanghai virogin biotech",
+        "cnbg-virogin biotech (shanghai"
+      ],
+      [
+        "uswm, llc (dba us worldmeds",
+        "uswm ct"
+      ],
+      [
+        "chendu diao nine hong pharmaceutical factory",
+        "chengdu diao jiuhong pharmaceutical factory"
+      ],
+      [
+        "impact biomedicines, inc., a wholly owned subsidiary of celgene",
+        "celgene"
+      ],
+      [
+        "shanghai first song biotechnology",
+        "shanghai first song therapeutics"
+      ],
+      [
+        "astellas pharma canada",
+        "astellas pharma europe",
+        "astellas pharma korea"
+      ],
+      [
+        "varian medical systems",
+        "varian, a siemens healthineers"
+      ],
+      [
+        "capstan medical",
+        "capstan therapeutics"
+      ],
+      [
+        "avistone biotechnology",
+        "avistone pharmaceutical\uff08ningbo\uff09"
+      ],
+      [
+        "jiangsu hengrui pharmaceutical",
+        "shanghai hengrui pharmaceutical"
+      ],
+      [
+        "tectonic therapeutic",
+        "tectonic operating"
+      ],
+      [
+        "roche pharma",
+        "roche-genentech",
+        "roche diabetes care",
+        "roche diagnostics international"
+      ],
+      [
+        "emd serono",
+        "merck serono co., ltd., china"
+      ],
+      [
+        "recursion pharmaceuticals",
+        "exscientia ai ltd., a wholly owned subsidiary of recursion pharmaceuticals"
+      ],
+      [
+        "viatris",
+        "viatris pharmaceuticals"
+      ],
+      [
+        "takeda france",
+        "takeda pharmaceuticals international",
+        "takeda canada"
+      ],
+      [
+        "clinigen",
+        "clinigen k.k"
+      ],
+      [
+        "almac",
+        "almac diagnostic services"
+      ],
+      [
+        "almirall",
+        "almirall, sas"
+      ],
+      [
+        "samsung",
+        "samsung pharmaceutical"
+      ],
+      [
+        "santen",
+        "santen sas"
+      ],
+      [
+        "perkinelmer",
+        "perkinelmer, wallac"
+      ],
+      [
+        "everest medicines (china",
+        "everest medicines (beijing"
+      ],
+      [
+        "curium us",
+        "curium pet france"
+      ],
+      [
+        "chiesi italia",
+        "chiesi farmaceutica ltda",
+        "chiesi pharma ab, nordic"
+      ],
+      [
+        "dicerna pharmaceuticals, inc., a novo nordisk",
+        "albireo, an ipsen"
+      ],
+      [
+        "ppd, part of thermo fisher scientific",
+        "pharmaceutical product development, (ppd"
+      ],
+      [
+        "alphatec spine",
+        "alucent biomedical"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 2,
+    "n_groups": 26,
+    "names_in_groups": 53,
+    "pairs": 28,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "bial r&d investments",
+        "bial - portela c"
+      ],
+      [
+        "seagen, a wholly owned subsidiary of pfizer",
+        "pfizer"
+      ],
+      [
+        "alpine immune sciences inc, a subsidiary of vertex",
+        "alpine immune sciences"
+      ],
+      [
+        "biostar pharma",
+        "beijing biostar pharmaceuticals"
+      ],
+      [
+        "napo pharmaceuticals",
+        "napo therapeutics, s.p.a"
+      ],
+      [
+        "multitude therapeutics (australia",
+        "multitude therapeutics"
+      ],
+      [
+        "advenchen laboratories nanjing",
+        "advenchen laboratories"
+      ],
+      [
+        "dr. reddy's laboratories",
+        "dr. reddys laboratories"
+      ],
+      [
+        "paradigm biopharmaceuticals",
+        "paradigm biopharmaceuticals usa"
+      ],
+      [
+        "zai lab (us",
+        "zai lab (hong kong"
+      ],
+      [
+        "clover biopharmaceuticals aus",
+        "clover biopharmaceuticals usa"
+      ],
+      [
+        "haisco-usa pharmaceuticals",
+        "sichuan haisco pharmaceutical group"
+      ],
+      [
+        "gencor pacific limited, hong kong",
+        "gencor pacific group"
+      ],
+      [
+        "fujian shengdi pharmaceutical",
+        "shanghai shengdi pharmaceutical"
+      ],
+      [
+        "cspc megalith biopharmaceutical",
+        "cspc pharmaceutical group"
+      ],
+      [
+        "otto bock healthcare products",
+        "otto bock healthcare"
+      ],
+      [
+        "tyligand bioscience (shanghai",
+        "tyligand pharmaceuticals (suzhou"
+      ],
+      [
+        "merck serono limited, uk",
+        "merck serono co., ltd., china"
+      ],
+      [
+        "merck kgaa, darmstadt, germany",
+        "emd serono research & development institute"
+      ],
+      [
+        "terumo",
+        "terumo medical"
+      ],
+      [
+        "medtronic - mitg",
+        "medtronic vascular",
+        "medtronic diabetes"
+      ],
+      [
+        "b. braun medical international trading",
+        "b. braun medical industries sdn. bhd"
+      ],
+      [
+        "c. r. bard",
+        "bard"
+      ],
+      [
+        "takeda pharmaceuticals international",
+        "takeda pharmaceuticals north america"
+      ],
+      [
+        "lumibird medical (quantel medical, ellex medical, optotek",
+        "lumenis be"
+      ],
+      [
+        "cynosure",
+        "cynosurelutronic"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 3,
+    "n_groups": 33,
+    "names_in_groups": 93,
+    "pairs": 117,
+    "group_sizes": [
+      5,
+      7,
+      4,
+      2,
+      7,
+      5,
+      3,
+      4,
+      4,
+      2,
+      2,
+      3,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3
+    ],
+    "groups": [
+      [
+        "chia tai tianqing pharmaceutical group",
+        "chia tai tianqing pharmaceutical (guangzhou",
+        "guangzhou chia tai innovative pharmaceutical",
+        "nanjing chia-tai tianqing pharmaceutical",
+        "chia tai tianqing pharmaceutical group nanjing shunxin pharmaceutical"
+      ],
+      [
+        "medtronic",
+        "medtronics",
+        "medtronic bakken research",
+        "medtronic diabetes",
+        "medtronic heart valves",
+        "medtronic neurovascular clinical affairs",
+        "mozarc medical us"
+      ],
+      [
+        "janssen pharmaceuticals",
+        "janssen-cilag",
+        "janssen-cilag s.p.a",
+        "xian-janssen pharmaceutical"
+      ],
+      [
+        "merck serono gmbh, germany",
+        "merck serono s.p.a., italy"
+      ],
+      [
+        "roche pharma",
+        "roche farma",
+        "hoffmann-la roche",
+        "roche diagnostics",
+        "roche diagnostics international",
+        "roche diabetes care",
+        "roche sequencing solutions"
+      ],
+      [
+        "stryker canada",
+        "stryker australia",
+        "stryker nordic",
+        "stryker craniomaxillofacial",
+        "stryker trauma and extremities"
+      ],
+      [
+        "b. braun melsungen",
+        "b. braun korea",
+        "b. braun medical international trading"
+      ],
+      [
+        "fresenius",
+        "fresenius kabi swissbiosim",
+        "fresenius kabi taiwan",
+        "fresenius medical care deutschland"
+      ],
+      [
+        "servier",
+        "servier russia",
+        "institut de recherches internationales servier (i.r.i.s",
+        "chugai pharma france"
+      ],
+      [
+        "chugai pharmaceutical",
+        "chugai pharma france"
+      ],
+      [
+        "astellas pharma canada",
+        "astellas pharma europe"
+      ],
+      [
+        "chiesi sas",
+        "chiesi italia",
+        "chiesi farmaceutica ltda"
+      ],
+      [
+        "abbott point of care",
+        "abbott diabetes care",
+        "abbott rapid dx",
+        "abbott (china"
+      ],
+      [
+        "archer-daniels-midland",
+        "archer daniels midland"
+      ],
+      [
+        "agomab spain s.l.u",
+        "agomab spain s.l"
+      ],
+      [
+        "essilor international",
+        "essilor-polylite taiwan"
+      ],
+      [
+        "\u00f6ssur france",
+        "\u00f6ssur iceland ehf"
+      ],
+      [
+        "otto bock france snc",
+        "otto bock healthcare"
+      ],
+      [
+        "bioactor",
+        "bioactor b.v"
+      ],
+      [
+        "biotronik",
+        "biotronik korea"
+      ],
+      [
+        "antengene",
+        "antengene biologics"
+      ],
+      [
+        "beta pharma shanghai",
+        "beta pharma (suzhou"
+      ],
+      [
+        "newsoara biopharma",
+        "newsoara hyk biopharmaceutical (shanghai"
+      ],
+      [
+        "chendu diao pharmaceutical group",
+        "chendu diao nine hong pharmaceutical factory"
+      ],
+      [
+        "uswm, llc (dba us worldmeds",
+        "uswm ct"
+      ],
+      [
+        "sumitomo pharma switzerland",
+        "sumitomo pharma america"
+      ],
+      [
+        "point biopharma, a wholly owned subsidiary of eli lilly and",
+        "loxo oncology"
+      ],
+      [
+        "qilu pharmaceutical",
+        "shanghai qilu pharmaceutical research and development center"
+      ],
+      [
+        "bioray laboratories",
+        "bioray pharmaceutical"
+      ],
+      [
+        "biofortis clinical research",
+        "biofortis innovation services"
+      ],
+      [
+        "\u00f6ssur france",
+        "\u00f6ssur iceland ehf"
+      ],
+      [
+        "innovent biologics (suzhou",
+        "innovent biologics technology limited (shanghai r&d center"
+      ],
+      [
+        "aok nordost",
+        "aok baden-w\u00fcrttemberg",
+        "aok nordwest"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 4,
+    "n_groups": 38,
+    "names_in_groups": 102,
+    "pairs": 105,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      4,
+      4,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2,
+      3,
+      6,
+      3,
+      6,
+      3,
+      3,
+      2,
+      3,
+      4,
+      3,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "lanova medicines zhejiang",
+        "lanova medicines"
+      ],
+      [
+        "santen",
+        "santen sas"
+      ],
+      [
+        "shanghai hengrui pharmaceutical",
+        "shandong suncadia medicine"
+      ],
+      [
+        "jiangsu hansoh pharmaceutical",
+        "shanghai hansoh biomedical"
+      ],
+      [
+        "b. braun melsungen",
+        "b.braun surgical",
+        "b. braun ltd. centre of excellence infection control"
+      ],
+      [
+        "dr. reddy's laboratories",
+        "dr. reddys laboratories"
+      ],
+      [
+        "ranok therapeutics (hangzhou",
+        "ranok therapuetics"
+      ],
+      [
+        "acerand therapeutics (hong kong",
+        "acerand therapeutics (shanghai"
+      ],
+      [
+        "astellas pharma canada",
+        "astellas pharma global development",
+        "astellas pharma us",
+        "astellas pharma china"
+      ],
+      [
+        "incyte biosciences france",
+        "incyte biosciences japan gk",
+        "incyte biosciences italy s.r.l",
+        "incyte"
+      ],
+      [
+        "sotio biotech",
+        "sotio a.s",
+        "sotio biotech a.s"
+      ],
+      [
+        "pierre fabre",
+        "pierre fabre laboratories",
+        "pierre fabre medicament"
+      ],
+      [
+        "minnesota healthsolutions",
+        "minnesota health solutions"
+      ],
+      [
+        "gracell biotechnologies (shanghai",
+        "gracell biopharmaceuticals"
+      ],
+      [
+        "avencell europe",
+        "avencell therapeutics"
+      ],
+      [
+        "sysmex europe",
+        "sysmex espa\u00f1a"
+      ],
+      [
+        "merck serono co., ltd., china",
+        "merck serono s.p.a., italy",
+        "merck serono limited, uk"
+      ],
+      [
+        "chiesi farmaceutici s.p.a",
+        "chiesi sas",
+        "chiesi pharmaceuticals",
+        "chiesi hungary",
+        "chiesi usa",
+        "chiesi poland sp. z o.o"
+      ],
+      [
+        "abbott",
+        "abbott rapid dx",
+        "abbott diabetes care"
+      ],
+      [
+        "medtronic endovascular",
+        "medtronic heart valves",
+        "medtronic cardiovascular",
+        "medtronic spine",
+        "medtronic cardiac ablation solutions",
+        "medtronic cardiac rhythm and heart failure"
+      ],
+      [
+        "servier (tianjin) pharmaceutical",
+        "servier hellas pharmaceuticals",
+        "servier affaires m\u00e9dicales"
+      ],
+      [
+        "depuy synthes products",
+        "depuy international",
+        "medos international sarl"
+      ],
+      [
+        "otto bock france snc",
+        "otto bock healthcare products"
+      ],
+      [
+        "biotronik korea",
+        "biotronik australia",
+        "biotronik se & co. kg"
+      ],
+      [
+        "roche diabetes care",
+        "roche diagnostic",
+        "roche pharma",
+        "roche sequencing solutions"
+      ],
+      [
+        "otsuka pharmaceutical development & commercialization",
+        "otsuka australia pharmaceutical",
+        "otsuka america pharmaceutical"
+      ],
+      [
+        "tasly pharmaceuticals",
+        "tasly pharmaceutical group"
+      ],
+      [
+        "incyte biosciences france",
+        "incyte biosciences japan gk"
+      ],
+      [
+        "r-pharm",
+        "r-pharm international"
+      ],
+      [
+        "biofortis innovation services",
+        "biofortis, merieux nutrisciences",
+        "biofortis clinical research"
+      ],
+      [
+        "iqvia",
+        "iqvia rds",
+        "iqvia pvt"
+      ],
+      [
+        "incyte biosciences france",
+        "incyte"
+      ],
+      [
+        "nutricia",
+        "danone nutricia research",
+        "danone global research & innovation center"
+      ],
+      [
+        "clinlogic",
+        "clinlogix"
+      ],
+      [
+        "icon",
+        "icon clinical research"
+      ],
+      [
+        "metagenics europe",
+        "metagenics"
+      ],
+      [
+        "beneo-institute",
+        "beneo"
+      ],
+      [
+        "nin institute",
+        "hri-mail-nit"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 5,
+    "n_groups": 16,
+    "names_in_groups": 41,
+    "pairs": 39,
+    "group_sizes": [
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      3,
+      5
+    ],
+    "groups": [
+      [
+        "sotio biotech a.s",
+        "sotio biotech",
+        "sotio a.s"
+      ],
+      [
+        "epimab biotherapeutics (suzhou",
+        "shanghai epimab biotherapeutics"
+      ],
+      [
+        "shanghai first song biotechnology",
+        "shanghai first song therapeutics"
+      ],
+      [
+        "guangzhou burning rock bioengineering",
+        "guangzhou burning rock dx"
+      ],
+      [
+        "alpine immune sciences",
+        "alpine immune sciences inc, a subsidiary of vertex"
+      ],
+      [
+        "streetlab",
+        "streetlab vision"
+      ],
+      [
+        "bioray pharmaceutical",
+        "bioray laboratories"
+      ],
+      [
+        "chiesi farmaceutica ltda",
+        "chiesi usa",
+        "chiesi farmaceutici s.p.a",
+        "chiesi slovenija, d.o.o"
+      ],
+      [
+        "coloplast a/s",
+        "coloplast"
+      ],
+      [
+        "depuy synthes",
+        "depuy international",
+        "medos international sarl",
+        "cerenovus, part of depuy synthes products"
+      ],
+      [
+        "guangdong fapon biopharma",
+        "zhuhai fapon biopharma"
+      ],
+      [
+        "ajinomoto usa",
+        "ajinomoto"
+      ],
+      [
+        "amway (china) r&d center",
+        "amway"
+      ],
+      [
+        "fujifilm",
+        "fujifilm pharmaceuticals u"
+      ],
+      [
+        "johnson & johnson",
+        "johnson & johnson private",
+        "johnson & johnson medical (shanghai"
+      ],
+      [
+        "janssen research & development",
+        "janssen pharmaceuticals",
+        "janssen-cilag international",
+        "janssen medical affairs",
+        "janssen diagnostics"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 6,
+    "n_groups": 59,
+    "names_in_groups": 147,
+    "pairs": 156,
+    "group_sizes": [
+      2,
+      3,
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      4,
+      3,
+      8,
+      2,
+      2,
+      2,
+      2,
+      5,
+      3,
+      8,
+      3,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      5,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "imago biosciences, inc., a subsidiary of merck & co., inc., (rahway, new jersey usa",
+        "arqule, inc., a subsidiary of merck sharp & dohme llc, a subsidiary of merck & co., inc. (rahway, nj usa"
+      ],
+      [
+        "3d medicines (beijing",
+        "3d medicines (sichuan",
+        "3d medicines"
+      ],
+      [
+        "beijing innocare pharma tech",
+        "innocare pharma"
+      ],
+      [
+        "menarini silicon biosystems",
+        "silicon biosystems"
+      ],
+      [
+        "chia tai tianqing pharmaceutical group",
+        "chia tai tianqing pharmaceutical group nanjing shunxin pharmaceutical",
+        "nanjing chia-tai tianqing pharmaceutical",
+        "chia tai tianqing pharmaceutical (guangzhou"
+      ],
+      [
+        "sotio biotech a.s",
+        "sotio a.s"
+      ],
+      [
+        "epimab biotherapeutics (suzhou",
+        "shanghai epimab biotherapeutics"
+      ],
+      [
+        "innovent biologics (suzhou",
+        "innovent biologics technology limited (shanghai r&d center"
+      ],
+      [
+        "amway",
+        "amway (china) r&d center"
+      ],
+      [
+        "chengdu kanghong pharmaceutical group",
+        "chengdu kanghong biotech"
+      ],
+      [
+        "sichuan kelun pharmaceutical research institute",
+        "sichuan kelun pharmaceutical"
+      ],
+      [
+        "napo therapeutics, s.p.a",
+        "napo pharmaceuticals"
+      ],
+      [
+        "beta pharma (suzhou",
+        "beta pharma shanghai"
+      ],
+      [
+        "advenchen pharmaceuticals",
+        "advenchen laboratories"
+      ],
+      [
+        "angitia",
+        "angitia biopharmaceuticals"
+      ],
+      [
+        "ascletis pharma (china",
+        "ascletis pharmaceuticals"
+      ],
+      [
+        "avistone biotechnology",
+        "avistone pharmaceutical\uff08ningbo\uff09"
+      ],
+      [
+        "coopervision international limited (cvil",
+        "coopervision"
+      ],
+      [
+        "cg bio",
+        "cgbio"
+      ],
+      [
+        "tianjin hemay pharmaceutical",
+        "ganzhou hemay pharmaceutical"
+      ],
+      [
+        "p+f products + features usa",
+        "p+f products + features"
+      ],
+      [
+        "point biopharma, a wholly owned subsidiary of eli lilly and",
+        "eli lilly and"
+      ],
+      [
+        "incyte biosciences international s\u00e0rl",
+        "incyte biosciences uk"
+      ],
+      [
+        "pierre fabre dermo cosmetique",
+        "pierre fabre ib\u00e9rica",
+        "pierre fabre pharma"
+      ],
+      [
+        "nestl\u00e9 health science spain",
+        "nestl\u00e9 nutrition spain"
+      ],
+      [
+        "chiesi pharmaceuticals",
+        "chiesi farmaceutica ltda",
+        "chiesi pharma ab, nordic",
+        "chiesi poland sp. z o.o"
+      ],
+      [
+        "msd korea",
+        "msd france",
+        "msd pharmaceuticals"
+      ],
+      [
+        "janssen-cilag",
+        "janssen cilag s.a.s",
+        "janssen cilag n.v",
+        "janssen-cilag s.p.a",
+        "janssen pharmaceutical k.k",
+        "janssen pharmaceuticals",
+        "janssen biotech",
+        "janssen medical affairs"
+      ],
+      [
+        "astellas pharma europe b.v",
+        "astellas institute for regenerative medicine"
+      ],
+      [
+        "paion uk",
+        "paion deutschland"
+      ],
+      [
+        "merck serono limited, uk",
+        "emd serono"
+      ],
+      [
+        "smith & nephew orthopaedics",
+        "smith & nephew pte"
+      ],
+      [
+        "stryker neurovascular",
+        "stryker nordic",
+        "stryker canada",
+        "stryker trauma and extremities",
+        "stryker endoscopy"
+      ],
+      [
+        "b.braun surgical",
+        "b. braun ltd. centre of excellence infection control",
+        "b. braun medical industries sdn. bhd"
+      ],
+      [
+        "medtronics",
+        "medtronic france sas",
+        "medtronic neurovascular clinical affairs",
+        "medtronic cardiac rhythm and heart failure",
+        "medtronic spinal and biologics",
+        "medtronic bakken research",
+        "medtronic cardiovascular",
+        "medtronic cardiac ablation solutions"
+      ],
+      [
+        "abbott",
+        "abbott rapid dx",
+        "abbott medical devices"
+      ],
+      [
+        "roche diabetes care",
+        "roche diagnostics international",
+        "roche sequencing solutions",
+        "roche chugai"
+      ],
+      [
+        "chugai pharma france",
+        "roche chugai"
+      ],
+      [
+        "jiangsu hansoh pharmaceutical",
+        "shanghai hansoh biomedical"
+      ],
+      [
+        "taivex therapeutics",
+        "taiwan bio therapeutics"
+      ],
+      [
+        "epimab biotherapeutics (suzhou",
+        "shanghai epimab biotherapeutics"
+      ],
+      [
+        "arena is a wholly owned subsidiary of pfizer",
+        "pfizer pharmaceuticals"
+      ],
+      [
+        "hi-bio, a biogen",
+        "biogen"
+      ],
+      [
+        "celltrion",
+        "celltrion healthcare france"
+      ],
+      [
+        "fresenius kabi",
+        "fresenius kabi taiwan"
+      ],
+      [
+        "boston scientific korea",
+        "boston scientific japan k.k"
+      ],
+      [
+        "beijing innocare pharma tech",
+        "innocare pharma"
+      ],
+      [
+        "w.l.gore & associates",
+        "vascutek"
+      ],
+      [
+        "zhuhai yufan biotechnologies",
+        "fosun adgenvax biopharmaceutical"
+      ],
+      [
+        "sk bioscience",
+        "sk chemicals"
+      ],
+      [
+        "r-pharm",
+        "r-pharm international"
+      ],
+      [
+        "zydus therapeutics",
+        "zydus lifesciences"
+      ],
+      [
+        "nutricia",
+        "nutricia nutrition clinique"
+      ],
+      [
+        "johnson & johnson consumer inc. (j&jci",
+        "johnson & johnson surgical vision",
+        "johnson & johnson medical (shanghai",
+        "johnson & johnson pharmaceutical research & development, l.l.c",
+        "johnson & johnson enterprise innovation"
+      ],
+      [
+        "cspc-nbp pharmaceutical",
+        "cspc pharmaceutical group"
+      ],
+      [
+        "baxalta now part of shire",
+        "baxter healthcare"
+      ],
+      [
+        "beijing zhifei lvzhu biopharmaceutical",
+        "anhui zhifei longcom biologic pharmacy"
+      ],
+      [
+        "tasly biopharmaceuticals",
+        "jiangsu tasly diyi pharmaceutical"
+      ],
+      [
+        "xizang haisco pharmaceutical",
+        "haisco pharmaceutical group"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 7,
+    "n_groups": 31,
+    "names_in_groups": 78,
+    "pairs": 75,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      3,
+      2,
+      4,
+      4,
+      2,
+      2,
+      2,
+      3,
+      4,
+      5,
+      2,
+      6,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "otto bock healthcare",
+        "otto bock healthcare products"
+      ],
+      [
+        "gc biopharma",
+        "green cross"
+      ],
+      [
+        "avistone biotechnology",
+        "avistone pharmaceutical\uff08ningbo\uff09"
+      ],
+      [
+        "pierre fabre medicament",
+        "pierre fabre pharma",
+        "pierre fabre dermo cosmetique"
+      ],
+      [
+        "legend biotech usa",
+        "nanjing legend biotech"
+      ],
+      [
+        "novartis",
+        "novartis pharmaceuticals",
+        "beijing novartis pharma",
+        "novartis gene therapies"
+      ],
+      [
+        "pfizer pharmaceuticals",
+        "arena is a wholly owned subsidiary of pfizer",
+        "seagen, a wholly owned subsidiary of pfizer",
+        "medivation llc, a wholly owned subsidiary of pfizer"
+      ],
+      [
+        "merck serono co., ltd., china",
+        "merck serono international"
+      ],
+      [
+        "incyte biosciences japan gk",
+        "incyte biosciences uk"
+      ],
+      [
+        "braincare",
+        "braincare usa"
+      ],
+      [
+        "kyowa kirin",
+        "kyowa kirin china pharmaceutical",
+        "kyowa kirin korea"
+      ],
+      [
+        "servier bio-innovation",
+        "adir, a servier group",
+        "servier deutschland",
+        "servier affaires m\u00e9dicales"
+      ],
+      [
+        "medtronic",
+        "medtronics",
+        "medtronic bakken research",
+        "medtronic cardiovascular",
+        "medtronic neurovascular clinical affairs"
+      ],
+      [
+        "balt usa",
+        "balt international"
+      ],
+      [
+        "stryker instruments",
+        "stryker nordic",
+        "stryker spine",
+        "stryker craniomaxillofacial",
+        "stryker south pacific",
+        "stryker (beijing) healthcare products"
+      ],
+      [
+        "lundbeck",
+        "h. lundbeck a/s"
+      ],
+      [
+        "takeda",
+        "tesaro"
+      ],
+      [
+        "solventum",
+        "solventum us"
+      ],
+      [
+        "\u00f6ssur france",
+        "\u00f6ssur iceland ehf"
+      ],
+      [
+        "sumitomo pharma",
+        "sumitomo pharma america",
+        "sumitomo pharma switzerland"
+      ],
+      [
+        "santen pharmaceutical",
+        "santen"
+      ],
+      [
+        "nestle health science",
+        "nestl\u00e9 health science"
+      ],
+      [
+        "sanofi pasteur, a sanofi",
+        "genzyme, a sanofi"
+      ],
+      [
+        "caris life sciences",
+        "caris science"
+      ],
+      [
+        "paradigm biopharmaceuticals usa",
+        "paradigm biopharmaceuticals"
+      ],
+      [
+        "aerogen",
+        "aerogen pharma"
+      ],
+      [
+        "trb chemedica",
+        "trb chemedica international"
+      ],
+      [
+        "biohaven pharmaceuticals",
+        "biohaven therapeutics"
+      ],
+      [
+        "symatese",
+        "symatese aesthetics"
+      ],
+      [
+        "b.braun avitum",
+        "b. braun ltd. centre of excellence infection control"
+      ],
+      [
+        "jazz pharmaceuticals",
+        "jazz pharmaceuticals research uk"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 8,
+    "n_groups": 23,
+    "names_in_groups": 67,
+    "pairs": 90,
+    "group_sizes": [
+      6,
+      7,
+      2,
+      6,
+      3,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2
+    ],
+    "groups": [
+      [
+        "medtronic france sas",
+        "medtronic vascular",
+        "medtronic heart valves",
+        "medtronic bakken research",
+        "medtronic spinal and biologics",
+        "medtronic - mitg"
+      ],
+      [
+        "stryker endoscopy",
+        "stryker south pacific",
+        "stryker canada",
+        "stryker spine",
+        "stryker (beijing) healthcare products",
+        "stryker nordic",
+        "stryker neurovascular"
+      ],
+      [
+        "chugai pharma france",
+        "chugai pharma usa"
+      ],
+      [
+        "janssen cilag n.v",
+        "janssen cilag s.a.s",
+        "janssen-cilag g.m.b.h",
+        "janssen-cilag div. of johnson&johnson se",
+        "janssen research & development",
+        "janssen vaccines & prevention b.v"
+      ],
+      [
+        "astellas pharma europe b.v",
+        "astellas pharma canada",
+        "astellas pharma global development"
+      ],
+      [
+        "abbott medical devices",
+        "abbott (china",
+        "abbott",
+        "abbott rapid dx"
+      ],
+      [
+        "dr. reddy's laboratories",
+        "dr. reddys laboratories"
+      ],
+      [
+        "lumiradx",
+        "lumiradx uk"
+      ],
+      [
+        "trb chemedica",
+        "trb chemedica international"
+      ],
+      [
+        "incyte",
+        "incyte biosciences france"
+      ],
+      [
+        "merck serono co., ltd., china",
+        "merck serono s.p.a., italy"
+      ],
+      [
+        "santen pharmaceutical",
+        "santen sas"
+      ],
+      [
+        "otsuka pharmaceutical",
+        "otsuka medical devices co., ltd. japan",
+        "otsuka pharmaceutical factory",
+        "otsuka beijing research institute"
+      ],
+      [
+        "jazz pharmaceuticals",
+        "jazz pharmaceuticals research uk"
+      ],
+      [
+        "roche-genentech",
+        "roche sequencing solutions",
+        "roche diagnostics international",
+        "hoffmann-la roche"
+      ],
+      [
+        "ppd development",
+        "ppd, part of thermo fisher scientific"
+      ],
+      [
+        "gcp-service international ltd. & co. kg",
+        "gcp-service international west"
+      ],
+      [
+        "winclove probiotics b.v",
+        "winclove b.v"
+      ],
+      [
+        "cas lamvac (guangzhou) biomedical technology",
+        "cas lamvac biotech"
+      ],
+      [
+        "aok baden-w\u00fcrttemberg",
+        "aok rheinland/hamburg"
+      ],
+      [
+        "ceryx medical australia",
+        "ceryx medical"
+      ],
+      [
+        "noah pharmaceuticals",
+        "noah medical",
+        "noah tech"
+      ],
+      [
+        "fujifilm pharmaceuticals u",
+        "fujifilm"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 9,
+    "n_groups": 43,
+    "names_in_groups": 104,
+    "pairs": 90,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      5,
+      2,
+      2,
+      3,
+      5,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      3,
+      2,
+      2,
+      5,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      3,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "dizal pharmaceuticals",
+        "dizal (jiangsu) pharmaceutical"
+      ],
+      [
+        "brightgene new bio-medical technology(wuxi",
+        "brightgene bio-medical technology"
+      ],
+      [
+        "sichuan kelun pharmaceutical",
+        "sichuan kelun pharmaceutical research institute"
+      ],
+      [
+        "haisco pharmaceutical group",
+        "sichuan haisco pharmaceutical group"
+      ],
+      [
+        "gracell biotechnologies (shanghai",
+        "gracell biopharmaceuticals"
+      ],
+      [
+        "medigen",
+        "medigen biotechnology"
+      ],
+      [
+        "chr hansen - part of novonesis",
+        "chr hansen"
+      ],
+      [
+        "pharmacyclics switzerland",
+        "pharmacyclics"
+      ],
+      [
+        "esteve pharmaceuticals sas",
+        "esteve pharmaceuticals"
+      ],
+      [
+        "jazz pharmaceuticals research uk",
+        "jazz pharmaceuticals"
+      ],
+      [
+        "roche diagnostic",
+        "roche diagnostics"
+      ],
+      [
+        "arialys therapeutics",
+        "arialys australia"
+      ],
+      [
+        "servier (tianjin) pharmaceutical",
+        "adir, a servier group",
+        "servier deutschland",
+        "servier",
+        "servier affaires m\u00e9dicales"
+      ],
+      [
+        "eli lilly and",
+        "morphic therapeutic, inc. (a wholly owned subsidiary of eli lilly and"
+      ],
+      [
+        "myriad genetics",
+        "myriad genetic laboratories"
+      ],
+      [
+        "abbott diagnostics division",
+        "abbott nutrition",
+        "abbott point of care"
+      ],
+      [
+        "chiesi italia",
+        "chiesi farmaceutici s.p.a",
+        "chiesi sas",
+        "chiesi usa",
+        "chiesi farmaceutica ltda"
+      ],
+      [
+        "chugai pharmaceutical",
+        "chugai pharma france"
+      ],
+      [
+        "sanofi-synthelabo",
+        "sanofi pasteur, a sanofi",
+        "principia biopharma, a sanofi"
+      ],
+      [
+        "forte biosciences",
+        "forte"
+      ],
+      [
+        "tigermed",
+        "tigermed consulting"
+      ],
+      [
+        "genovate-navifus (australia",
+        "genovate biotechnology"
+      ],
+      [
+        "paradigm biopharmaceuticals usa",
+        "paradigm biopharmaceuticals"
+      ],
+      [
+        "ascendis pharma growth disorders a/s",
+        "ascendis pharma bone diseases a/s",
+        "ascendis pharma oncology division a/s"
+      ],
+      [
+        "fujifilm toyama chemical",
+        "fujifilm"
+      ],
+      [
+        "astellas pharma europe",
+        "astellas pharma",
+        "astellas pharma korea"
+      ],
+      [
+        "pierre fabre dermo cosmetique",
+        "pierre fabre medicament"
+      ],
+      [
+        "biotronik australia",
+        "biotronik france"
+      ],
+      [
+        "stryker neurovascular",
+        "stryker spine",
+        "stryker instruments",
+        "stryker endoscopy",
+        "stryker trauma and extremities"
+      ],
+      [
+        "lundbeck",
+        "h. lundbeck a/s"
+      ],
+      [
+        "kyowa kirin pharmaceutical development",
+        "kyowa kirin korea"
+      ],
+      [
+        "medacta usa",
+        "medacta international"
+      ],
+      [
+        "merck kgaa, darmstadt, germany",
+        "merck serono international"
+      ],
+      [
+        "lifetech scientific (shenzhen",
+        "shenzhen ionova life sciences"
+      ],
+      [
+        "harpoon therapeutics, inc., a subsidiary of merck & co., inc. (rahway, new jersey usa",
+        "acceleron pharma, inc., a wholly-owned subsidiary of merck & co., inc., rahway, nj usa",
+        "peloton therapeutics, inc., a subsidiary of merck & co., inc. (rahway, new jersey usa",
+        "prometheus biosciences, inc., a subsidiary of merck & co., inc. (rahway, new jersey usa"
+      ],
+      [
+        "arena is a wholly owned subsidiary of pfizer",
+        "wyeth is now a wholly owned subsidiary of pfizer",
+        "medivation llc, a wholly owned subsidiary of pfizer"
+      ],
+      [
+        "microport crm",
+        "microport neurotech",
+        "shanghai microport ep medtech",
+        "shanghai microport endovascular medtech\uff08group\uff09"
+      ],
+      [
+        "shanghai pharmaceuticals holding",
+        "shanghai hutchison pharmaceuticals"
+      ],
+      [
+        "thermo fisher scientific",
+        "ppd, part of thermo fisher scientific"
+      ],
+      [
+        "cspc megalith biopharmaceutical",
+        "cspc ouyi pharmaceutical"
+      ],
+      [
+        "innovent biologics (suzhou",
+        "innovent biopharmaceutical technology (hangzhou"
+      ],
+      [
+        "jc medical, inc., an affiliate of edwards lifesciences",
+        "edwards (shanghai) lifesciences medical supplies"
+      ],
+      [
+        "chendu diao pharmaceutical group",
+        "chengdu diao jiuhong pharmaceutical factory"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 10,
+    "n_groups": 24,
+    "names_in_groups": 67,
+    "pairs": 78,
+    "group_sizes": [
+      2,
+      7,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      4,
+      2,
+      5,
+      3,
+      4,
+      2
+    ],
+    "groups": [
+      [
+        "organon",
+        "organon and"
+      ],
+      [
+        "janssen",
+        "janssen-cilag",
+        "janssen-cilag s.p.a",
+        "janssen biotech",
+        "janssen research & development",
+        "janssen medical affairs",
+        "janssen diagnostics"
+      ],
+      [
+        "alpine immune sciences",
+        "alpine immune sciences inc, a subsidiary of vertex"
+      ],
+      [
+        "solventum",
+        "solventum us"
+      ],
+      [
+        "sotio biotech",
+        "sotio biotech a.s"
+      ],
+      [
+        "mibelle",
+        "mibelle group biochemistry"
+      ],
+      [
+        "dizal pharmaceuticals",
+        "dizal (jiangsu) pharmaceutical"
+      ],
+      [
+        "recursion pharmaceuticals",
+        "exscientia ai ltd., a wholly owned subsidiary of recursion pharmaceuticals"
+      ],
+      [
+        "sichuan kelun pharmaceutical",
+        "sichuan kelun pharmaceutical research institute",
+        "sichuan kelun-biotech biopharmaceutical"
+      ],
+      [
+        "viatris korea",
+        "viatris pharmaceuticals"
+      ],
+      [
+        "kyowa kirin",
+        "kyowa kirin pharmaceutical development",
+        "kyowa kirin china pharmaceutical",
+        "kyowa kirin korea"
+      ],
+      [
+        "winclove b.v",
+        "winclove probiotics b.v"
+      ],
+      [
+        "amway",
+        "amway (china) r&d center"
+      ],
+      [
+        "almirall",
+        "almirall, sas"
+      ],
+      [
+        "c. r. bard",
+        "bard"
+      ],
+      [
+        "b. braun medical international trading",
+        "b. braun medical industries sdn. bhd",
+        "b.braun surgical"
+      ],
+      [
+        "msd korea",
+        "msd pharmaceuticals",
+        "msd r&d (china"
+      ],
+      [
+        "takeda pharmaceuticals north america",
+        "takeda pharmaceuticals international",
+        "takeda canada"
+      ],
+      [
+        "pierre fabre medicament",
+        "pierre fabre laboratories",
+        "pierre fabre ib\u00e9rica",
+        "pierre fabre dermo cosmetique"
+      ],
+      [
+        "daiichi sankyo",
+        "daiichi sankyo korea"
+      ],
+      [
+        "otsuka pharmaceutical",
+        "korea otsuka pharmaceutical",
+        "otsuka australia pharmaceutical",
+        "otsuka beijing research institute",
+        "otsuka pharmaceutical factory"
+      ],
+      [
+        "biotronik se & co. kg",
+        "biotronik korea",
+        "biotronik japan"
+      ],
+      [
+        "chiesi pharma ab, nordic",
+        "chiesi farmaceutici s.p.a",
+        "chiesi poland sp. z o.o",
+        "chiesi uk"
+      ],
+      [
+        "sotio biotech",
+        "sotio biotech a.s"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 11,
+    "n_groups": 26,
+    "names_in_groups": 61,
+    "pairs": 48,
+    "group_sizes": [
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      3,
+      5,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "nestl\u00e9 nutrition spain",
+        "nestl\u00e9 health science spain"
+      ],
+      [
+        "incyte biosciences international s\u00e0rl",
+        "incyte biosciences uk",
+        "incyte biosciences japan gk"
+      ],
+      [
+        "paradigm biopharmaceuticals",
+        "paradigm biopharmaceuticals usa"
+      ],
+      [
+        "sotio biotech a.s",
+        "sotio biotech"
+      ],
+      [
+        "antengene",
+        "antengene therapeutics"
+      ],
+      [
+        "catalyst pharmaceuticals",
+        "catalyst pharmaceutical research"
+      ],
+      [
+        "medivation llc, a wholly owned subsidiary of pfizer",
+        "medivation"
+      ],
+      [
+        "tioga cardiovascular",
+        "tioga pharmaceuticals"
+      ],
+      [
+        "chendu diao nine hong pharmaceutical factory",
+        "chendu diao pharmaceutical group",
+        "chengdu diao jiuhong pharmaceutical factory"
+      ],
+      [
+        "icometrix",
+        "icometrixleuven"
+      ],
+      [
+        "thermo fisher scientific",
+        "ppd, part of thermo fisher scientific"
+      ],
+      [
+        "streetlab vision",
+        "streetlab"
+      ],
+      [
+        "regen lab",
+        "regenlab france sas",
+        "regenlife sas"
+      ],
+      [
+        "med-el",
+        "med-el elektromedizinische ger\u00e4te gesmbh"
+      ],
+      [
+        "zhuhai fapon biopharma",
+        "guangdong fapon biopharma"
+      ],
+      [
+        "soci\u00e9t\u00e9 des produits nestl\u00e9 (spn",
+        "nestl\u00e9 health science"
+      ],
+      [
+        "spire",
+        "spire therapeutics"
+      ],
+      [
+        "philips healthcare",
+        "philips medical systems",
+        "philips healthcare (suzhou",
+        "philips clinical & medical affairs global"
+      ],
+      [
+        "biofortis innovation services",
+        "biofortis clinical research"
+      ],
+      [
+        "bayer healthcare pharmaceuticals, inc./bayer schering pharma",
+        "bayer yakuhin"
+      ],
+      [
+        "glubio therapeutics",
+        "hangzhou glubio pharmaceutical"
+      ],
+      [
+        "shanghai microport endovascular medtech\uff08group\uff09",
+        "shanghai microport medical (group"
+      ],
+      [
+        "merck healthcare kgaa, darmstadt, germany, an affiliate of merck kgaa, darmstadt, germany",
+        "merck serono international",
+        "emd serono"
+      ],
+      [
+        "janssen-cilag",
+        "janssen cilag s.a.s",
+        "janssen-cilag div. of johnson&johnson se",
+        "janssen scientific affairs",
+        "janssen"
+      ],
+      [
+        "johnson & johnson pharmaceutical research & development, l.l.c",
+        "johnson & johnson"
+      ],
+      [
+        "takeda pharmaceuticals international",
+        "takeda development center americas"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 12,
+    "n_groups": 26,
+    "names_in_groups": 62,
+    "pairs": 49,
+    "group_sizes": [
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      2,
+      2,
+      3,
+      2,
+      3,
+      5,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "kyowa kirin",
+        "kyowa kirin china pharmaceutical",
+        "kyowa kirin korea"
+      ],
+      [
+        "us endoscopy",
+        "us endoscopy group"
+      ],
+      [
+        "jiangsu hengrui pharmaceutical",
+        "jiangsu hengrui medicine"
+      ],
+      [
+        "ranok therapuetics",
+        "ranok therapeutics (hangzhou"
+      ],
+      [
+        "winclove b.v",
+        "winclove probiotics b.v"
+      ],
+      [
+        "nova eye",
+        "nova eye medical"
+      ],
+      [
+        "alpine immune sciences inc, a subsidiary of vertex",
+        "alpine immune sciences"
+      ],
+      [
+        "sotio biotech a.s",
+        "sotio biotech"
+      ],
+      [
+        "taiho oncology",
+        "taiho pharmaceutical"
+      ],
+      [
+        "ono pharmaceutical",
+        "ono pharma usa"
+      ],
+      [
+        "b. braun medical industries sdn. bhd",
+        "b. braun ltd. centre of excellence infection control",
+        "b. braun melsungen"
+      ],
+      [
+        "otsuka beijing research institute",
+        "otsuka america pharmaceutical",
+        "otsuka pharmaceutical factory"
+      ],
+      [
+        "nerviano medical sciences",
+        "nerviano medical sciences (shanghai"
+      ],
+      [
+        "chendu diao nine hong pharmaceutical factory",
+        "chendu diao pharmaceutical group"
+      ],
+      [
+        "laboratory corporation of america",
+        "labcorp corporation of america holdings"
+      ],
+      [
+        "novartis",
+        "novartis pharmaceuticals",
+        "beijing novartis pharma"
+      ],
+      [
+        "merck serono international",
+        "merck serono s.p.a., italy",
+        "merck serono co., ltd., china"
+      ],
+      [
+        "ppd, part of thermo fisher scientific",
+        "ppd development"
+      ],
+      [
+        "otto bock healthcare",
+        "otto bock healthcare products"
+      ],
+      [
+        "winclove b.v",
+        "winclove probiotics b.v"
+      ],
+      [
+        "chiesi poland sp. z o.o",
+        "chiesi usa",
+        "chiesi sas"
+      ],
+      [
+        "mylan pharmaceuticals",
+        "mylan laboratories"
+      ],
+      [
+        "almirall",
+        "almirall hermal",
+        "almirall, sas"
+      ],
+      [
+        "johnson & johnson",
+        "johnson & johnson surgical vision",
+        "johnson & johnson private",
+        "johnson & johnson enterprise innovation",
+        "johnson & johnson medical (shanghai"
+      ],
+      [
+        "incyte",
+        "incyte biosciences international s\u00e0rl"
+      ],
+      [
+        "icell gene therapeutics",
+        "icell immunityx\uff08hangzhou\uff09"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 13,
+    "n_groups": 23,
+    "names_in_groups": 53,
+    "pairs": 40,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      4,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "agomab spain s.l.u",
+        "agomab spain s.l"
+      ],
+      [
+        "3d medicines",
+        "3d medicines (beijing"
+      ],
+      [
+        "acerand therapeutics (hong kong",
+        "acerand therapeutics (shanghai"
+      ],
+      [
+        "ceryx medical australia",
+        "ceryx medical"
+      ],
+      [
+        "santen pharmaceutical",
+        "santen"
+      ],
+      [
+        "smith & nephew",
+        "smith & nephew orthopaedics"
+      ],
+      [
+        "encore medical",
+        "encore medical, l.p"
+      ],
+      [
+        "janssen",
+        "janssen-cilag",
+        "janssen-cilag international",
+        "janssen pharmaceutical k.k"
+      ],
+      [
+        "briohealth",
+        "briohealth solutions"
+      ],
+      [
+        "genentech",
+        "roche-genentech"
+      ],
+      [
+        "novartis pharmaceuticals",
+        "novartis"
+      ],
+      [
+        "chiesi italia",
+        "chiesi farmaceutici s.p.a",
+        "chiesi hungary",
+        "chiesi slovenija, d.o.o"
+      ],
+      [
+        "rarecells",
+        "rarecells diagnostics sas"
+      ],
+      [
+        "pierre fabre medicament",
+        "pierre fabre pharma"
+      ],
+      [
+        "laboratory corporation of america",
+        "labcorp corporation of america holdings"
+      ],
+      [
+        "medtronic cardiovascular",
+        "medtronic cardiac surgery",
+        "medtronicneuro",
+        "medtronic cardiac ablation solutions"
+      ],
+      [
+        "fresenius kabi",
+        "fresenius kabi taiwan",
+        "fresenius kabi sino-swed pharmaceutical"
+      ],
+      [
+        "edwards lifesciences",
+        "edwards (shanghai) lifesciences medical supplies"
+      ],
+      [
+        "nanjing iaso biotechnology",
+        "shanghai iaso biotechnology"
+      ],
+      [
+        "innovent biologics (suzhou",
+        "innovent biologics technology limited (shanghai r&d center"
+      ],
+      [
+        "theravia",
+        "trigone pharma"
+      ],
+      [
+        "lumibird medical (quantel medical, ellex medical, optotek",
+        "lumiradx"
+      ],
+      [
+        "astellas pharma",
+        "astellas pharma global development"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 14,
+    "n_groups": 36,
+    "names_in_groups": 94,
+    "pairs": 103,
+    "group_sizes": [
+      3,
+      3,
+      2,
+      2,
+      5,
+      6,
+      5,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      7,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "eisai",
+        "eisai china",
+        "laboratoire eisai"
+      ],
+      [
+        "hoffmann-la roche",
+        "roche diagnostics",
+        "roche sequencing solutions"
+      ],
+      [
+        "pharmaessentia",
+        "pharmaessentia japan k.k"
+      ],
+      [
+        "tanabe pharma",
+        "tanabe pharma america"
+      ],
+      [
+        "biotronik",
+        "biotronik japan",
+        "biotronik korea",
+        "biotronik france",
+        "biotronik se & co. kg"
+      ],
+      [
+        "medtronic",
+        "medtronic bakken research",
+        "medtronic spinal and biologics",
+        "medtronicneuro",
+        "medtronic vascular",
+        "medtronic cardiac rhythm and heart failure"
+      ],
+      [
+        "stryker australia",
+        "stryker trauma and extremities",
+        "stryker nordic",
+        "stryker instruments",
+        "stryker endoscopy"
+      ],
+      [
+        "djo",
+        "djo uk"
+      ],
+      [
+        "almirall",
+        "almirall, sas"
+      ],
+      [
+        "catalyst pharmaceuticals",
+        "catalyst pharmaceutical research"
+      ],
+      [
+        "baylx",
+        "beijing baylx biotech"
+      ],
+      [
+        "servier bio-innovation",
+        "servier affaires m\u00e9dicales",
+        "servier (tianjin) pharmaceutical"
+      ],
+      [
+        "ono pharmaceutical",
+        "ono pharma usa"
+      ],
+      [
+        "zai lab (shanghai",
+        "zai lab (hong kong"
+      ],
+      [
+        "ibsa institut biochimique",
+        "ibsa farmaceutici italia srl"
+      ],
+      [
+        "medivation",
+        "medivation llc, a wholly owned subsidiary of pfizer"
+      ],
+      [
+        "pfizer",
+        "arena is a wholly owned subsidiary of pfizer"
+      ],
+      [
+        "bavarian nordic",
+        "valneva austria"
+      ],
+      [
+        "fresenius",
+        "fresenius kabi",
+        "fresenius kabi taiwan"
+      ],
+      [
+        "vifor fresenius medical care renal pharma",
+        "fresenius kabi"
+      ],
+      [
+        "mylan pharmaceuticals",
+        "viatris"
+      ],
+      [
+        "medacta international",
+        "medacta usa"
+      ],
+      [
+        "philips healthcare",
+        "philips healthcare (suzhou"
+      ],
+      [
+        "astellas pharma global development",
+        "astellas pharma europe",
+        "astellas pharma china",
+        "astellas institute for regenerative medicine"
+      ],
+      [
+        "accord healthcare",
+        "advanz pharma"
+      ],
+      [
+        "ceryx medical",
+        "ceryx medical australia"
+      ],
+      [
+        "beigene",
+        "beigene usa"
+      ],
+      [
+        "ausperbio therapeutics",
+        "ausper biopharma"
+      ],
+      [
+        "bioheng therapeutics us",
+        "nanjing bioheng biotech"
+      ],
+      [
+        "janssen-cilag",
+        "janssen pharmaceuticals",
+        "janssen research & development",
+        "janssen diagnostics",
+        "janssen medical affairs",
+        "janssen pharmaceutical k.k",
+        "janssen cilag s.a.s"
+      ],
+      [
+        "sichuan haisco pharmaceutical group",
+        "haisco pharmaceutical group",
+        "xizang haisco pharmaceutical"
+      ],
+      [
+        "chengdu kanghong pharmaceutical group",
+        "chengdu kanghong biotech"
+      ],
+      [
+        "bausch & lomb",
+        "bausch health americas"
+      ],
+      [
+        "tasly pharmaceuticals",
+        "tasly pharmaceutical group"
+      ],
+      [
+        "edwards lifesciences",
+        "jc medical, inc., an affiliate of edwards lifesciences"
+      ],
+      [
+        "archer-daniels-midland",
+        "archer daniels midland"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 15,
+    "n_groups": 19,
+    "names_in_groups": 39,
+    "pairs": 21,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "alere san diego",
+        "abbott rapid dx"
+      ],
+      [
+        "us endoscopy",
+        "us endoscopy group"
+      ],
+      [
+        "chengdu diao jiuhong pharmaceutical factory",
+        "chendu diao nine hong pharmaceutical factory"
+      ],
+      [
+        "guangzhou burning rock dx",
+        "guangzhou burning rock bioengineering"
+      ],
+      [
+        "inquis medical",
+        "inquis clinical research"
+      ],
+      [
+        "highlightll pharmaceutical (usa",
+        "hangzhou highlightll pharmaceutical"
+      ],
+      [
+        "qed therapeutics, a bridgebio",
+        "eidos therapeutics, a bridgebio"
+      ],
+      [
+        "coloplast a/s",
+        "coloplast"
+      ],
+      [
+        "symatese",
+        "symatese aesthetics"
+      ],
+      [
+        "bioactor",
+        "bioactor b.v"
+      ],
+      [
+        "nec bio therapeutics",
+        "nec bio b.v"
+      ],
+      [
+        "akesobio australia",
+        "akesobio"
+      ],
+      [
+        "philips healthcare",
+        "philips medical systems",
+        "philips portuguesa"
+      ],
+      [
+        "sound biopharmaceuticals",
+        "cytosinlab therapeutics"
+      ],
+      [
+        "3d medicines (beijing",
+        "3d medicines"
+      ],
+      [
+        "paion uk",
+        "paion deutschland"
+      ],
+      [
+        "braincare",
+        "braincare usa"
+      ],
+      [
+        "r-pharm",
+        "r-pharm international"
+      ],
+      [
+        "santen pharmaceutical",
+        "santen"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 16,
+    "n_groups": 40,
+    "names_in_groups": 90,
+    "pairs": 63,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      2,
+      3,
+      2,
+      2,
+      4,
+      2,
+      4,
+      2,
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "alpine immune sciences inc, a subsidiary of vertex",
+        "alpine immune sciences"
+      ],
+      [
+        "icometrix",
+        "icometrixleuven"
+      ],
+      [
+        "braincare",
+        "braincare usa"
+      ],
+      [
+        "viatris",
+        "viatris pharmaceuticals"
+      ],
+      [
+        "guangzhou burning rock bioengineering",
+        "guangzhou burning rock dx"
+      ],
+      [
+        "depuy synthes",
+        "depuy international"
+      ],
+      [
+        "tianjin hemay pharmaceutical",
+        "ganzhou hemay pharmaceutical"
+      ],
+      [
+        "intervene",
+        "intervene immune"
+      ],
+      [
+        "sonova",
+        "sonova canada"
+      ],
+      [
+        "ascletis pharma (china",
+        "ascletis pharmaceuticals"
+      ],
+      [
+        "incyte biosciences uk",
+        "incyte biosciences france"
+      ],
+      [
+        "ppd development",
+        "ppd, part of thermo fisher scientific",
+        "pharmaceutical product development, (ppd"
+      ],
+      [
+        "rho",
+        "rho federal systems division"
+      ],
+      [
+        "anova innovation",
+        "anova enterprises"
+      ],
+      [
+        "kahr medical",
+        "kahr bio australia"
+      ],
+      [
+        "msd france",
+        "msd italia s.r.l",
+        "msd pharmaceuticals"
+      ],
+      [
+        "pierre fabre medicament",
+        "pierre fabre laboratories",
+        "pierre fabre"
+      ],
+      [
+        "servier",
+        "servier bio-innovation"
+      ],
+      [
+        "fujifilm",
+        "fujifilm medical systems usa"
+      ],
+      [
+        "acceleron pharma, inc., a wholly-owned subsidiary of merck & co., inc., rahway, nj usa",
+        "peloton therapeutics, inc., a subsidiary of merck & co., inc. (rahway, new jersey usa",
+        "prometheus biosciences, inc., a subsidiary of merck & co., inc. (rahway, new jersey usa"
+      ],
+      [
+        "merck healthcare kgaa, darmstadt, germany, an affiliate of merck kgaa, darmstadt, germany",
+        "emd serono research & development institute"
+      ],
+      [
+        "arena is a wholly owned subsidiary of pfizer",
+        "wyeth is now a wholly owned subsidiary of pfizer"
+      ],
+      [
+        "xian-janssen pharmaceutical",
+        "janssen-cilag g.m.b.h",
+        "janssen-cilag s.p.a",
+        "janssen medical affairs"
+      ],
+      [
+        "array biopharma",
+        "array genomics"
+      ],
+      [
+        "philips respironics",
+        "philips healthcare",
+        "philips clinical & medical affairs global",
+        "philips portuguesa"
+      ],
+      [
+        "solventum us",
+        "solventum orthodontics"
+      ],
+      [
+        "chiesi poland sp. z o.o",
+        "chiesi pharma ab, nordic"
+      ],
+      [
+        "iqvia",
+        "iqvia rds"
+      ],
+      [
+        "medtronic cardiac rhythm and heart failure",
+        "medtronic spinal and biologics",
+        "medtronic neurovascular clinical affairs",
+        "medtronicneuro"
+      ],
+      [
+        "takeda canada",
+        "takeda pharmaceuticals international"
+      ],
+      [
+        "stryker (beijing) healthcare products",
+        "stryker south pacific"
+      ],
+      [
+        "djo",
+        "djo uk"
+      ],
+      [
+        "biotronik",
+        "biotronik japan"
+      ],
+      [
+        "bausch & lomb",
+        "bausch health americas"
+      ],
+      [
+        "microport crm",
+        "shanghai microport medical (group"
+      ],
+      [
+        "sumitomo pharma america",
+        "shanghai longwood biopharmaceuticals"
+      ],
+      [
+        "horizon pharma ireland, ltd., dublin ireland",
+        "horizon pharma usa"
+      ],
+      [
+        "ethicon",
+        "ethicon endo-surgery"
+      ],
+      [
+        "kyowa kirin china pharmaceutical",
+        "kyowa kirin pharmaceutical development"
+      ],
+      [
+        "west-ward pharmaceutical",
+        "hikma pharmaceuticals"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 17,
+    "n_groups": 46,
+    "names_in_groups": 117,
+    "pairs": 127,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      3,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      6,
+      2,
+      2,
+      6,
+      4,
+      8,
+      2,
+      2,
+      3,
+      5,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "seagen, a wholly owned subsidiary of pfizer",
+        "seagen"
+      ],
+      [
+        "shire",
+        "baxalta now part of shire"
+      ],
+      [
+        "briohealth solutions",
+        "briohealth"
+      ],
+      [
+        "incyte",
+        "incyte biosciences japan gk"
+      ],
+      [
+        "recursion pharmaceuticals",
+        "exscientia ai ltd., a wholly owned subsidiary of recursion pharmaceuticals"
+      ],
+      [
+        "iqvia",
+        "iqvia biotech"
+      ],
+      [
+        "nestle health science",
+        "nestl\u00e9 health science spain",
+        "soci\u00e9t\u00e9 des produits nestl\u00e9 (spn"
+      ],
+      [
+        "gracell biotechnologies (shanghai",
+        "gracell biopharmaceuticals"
+      ],
+      [
+        "ascendis pharma oncology division a/s",
+        "ascendis pharma endocrinology division a/s",
+        "ascendis pharma growth disorders a/s"
+      ],
+      [
+        "djo",
+        "djo uk"
+      ],
+      [
+        "biotronik",
+        "biotronik france",
+        "biotronik australia"
+      ],
+      [
+        "b. braun melsungen",
+        "b. braun ltd. centre of excellence infection control"
+      ],
+      [
+        "chia tai tianqing pharmaceutical group",
+        "chia tai tianqing pharmaceutical (guangzhou"
+      ],
+      [
+        "a2 milk",
+        "a2 biotherapeutics"
+      ],
+      [
+        "sonova",
+        "sonova canada"
+      ],
+      [
+        "stryker instruments",
+        "stryker spine",
+        "stryker neurovascular",
+        "stryker craniomaxillofacial",
+        "stryker nordic",
+        "stryker australia"
+      ],
+      [
+        "otto bock healthcare products",
+        "otto bock france snc"
+      ],
+      [
+        "berlin-chemie ag menarini group",
+        "berlin-chemie menarini"
+      ],
+      [
+        "medtronic",
+        "medtronic cardiac surgery",
+        "medtronic - mitg",
+        "medtronic neurovascular clinical affairs",
+        "medtronic bakken research",
+        "medtronic vascular"
+      ],
+      [
+        "astellas pharma",
+        "astellas pharma canada",
+        "astellas pharma europe",
+        "astellas gene therapies"
+      ],
+      [
+        "janssen research & development",
+        "janssen pharmaceuticals",
+        "janssen biotech",
+        "janssen pharmaceutica",
+        "janssen",
+        "janssen pharmaceutical k.k",
+        "janssen cilag s.a.s",
+        "johnson & johnson pharmaceutical research & development, l.l.c"
+      ],
+      [
+        "fresenius kabi",
+        "fresenius kabi swissbiosim"
+      ],
+      [
+        "teva pharmaceuticals usa",
+        "teva pharma"
+      ],
+      [
+        "novartis",
+        "novartis pharmaceuticals",
+        "beijing novartis pharma"
+      ],
+      [
+        "servier russia",
+        "servier bio-innovation",
+        "adir, a servier group",
+        "institut de recherches internationales servier (i.r.i.s",
+        "groupe \u00e9thique et sant\u00e9"
+      ],
+      [
+        "acceleron pharma, inc., a wholly-owned subsidiary of merck & co., inc., rahway, nj usa",
+        "prometheus biosciences, inc., a subsidiary of merck & co., inc. (rahway, new jersey usa"
+      ],
+      [
+        "merck sharp & dohme",
+        "merck canada"
+      ],
+      [
+        "covance",
+        "labcorp corporation of america holdings",
+        "laboratory corporation of america"
+      ],
+      [
+        "aura",
+        "aura biosciences"
+      ],
+      [
+        "spire",
+        "spire therapeutics"
+      ],
+      [
+        "biofortis clinical research",
+        "biofortis innovation services"
+      ],
+      [
+        "chengdu joyo pharma",
+        "guangzhou joyo pharma"
+      ],
+      [
+        "mibelle",
+        "mibelle group biochemistry"
+      ],
+      [
+        "chugai pharma usa",
+        "roche chugai"
+      ],
+      [
+        "gencor pacific limited, hong kong",
+        "gencor pacific group"
+      ],
+      [
+        "jiangsu hengrui pharmaceutical",
+        "guangdong hengrui pharmaceutical"
+      ],
+      [
+        "haisco pharmaceutical group",
+        "haisco-usa pharmaceuticals"
+      ],
+      [
+        "advenchen laboratories",
+        "advenchen pharmaceuticals"
+      ],
+      [
+        "hope biosciences",
+        "hope biosciences research foundation"
+      ],
+      [
+        "takeda pharmaceuticals north america",
+        "takeda france"
+      ],
+      [
+        "otsuka pharmaceutical factory",
+        "otsuka america pharmaceutical",
+        "otsuka pharmaceutical development & commercialization"
+      ],
+      [
+        "regen lab",
+        "regenlab france sas"
+      ],
+      [
+        "green cross",
+        "green cross wellbeing"
+      ],
+      [
+        "bial r&d investments",
+        "bial - portela c"
+      ],
+      [
+        "r3 stem cell",
+        "r3 medical research"
+      ],
+      [
+        "nerviano medical sciences",
+        "nerviano medical sciences (shanghai"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 18,
+    "n_groups": 53,
+    "names_in_groups": 124,
+    "pairs": 100,
+    "group_sizes": [
+      3,
+      2,
+      2,
+      7,
+      2,
+      3,
+      2,
+      4,
+      2,
+      3,
+      3,
+      3,
+      2,
+      3,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "chiesi sas",
+        "chiesi italia",
+        "chiesi farmaceutica ltda"
+      ],
+      [
+        "us endoscopy",
+        "us endoscopy group"
+      ],
+      [
+        "napo therapeutics, s.p.a",
+        "napo pharmaceuticals"
+      ],
+      [
+        "janssen pharmaceutica n.v., belgium",
+        "janssen pharmaceutica",
+        "janssen",
+        "janssen korea, ltd., korea",
+        "janssen-cilag div. of johnson&johnson se",
+        "xian-janssen pharmaceutical",
+        "janssen diagnostics"
+      ],
+      [
+        "jiangsu aidea pharmaceutical group",
+        "chengdu aidea pharmaceutical technology"
+      ],
+      [
+        "roche diagnostics",
+        "roche diagnostics international",
+        "roche diagnostic"
+      ],
+      [
+        "roche farma",
+        "roche-genentech"
+      ],
+      [
+        "astellas pharma europe",
+        "astellas pharma us",
+        "astellas pharma global development",
+        "astellas pharma europe b.v"
+      ],
+      [
+        "smith & nephew",
+        "smith & nephew orthopaedics"
+      ],
+      [
+        "sichuan haisco pharmaceutical group",
+        "haisco pharmaceutical group",
+        "xizang haisco pharmaceutical"
+      ],
+      [
+        "chia tai tianqing pharmaceutical group nanjing shunxin pharmaceutical",
+        "chia tai tianqing pharmaceutical group",
+        "chia tai tianqing pharmaceutical (guangzhou"
+      ],
+      [
+        "jazz pharmaceuticals research uk",
+        "jazz pharmaceuticals",
+        "jazz pharmaceuticals ireland"
+      ],
+      [
+        "celgene",
+        "juno therapeutics, a subsidiary of celgene"
+      ],
+      [
+        "biotronik japan",
+        "biotronik france",
+        "biotronik se & co. kg"
+      ],
+      [
+        "microport orthopedics",
+        "shanghai microport endovascular medtech\uff08group\uff09"
+      ],
+      [
+        "cyclo therapeutics",
+        "cycle therapeutics"
+      ],
+      [
+        "medigen",
+        "medigene"
+      ],
+      [
+        "servier russia",
+        "institut de recherches internationales servier (i.r.i.s",
+        "adir, a servier group"
+      ],
+      [
+        "pepsico",
+        "pepsico global r&d"
+      ],
+      [
+        "b.braun surgical",
+        "b. braun melsungen"
+      ],
+      [
+        "medtronic vascular",
+        "medtronic diabetes",
+        "medtronic spine"
+      ],
+      [
+        "takeda pharmaceuticals international",
+        "baxalta now part of shire"
+      ],
+      [
+        "otto bock healthcare products",
+        "otto bock healthcare"
+      ],
+      [
+        "depuy international",
+        "cerenovus, part of depuy synthes products"
+      ],
+      [
+        "cmic co, ltd. japan",
+        "clinigen k.k"
+      ],
+      [
+        "genoss",
+        "genomic health\u00ae"
+      ],
+      [
+        "dizal pharmaceuticals",
+        "dizal (jiangsu) pharmaceutical"
+      ],
+      [
+        "theras, inc., d/b/a bbot (bridgebio oncology therapeutics",
+        "qed therapeutics, a bridgebio"
+      ],
+      [
+        "imago biosciences, inc., a subsidiary of merck & co., inc., (rahway, new jersey usa",
+        "arqule, inc., a subsidiary of merck sharp & dohme llc, a subsidiary of merck & co., inc. (rahway, nj usa"
+      ],
+      [
+        "sanofi",
+        "sanofi pasteur, a sanofi",
+        "provention bio, a sanofi"
+      ],
+      [
+        "merck, s.l., spain",
+        "merck serono limited, uk"
+      ],
+      [
+        "bellus health inc. - a gsk",
+        "haleon"
+      ],
+      [
+        "insmed",
+        "insmed gene therapy"
+      ],
+      [
+        "hanx biopharmaceuticals (wuhan",
+        "hangzhou hanx biopharmaceuticals"
+      ],
+      [
+        "ascendis pharma oncology division a/s",
+        "ascendis pharma growth disorders a/s"
+      ],
+      [
+        "daiichi sankyo europe, gmbh, a daiichi sankyo",
+        "daiichi sankyo korea"
+      ],
+      [
+        "pt kalbe farma tbk",
+        "pt kalbe genexine biologics"
+      ],
+      [
+        "celltrion",
+        "celltrion pharm",
+        "celltrion healthcare france"
+      ],
+      [
+        "guangzhou joyo pharma",
+        "chengdu joyo pharma"
+      ],
+      [
+        "sound biopharmaceuticals",
+        "sound pharmaceuticals"
+      ],
+      [
+        "abbott",
+        "abbott rapid dx"
+      ],
+      [
+        "pharmaessentia",
+        "pharmaessentia japan k.k"
+      ],
+      [
+        "genrix (shanghai) biopharmaceutical",
+        "chongqing genrix biopharmaceutical"
+      ],
+      [
+        "vcanbio cell and gene engineering",
+        "wuhan optics valley vcanbiopharma"
+      ],
+      [
+        "chendu diao nine hong pharmaceutical factory",
+        "chendu diao pharmaceutical group"
+      ],
+      [
+        "shanghai institute of biological products",
+        "shanghai pharmaceutical group biological therapy technology"
+      ],
+      [
+        "metsera, a wholly owned subsidiary of pfizer",
+        "pharmacyclics switzerland"
+      ],
+      [
+        "k-group, beta, inc., a wholly owned subsidiary of zentalis pharmaceuticals",
+        "rempex (a wholly owned subsidiary of melinta therapeutics"
+      ],
+      [
+        "virogin biotech canada",
+        "shanghai virogin biotech",
+        "cnbg-virogin biotech (shanghai"
+      ],
+      [
+        "icell gene therapeutics",
+        "shanghai icell biotechnology co., ltd, shanghai, china"
+      ],
+      [
+        "santen",
+        "santen sas"
+      ],
+      [
+        "ucb pharma",
+        "ucb biosciences"
+      ],
+      [
+        "jiangsu simcere pharmaceutical",
+        "fujian shengdi pharmaceutical"
+      ]
+    ]
+  },
+  {
+    "stratum": "INDUSTRY",
+    "n_total": 7226,
+    "n_sample": 2000,
+    "sample": 19,
+    "n_groups": 35,
+    "names_in_groups": 85,
+    "pairs": 74,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2,
+      6,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      4,
+      2
+    ],
+    "groups": [
+      [
+        "minghui pharmaceutical (hangzhou",
+        "minghui pharmaceutical"
+      ],
+      [
+        "ausperbio therapeutics",
+        "ausper biopharma"
+      ],
+      [
+        "securabio",
+        "secura bio"
+      ],
+      [
+        "streetlab vision",
+        "streetlab"
+      ],
+      [
+        "guangzhou burning rock dx",
+        "guangzhou burning rock bioengineering"
+      ],
+      [
+        "chiesi sas",
+        "chiesi usa",
+        "chiesi pharma ab, nordic"
+      ],
+      [
+        "pierre fabre medicament",
+        "pierre fabre ib\u00e9rica",
+        "pierre fabre"
+      ],
+      [
+        "institut de recherches internationales servier (i.r.i.s",
+        "servier",
+        "servier hellas pharmaceuticals"
+      ],
+      [
+        "nanjing iaso biotechnology",
+        "shanghai iaso biotechnology"
+      ],
+      [
+        "medivation",
+        "medivation llc, a wholly owned subsidiary of pfizer"
+      ],
+      [
+        "horizon pharma usa",
+        "horizon pharma ireland, ltd., dublin ireland"
+      ],
+      [
+        "pharmaessentia japan k.k",
+        "pharmaessentia"
+      ],
+      [
+        "stryker neurovascular",
+        "stryker canada",
+        "stryker orthopaedics",
+        "stryker south pacific",
+        "stryker nordic",
+        "stryker trauma and extremities"
+      ],
+      [
+        "depuy synthes",
+        "depuy orthopaedics"
+      ],
+      [
+        "b. braun melsungen",
+        "b.braun avitum",
+        "b. braun medical international trading",
+        "b. braun medical industries sdn. bhd"
+      ],
+      [
+        "nggt",
+        "nggt (suzhou) biotechnology"
+      ],
+      [
+        "incyte biosciences italy s.r.l",
+        "incyte"
+      ],
+      [
+        "avistone pharmaceutical\uff08ningbo\uff09",
+        "avistone biotechnology"
+      ],
+      [
+        "biofortis innovation services",
+        "biofortis clinical research"
+      ],
+      [
+        "bristol-myers squibb",
+        "karuna therapeutics, inc., a bristol myers squibb"
+      ],
+      [
+        "celgene",
+        "juno therapeutics, a subsidiary of celgene"
+      ],
+      [
+        "chia tai tianqing pharmaceutical (guangzhou",
+        "shanghai chia tai tianqing pharmaceutical technology development"
+      ],
+      [
+        "principia biopharma, a sanofi",
+        "bioverativ, a sanofi"
+      ],
+      [
+        "bellus health inc. - a gsk",
+        "gb002",
+        "idrx inc. - a gsk"
+      ],
+      [
+        "innovent biologics (suzhou",
+        "innovent biopharmaceutical technology (hangzhou"
+      ],
+      [
+        "merck serono gmbh, germany",
+        "emd serono research & development institute",
+        "merz therapeutics"
+      ],
+      [
+        "calcilytix therapeutics, inc., a bridgebio",
+        "theras, inc., d/b/a bbot (bridgebio oncology therapeutics"
+      ],
+      [
+        "metsera, a wholly owned subsidiary of pfizer",
+        "wyeth is now a wholly owned subsidiary of pfizer"
+      ],
+      [
+        "arqule, inc., a subsidiary of merck sharp & dohme llc, a subsidiary of merck & co., inc. (rahway, nj usa",
+        "merck sharp & dohme"
+      ],
+      [
+        "boston scientific korea",
+        "boston scientific japan k.k"
+      ],
+      [
+        "ppd development",
+        "ppd, part of thermo fisher scientific"
+      ],
+      [
+        "nova eye",
+        "nova eye medical"
+      ],
+      [
+        "nutricia nutrition clinique",
+        "nutricia",
+        "nutricia research",
+        "nutricia uk"
+      ],
+      [
+        "astellas gene therapies",
+        "astellas pharma europe",
+        "astellas pharma canada",
+        "astellas institute for regenerative medicine"
+      ],
+      [
+        "chr hansen",
+        "chr hansen - part of novonesis"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 0,
+    "n_groups": 8,
+    "names_in_groups": 16,
+    "pairs": 8,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "affiliated cancer hospital of shantou university medical college",
+        "affiliated cancer hospital & institute of guangzhou medical university"
+      ],
+      [
+        "thunder bay regional health research institute",
+        "thunder bay regional health sciences centre"
+      ],
+      [
+        "george institute for global health, australia",
+        "george institute for global health, china"
+      ],
+      [
+        "zibo municipal hospital",
+        "central hospital of zibo"
+      ],
+      [
+        "kyoto university hospital",
+        "kyoto university, graduate school of medicine"
+      ],
+      [
+        "chang gung memorial hospital",
+        "kaoshiung chang gung memorial hospital"
+      ],
+      [
+        "yang jianjun, phd",
+        "yangjianjun"
+      ],
+      [
+        "royal free hampstead nhs trust",
+        "royal free hospital nhs foundation trust"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 1,
+    "n_groups": 8,
+    "names_in_groups": 16,
+    "pairs": 8,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "ankara bilkent sehir hastanesi",
+        "t.c. sa\u011fl\u0131k bakanl\u0131\u011f\u0131 ankara bilkent \u015fehir hastanesi"
+      ],
+      [
+        "state university of new york at buffalo",
+        "university at buffalo"
+      ],
+      [
+        "san ysidro health center",
+        "centro de salud la comunidad de san ysidro inc dba: san ysidro health"
+      ],
+      [
+        "universitat internacional de catalunya",
+        "international university of catalonia"
+      ],
+      [
+        "nethersole school of nursing",
+        "alice ho miu ling nethersole hospital"
+      ],
+      [
+        "irccs san raffaele",
+        "scientific institute san raffaele"
+      ],
+      [
+        "first affiliated hospital of university of science and technology of china",
+        "first affiliated hospital, university of science and technology of china"
+      ],
+      [
+        "jiangsu taizhou people's hospital",
+        "taizhou enze medical center group"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 2,
+    "n_groups": 14,
+    "names_in_groups": 29,
+    "pairs": 16,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "third military medical university",
+        "second affiliated hospital of third military medical university"
+      ],
+      [
+        "fu wai hospital, beijing, china",
+        "chinese academy of medical sciences, fuwai hospital"
+      ],
+      [
+        "tameside general hospital",
+        "tameside hospital nhs foundation trust"
+      ],
+      [
+        "tulane university",
+        "tulane university school of public health and tropical medicine"
+      ],
+      [
+        "scripps research institute",
+        "scripps health",
+        "scripps clinic"
+      ],
+      [
+        "namik kemal university",
+        "namik kemal university school of medicine, tekirdag"
+      ],
+      [
+        "i\u0307stinye university",
+        "istinye university"
+      ],
+      [
+        "jiangxi university of traditional chinese medicine",
+        "affiliated hospital of jiangxi university of traditional chinese medicine"
+      ],
+      [
+        "masaryk hospital usti nad labem",
+        "masarykova nemocnice v usti nad labem, krajska zdravotni a.s"
+      ],
+      [
+        "centre leon berard",
+        "h\u00f4pital l\u00e9on b\u00e9rard"
+      ],
+      [
+        "rubens camargo siqueira",
+        "centro de pesquisa rubens siqueira"
+      ],
+      [
+        "oswaldo cruz foundation",
+        "immunobiological technology institute (bio-manguinhos) / oswaldo cruz foundation (fiocruz"
+      ],
+      [
+        "university of freiburg",
+        "university hospital freiburg"
+      ],
+      [
+        "paijat-hame hospital district",
+        "p\u00e4ij\u00e4t h\u00e4me central hospital"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 3,
+    "n_groups": 7,
+    "names_in_groups": 14,
+    "pairs": 7,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "centre for aging and brain health innovation",
+        "norwegian centre for ageing and health"
+      ],
+      [
+        "lawson research institute of st. joseph's",
+        "london health sciences centre research institute or lawson research institute of st. joseph's"
+      ],
+      [
+        "irccs sdn",
+        "irccs synlab sdn"
+      ],
+      [
+        "novo nordisk foundation center for basic metabolic research",
+        "novo nordic foundation"
+      ],
+      [
+        "aerospace center hospital",
+        "peking university aerospace center hospital"
+      ],
+      [
+        "kyoto university hospital",
+        "kyoto university, graduate school of medicine"
+      ],
+      [
+        "university of paris 5 - rene descartes",
+        "universit\u00e9 de nantes"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 4,
+    "n_groups": 7,
+    "names_in_groups": 15,
+    "pairs": 9,
+    "group_sizes": [
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "boninger, michael, md",
+        "michael boninger"
+      ],
+      [
+        "porteus, matthew, md",
+        "research foundation flanders",
+        "research foundation - flanders (fonds wetenschappelijk onderzoek"
+      ],
+      [
+        "hanyang university",
+        "hanyang university seoul hospital"
+      ],
+      [
+        "boston children's hospital",
+        "boston children's hospital, boston, ma, usa"
+      ],
+      [
+        "mount sinai hospital",
+        "mount sinai hospital, canada"
+      ],
+      [
+        "copenhagen university hospital, hvidovre",
+        "copenhagen university hospital, denmark"
+      ],
+      [
+        "yan zhang",
+        "yan zhang, md"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 5,
+    "n_groups": 10,
+    "names_in_groups": 22,
+    "pairs": 14,
+    "group_sizes": [
+      2,
+      3,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "groupe hospitalier pitie-salpetriere",
+        "piti\u00e9-salp\u00eatri\u00e8re hospital"
+      ],
+      [
+        "steno diabetes center copenhagen",
+        "steno diabetes center greenland",
+        "steno diabetes centre north denmark"
+      ],
+      [
+        "polish cardiology association",
+        "polish cardiac society"
+      ],
+      [
+        "shanghai 6th people's hospital",
+        "shanghai jiao tong university school of medicine",
+        "ningbo no.6 hospital"
+      ],
+      [
+        "bishoy shehata fahim",
+        "bishoy shehata"
+      ],
+      [
+        "general university hospital of patras",
+        "university general hospital of patras"
+      ],
+      [
+        "tergooi hospital",
+        "tergooi medical center"
+      ],
+      [
+        "university of luebeck",
+        "university hospital l\u00fcbeck"
+      ],
+      [
+        "kyung hee university hospital at gangdong",
+        "kyung hee university hospital"
+      ],
+      [
+        "aksaray university",
+        "aksaray university training and research hospital"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 6,
+    "n_groups": 7,
+    "names_in_groups": 15,
+    "pairs": 9,
+    "group_sizes": [
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "scientific institute san raffaele",
+        "irccs san raffaele",
+        "san raffaele university hospital, italy"
+      ],
+      [
+        "anne m. connolly",
+        "eileen connolly"
+      ],
+      [
+        "second affiliated hospital of xi'an jiaotong university",
+        "xi'an jiaotong university"
+      ],
+      [
+        "robert h. lurie cancer center",
+        "ann & robert h lurie children's hospital of chicago"
+      ],
+      [
+        "yang jianjun, phd",
+        "yangjianjun"
+      ],
+      [
+        "complejo hospitalario universitario de santiago",
+        "hospital clinico universitario de santiago"
+      ],
+      [
+        "region g\u00e4vleborg",
+        "university of gavle"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 7,
+    "n_groups": 11,
+    "names_in_groups": 22,
+    "pairs": 11,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "university of rome foro italico",
+        "universit\u00e0 degli studi di roma foro italico"
+      ],
+      [
+        "first affiliated hospital of guangdong pharmaceutical university",
+        "first affiliated hospital of guangzhou medical university"
+      ],
+      [
+        "gpoh consortium sickle cell disease",
+        "german society for pediatric oncology and hematology gpoh ggmbh"
+      ],
+      [
+        "hebei medical university third hospital",
+        "hebei medical university fourth hospital"
+      ],
+      [
+        "second hospital of hebei medical university",
+        "second hospital of shandong university"
+      ],
+      [
+        "hospital \u00e1lvaro cunqueiro",
+        "complexo hospitalario universitario de a coru\u00f1a"
+      ],
+      [
+        "health sciences centre foundation, manitoba",
+        "health sciences centre, winnipeg, manitoba"
+      ],
+      [
+        "hospital universitari joan xxiii de tarragona",
+        "joan xxiii university hospital"
+      ],
+      [
+        "rush university",
+        "rush university medical center"
+      ],
+      [
+        "staten island university hospital",
+        "north shore university hospital"
+      ],
+      [
+        "clinical hospital centre zagreb",
+        "klini\u010dki bolni\u010dki centar zagreb"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 8,
+    "n_groups": 8,
+    "names_in_groups": 16,
+    "pairs": 8,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "academisch ziekenhuis groningen",
+        "university hospital, ghent"
+      ],
+      [
+        "polyclinic of the hospitaller brothers of st. john of god, budapest",
+        "st john of god hospital, vienna"
+      ],
+      [
+        "fu jen catholic university hospital",
+        "fu jen catholic university"
+      ],
+      [
+        "campus bio-medico university",
+        "fondazione policlinico universitario campus bio-medico"
+      ],
+      [
+        "sidney kimmel comprehensive cancer center at thomas jefferson university",
+        "thomas jefferson university"
+      ],
+      [
+        "unity health",
+        "unity health toronto"
+      ],
+      [
+        "istanbul medipol university hospital",
+        "medipol university"
+      ],
+      [
+        "beijing tsinghua changgeng hospital",
+        "beijing tsinghua chang gung hospital"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 9,
+    "n_groups": 7,
+    "names_in_groups": 15,
+    "pairs": 9,
+    "group_sizes": [
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "irccs san raffaele roma",
+        "ospedale san raffaele"
+      ],
+      [
+        "malawi liverpool wellcome programme",
+        "malawi-liverpool-wellcome trust clinical research programme"
+      ],
+      [
+        "university hospital of cologne",
+        "universit\u00e4tsklinikum k\u00f6ln",
+        "university of cologne"
+      ],
+      [
+        "howard s. hochster, md",
+        "howard s hochster"
+      ],
+      [
+        "chungbuk national university",
+        "chungbuk national university hospital"
+      ],
+      [
+        "fundacion para la investigacion hospital la fe",
+        "fundaci\u00f3n p\u00fablica andaluza para la gesti\u00f3n de la investigaci\u00f3n en sevilla"
+      ],
+      [
+        "instituto de investigaci\u00f3n sanitaria gregorio mara\u00f1\u00f3n",
+        "hospital general universitario gregorio mara\u00f1on"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 10,
+    "n_groups": 7,
+    "names_in_groups": 14,
+    "pairs": 7,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "consorci sanitari del maresme",
+        "consorci sanitari del maresme. hospital universitari de matar\u00f3"
+      ],
+      [
+        "fred hutchinson cancer research center/university of washington cancer consortium",
+        "fred hutchinson cancer center"
+      ],
+      [
+        "deutsche krebshilfe e.v., bonn (germany",
+        "deutsche krebsgesellschaft e.v"
+      ],
+      [
+        "research unit for general practice in aalborg",
+        "research unit for general practice, aarhus university"
+      ],
+      [
+        "bulent ecevit university",
+        "zonguldak bulent ecevit university"
+      ],
+      [
+        "metrohealth system, ohio",
+        "metrohealth medical center"
+      ],
+      [
+        "gang wu",
+        "gang wu, md"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 11,
+    "n_groups": 10,
+    "names_in_groups": 21,
+    "pairs": 12,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "zuyderland medisch centrum",
+        "zuyderland medical centre"
+      ],
+      [
+        "azienda ospedaliera universitaria integrata verona",
+        "universita di verona"
+      ],
+      [
+        "wang zhen",
+        "zhen wang"
+      ],
+      [
+        "yu wang",
+        "wang zhen"
+      ],
+      [
+        "island health",
+        "island health, victoria, bc",
+        "vancouver island health authority"
+      ],
+      [
+        "centro universitario la salle",
+        "fundaci\u00f3 universit\u00e0ria del bages"
+      ],
+      [
+        "alberta children's hospital",
+        "alberta children's hospital research institute"
+      ],
+      [
+        "fundacion dexeus",
+        "dexeus clinic woman"
+      ],
+      [
+        "wang zhen",
+        "zhen wang"
+      ],
+      [
+        "cantonal hospital of aarau, switzerland",
+        "kantonsspital aarau"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 12,
+    "n_groups": 9,
+    "names_in_groups": 18,
+    "pairs": 9,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "belfast health and social care trust",
+        "leeds teaching hospitals nhs trust"
+      ],
+      [
+        "fundaci\u00f3 institut germans trias i pujol",
+        "germans trias i pujol hospital"
+      ],
+      [
+        "guy's and st thomas' nhs foundation trust",
+        "guy's & st thomas' charity"
+      ],
+      [
+        "university college, london",
+        "university college london (ucl) cancer institute"
+      ],
+      [
+        "christianacare",
+        "christiana care health services"
+      ],
+      [
+        "ningbo no. 1 hospital",
+        "ningbo no.2 hospital"
+      ],
+      [
+        "slagelse hospital",
+        "slagelse sygehus"
+      ],
+      [
+        "alberta health services",
+        "alberta health services, calgary"
+      ],
+      [
+        "pusan national university hospital",
+        "pusan national university yangsan hospital"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 13,
+    "n_groups": 8,
+    "names_in_groups": 16,
+    "pairs": 8,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "dr david hasan, m.d",
+        "dr. david wasserstein"
+      ],
+      [
+        "intermountain medical center",
+        "intermountain health care"
+      ],
+      [
+        "instituto de investigaci\u00f3n sanitaria gregorio mara\u00f1\u00f3n",
+        "fundaci\u00f3n para la investigaci\u00f3n biom\u00e9dica del hospital gregorio maranon"
+      ],
+      [
+        "yan zhang, md",
+        "yan zhang"
+      ],
+      [
+        "mario negri institute for pharmacological research",
+        "istituto di ricerche farmacologiche mario negri"
+      ],
+      [
+        "ou bai, md/phd",
+        "oubai, md/phd"
+      ],
+      [
+        "first affiliated hospital of henan university of traditional chinese medicine",
+        "third affiliated hospital of henan university of traditional chinese medicine"
+      ],
+      [
+        "ospedale san raffaele",
+        "irccs san raffaele"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 14,
+    "n_groups": 4,
+    "names_in_groups": 10,
+    "pairs": 9,
+    "group_sizes": [
+      2,
+      2,
+      4,
+      2
+    ],
+    "groups": [
+      [
+        "centro de salud la comunidad de san ysidro inc dba: san ysidro health",
+        "san ysidro health center"
+      ],
+      [
+        "immuneonco biopharmaceuticals (shanghai",
+        "immunecare biopharmaceuticals (shanghai"
+      ],
+      [
+        "steno diabetes center copenhagen",
+        "steno diabetes centre north denmark",
+        "steno diabetes center odense",
+        "steno diabetes center greenland"
+      ],
+      [
+        "academisch medisch centrum - universiteit van amsterdam (amc-uva",
+        "fairview university medical center"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 15,
+    "n_groups": 5,
+    "names_in_groups": 10,
+    "pairs": 5,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "fuzhou university affiliated provincial hospital",
+        "fuzhou university"
+      ],
+      [
+        "junbo ge",
+        "ge junbo"
+      ],
+      [
+        "ana rita londral",
+        "ana rita londral, phd"
+      ],
+      [
+        "university of cologne",
+        "medical university of cologne"
+      ],
+      [
+        "sociedad de lucha contra el c\u00e1ncer del ecuador",
+        "sociedad de lucha contra el c\u00e1ncer"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 16,
+    "n_groups": 1,
+    "names_in_groups": 2,
+    "pairs": 1,
+    "group_sizes": [
+      2
+    ],
+    "groups": [
+      [
+        "health sciences north research institute",
+        "health sciences north"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 17,
+    "n_groups": 5,
+    "names_in_groups": 10,
+    "pairs": 5,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "shanghai pudong new area people's hospital",
+        "shanghai pudong hospital"
+      ],
+      [
+        "boston children's hospital",
+        "boston children's hospital, boston, ma, usa"
+      ],
+      [
+        "general hospital of larissa",
+        "general university hospital of patras"
+      ],
+      [
+        "university general hospital of patras",
+        "general university hospital of patras"
+      ],
+      [
+        "university of santo tomas",
+        "university of santo tomas hospital, philippines"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 18,
+    "n_groups": 12,
+    "names_in_groups": 25,
+    "pairs": 14,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "azienda ospedaliero universitaria, santa maria della misericordia di udine, italy",
+        "azienda ospedaliera s. maria della misericordia"
+      ],
+      [
+        "instituto nacional de ciencias medicas y nutricion salvador zubiran",
+        "national institute of medical sciences and nutrition, salvador zubiran"
+      ],
+      [
+        "konkuk university hospital",
+        "konkuk university medical center"
+      ],
+      [
+        "ko\u00e7 university",
+        "koc university hospital"
+      ],
+      [
+        "lincoln university college",
+        "lincoln university college malaysia"
+      ],
+      [
+        "xiamen children's hospital",
+        "xiamen children's hospital, fujian of china"
+      ],
+      [
+        "kantonsspital graub\u00fcnden",
+        "cantonal hospital graubuenden"
+      ],
+      [
+        "blood cancer united",
+        "blood cancer research partnership"
+      ],
+      [
+        "hangzhou tcm hospital affiliated to zhejiang chinese medical university",
+        "hangzhou hospital of traditional chinese medicine"
+      ],
+      [
+        "centre hospitalier de l'universit\u00e9 de montr\u00e9al (chum",
+        "chu de rouen - accueil",
+        "university hospital, rouen"
+      ],
+      [
+        "healing advocates registry and ministry",
+        "healing advocacy fund"
+      ],
+      [
+        "paijathame central hospital",
+        "joint authority for p\u00e4ij\u00e4t-h\u00e4me social and health care"
+      ]
+    ]
+  },
+  {
+    "stratum": "OTHER",
+    "n_total": 15783,
+    "n_sample": 2000,
+    "sample": 19,
+    "n_groups": 11,
+    "names_in_groups": 22,
+    "pairs": 11,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "second affiliated hospital of nantong university",
+        "affiliated hospital of nantong university"
+      ],
+      [
+        "lawson research institute of st. joseph's",
+        "london health sciences centre research institute or lawson research institute of st. joseph's"
+      ],
+      [
+        "university of western ontario, canada",
+        "western university"
+      ],
+      [
+        "howard s. hochster, md",
+        "howard s hochster"
+      ],
+      [
+        "university of erlangen-n\u00fcrnberg",
+        "university of erlangen-n\u00fcrnberg medical school"
+      ],
+      [
+        "changchun university of chinese medicine",
+        "affiliated hospital of changchun university of chinese medicine"
+      ],
+      [
+        "minneapolis heart institute",
+        "minneapolis heart institute foundation"
+      ],
+      [
+        "norfolk and norwich university hospitals nhs foundation trust",
+        "clinical research and trials unit (norfolk & norwich university hospital, uk"
+      ],
+      [
+        "sidney kimmel comprehensive cancer center at thomas jefferson university",
+        "jefferson medical college of thomas jefferson university"
+      ],
+      [
+        "universita degli studi di catania",
+        "university of catania"
+      ],
+      [
+        "adventhealth",
+        "adventhealth university"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 0,
+    "n_groups": 62,
+    "names_in_groups": 132,
+    "pairs": 79,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "lebanon valley college",
+        "villa maria college"
+      ],
+      [
+        "chru tours",
+        "tours university"
+      ],
+      [
+        "conseil national de l'ordre des masseurs-kin\u00e9sith\u00e9rapeutes",
+        "conseil national de l'ordre des masseur kin\u00e9sith\u00e9rapeutes (cnomk"
+      ],
+      [
+        "centro de investigaci\u00f3n biom\u00e9dica en red de fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn",
+        "centro de investigaci\u00f3n biom\u00e9dica en red fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn"
+      ],
+      [
+        "beijing anzhen hospital affiliated to capital medical university",
+        "sheng wang, anzhen hospital, beijing, china"
+      ],
+      [
+        "centro de investigaci\u00f3n en red de enfermedades raras (ciberer",
+        "centro de biolog\u00e3-a molecular severo ochoa, spain (cbmso"
+      ],
+      [
+        "colegio profesional fisioterapeutas castilla y le\u00f3n",
+        "colegio profesional de fisioterapeutas de castilla y le\u00f3n"
+      ],
+      [
+        "giusy rita, caponio",
+        "cerabino nicole"
+      ],
+      [
+        "dr. raffaele cozzolongo",
+        "dr. giannuzzi vito",
+        "vito, giannuzzi",
+        "dr. ancona anna"
+      ],
+      [
+        "francesco russo",
+        "russo francesco, md"
+      ],
+      [
+        "coletta sergio",
+        "scalavino viviana"
+      ],
+      [
+        "antonella, orlando",
+        "bianco antonella"
+      ],
+      [
+        "michele, linsalata",
+        "ignazzi antonia"
+      ],
+      [
+        "irccs bonino pulejo",
+        "irccs centro neurolesi bonino pulejo, messina"
+      ],
+      [
+        "irccs de bellis, castellana grotte, italy",
+        "policlinico di bari giovanni xxiii"
+      ],
+      [
+        "tfs health science",
+        "tfs"
+      ],
+      [
+        "nordea-fonden, denmark",
+        "a.p. moller foundation"
+      ],
+      [
+        "funding: grosserer l. f. foghts foundation",
+        "grosserer l.f. foghts foundation"
+      ],
+      [
+        "anticancerfund.org",
+        "anti cancer fund"
+      ],
+      [
+        "second xiangya hospital, central south university",
+        "central south university xiangya hospital"
+      ],
+      [
+        "dunamenti rek reproduction center",
+        "dunamenti rek gyor clinic"
+      ],
+      [
+        "kawasaki disease foundation",
+        "kawasaki disease foundation australia"
+      ],
+      [
+        "centro hospitalar de lisboa central epe, lisboa, portugal",
+        "centro clinico nemo brescia"
+      ],
+      [
+        "clinique saint pierre - perpignan",
+        "clinique saint augustin - bordeaux"
+      ],
+      [
+        "norwegian women's public health association (nks",
+        "norwegian women's public health association (norske kvinners sanitetsforening"
+      ],
+      [
+        "bod\u00f8 sykehus",
+        "bod\u00f8 hospital, norway"
+      ],
+      [
+        "azienda ospedaliero universitaria renato dulbecco",
+        "universit\u00e0 magna grecia, catanzaro"
+      ],
+      [
+        "gemeinsamer bundesausschuss (g-ba",
+        "gemeinsamer bundesaussschuss"
+      ],
+      [
+        "ren ji hospital of shanghai jiao tong university",
+        "ruijin hospital north shanghai jiao tong university school of medicine"
+      ],
+      [
+        "balgrist foundation",
+        "kle's dr prabhakar kore hospital & mrc balgaum"
+      ],
+      [
+        "plateforme d'investigation clinique, inserm cic1405, chu de clermont-ferrand, france",
+        "m\u00e9decine du sport et explorations fonctionnelles, chu de clermont-ferrand, france",
+        "direction de la recherche clinique et des innovations, chu de clermont-ferrand, france"
+      ],
+      [
+        "centre hospitalier universitaire vaudois (switzerland",
+        "h\u00f4pital universitaire de lausanne"
+      ],
+      [
+        "prof. eugenio garofalo",
+        "prof antonio esposito"
+      ],
+      [
+        "kantonal spital wallis, sion",
+        "kantonal hospital wallis, sion"
+      ],
+      [
+        "jolimont",
+        "h\u00f4pital jolimont",
+        "jolimont hospital haine saint paul"
+      ],
+      [
+        "ms vereniging nederland",
+        "depressie vereniging (patient association"
+      ],
+      [
+        "hospital das clinicas da faculdade de medicina da universidade de s\u00e3o paulo s\u00e3o paulo",
+        "hospital das cl\u00ednicas, university of sao paulo medical school"
+      ],
+      [
+        "faculdade de medicina de ribeir\u00e3o preto/usp",
+        "instituto do cora\u00e7\u00e3o da universidade de s\u00e3o paulo, brazil"
+      ],
+      [
+        "bhabha atomic research centre (barc",
+        "bhabha atomic research centre and indian institute of technology, mumbai"
+      ],
+      [
+        "lmu university hospital, department of neurosurgery",
+        "lmu klinikum - department of neurology",
+        "lmu klinikum - department of neuroradiology"
+      ],
+      [
+        "university hospital regensburg, center for clinical trials",
+        "university hospital regensburg, tinnituszentrum regensburg, germany",
+        "university of regensburg, tumor center regensburg, center for quality management and health services research"
+      ],
+      [
+        "clario",
+        "clinserv"
+      ],
+      [
+        "mylan",
+        "makromed"
+      ],
+      [
+        "novartis pharma b.v",
+        "novartis pharmaceuticals uk"
+      ],
+      [
+        "johnson & johnson medical products",
+        "johnson and johnson medical"
+      ],
+      [
+        "msd pharma (singapore) pte",
+        "msd sharp & dohme gmbh, germany"
+      ],
+      [
+        "universit\u00e3\u00a4tsklinikum hamburg-eppendorf",
+        "universit\u00e4res herzzentrum hamburg-eppendorf",
+        "university heart & vascular center hamburg, department of cardiology"
+      ],
+      [
+        "university hospital t\u00fcbingen, department of neurosurgery",
+        "universit\u00e4tsklinikum t\u00fcbingen, institut f\u00fcr tropenmedizin wilhelmstrasse"
+      ],
+      [
+        "yidu central hospital of weifang",
+        "weifang respiratory disease hospital"
+      ],
+      [
+        "gansu maternal and child health center",
+        "gansu maternal and child health hospital"
+      ],
+      [
+        "maternal and child health hospital of henan province",
+        "geriatrics research institute of henan provincial people's hospital"
+      ],
+      [
+        "royal free london nhs trust",
+        "royal london hospital"
+      ],
+      [
+        "second affiliated hospital of guangzhou university of chinese medicine",
+        "first affiliated hospital of guangxi university of traditional chinese medicine"
+      ],
+      [
+        "instituto de neurologia cognitiva (ineco",
+        "hospital italiano de buenos aires, argentina"
+      ],
+      [
+        "association sanfilippo sud",
+        "association fibroses pulmonaires france"
+      ],
+      [
+        "instituto vasco de investigaci\u00e3\u00b3n sanitaria (bioef",
+        "health department of the basque government"
+      ],
+      [
+        "irccs istituti clinici maugeri, istituto di pavia",
+        "istituti clinici scientifici maugeri spa, irccs milano"
+      ],
+      [
+        "irccs fondazione don carlo gnocchi, milano",
+        "irccs fondazione don gnocchi-firenze"
+      ],
+      [
+        "fundaci\u00f3n onkologikoa fundazioa",
+        "hospital universitario de donostia, guip\u00fazcoa"
+      ],
+      [
+        "faculty of medicine of the university of porto",
+        "faculdade de ci\u00eancias da nutri\u00e7\u00e3o e alimenta\u00e7\u00e3o da universidade do porto (fcnaup",
+        "unidade de farmacovigil\u00e2ncia do porto"
+      ],
+      [
+        "clinical trials network for lyme and other tick-borne diseases",
+        "columbia clinical trials network for lyme and other tick-borne diseases"
+      ],
+      [
+        "clinique des c\u00e8dres, echirolles",
+        "clinique des augustines"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 1,
+    "n_groups": 13,
+    "names_in_groups": 27,
+    "pairs": 15,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "university medical center hamburg-eppendorf - clinic for cardiology university medical center hamburg-eppendorf",
+        "universit\u00e4tsklinikum hamburg-eppendorf - klinik f\u00fcr kardiologie universit\u00e4tsklinikum hamburg-eppendorf"
+      ],
+      [
+        "afyonkarahisar university of health sciences health application and research center",
+        "afyonkarahisar university of health sciences, faculty of medicine, department of child and adolescent psychiatry"
+      ],
+      [
+        "danish cardiovascular academy (dca",
+        "danish cardiovascular academy"
+      ],
+      [
+        "minist\u00e8re de l'\u00e9conomie, de l'innovation et de l'\u00e9nergie du qu\u00e9bec",
+        "minist\u00e8re de l'\u00e9conomie, de l'innovation et de l'\u00e9nergie, qu\u00e9bec, canada"
+      ],
+      [
+        "centre for neurology studies, canada",
+        "centre for neurology studies, surrey neuroplasticity clinic"
+      ],
+      [
+        "ml4 foundation",
+        "mucolipidosis type iv (ml4) foundation"
+      ],
+      [
+        "hospital de base s\u00e3o jos\u00e9 do rio preto",
+        "hospital de base de sao jose do rio preto"
+      ],
+      [
+        "beijing hospital (only for base-nafld",
+        "shanghai jiao tong university affiliated sixth people's hospital beijing hospital (only for base-nafld",
+        "jinan hospital, xuanwu hospital, capital medical university"
+      ],
+      [
+        "first people's hospital of mianyang",
+        "tirst people's hospital of mianyang"
+      ],
+      [
+        "partenariat de recherche en oncologie digestive - prodige",
+        "prodige"
+      ],
+      [
+        "bornholm hospital, denmark",
+        "bornholms hospital"
+      ],
+      [
+        "nanyang nanshi hospital, henan university",
+        "nanyang nanshi hospital"
+      ],
+      [
+        "affiliated nanhua hospital, university of south china",
+        "university of south china affiliated nanhua hospital"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 2,
+    "n_groups": 22,
+    "names_in_groups": 46,
+    "pairs": 26,
+    "group_sizes": [
+      3,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "association cro - tous unis pour la vision",
+        "ecouter voir",
+        "hoya lens france"
+      ],
+      [
+        "torii pharmaceutical",
+        "torii pharmaceuticals"
+      ],
+      [
+        "providence care hospital, kingston, on, canada",
+        "providence care hospital - providence care"
+      ],
+      [
+        "belgian health care knowledge centre (kce",
+        "kce belgian healthcare knowledge centre",
+        "federaal kenniscentrum voor gezondheidszorg, belgium"
+      ],
+      [
+        "university of massachusetts chan medical school, worcester",
+        "university of massachusetts chan medical school"
+      ],
+      [
+        "dutch network for cardiovascular research (wcn), utrecht",
+        "dutch network for cardiovascular research (wcn"
+      ],
+      [
+        "clinatec",
+        "fonds de dotation clinatec"
+      ],
+      [
+        "leland stanford junior university",
+        "board of trustees of the leland stanford junior university"
+      ],
+      [
+        "institute of human behaviour and allied sciences delhi, india",
+        "institute of human behaviour and allied sciences delhi"
+      ],
+      [
+        "bangor university, qwynedd, uk",
+        "bangor university (uk"
+      ],
+      [
+        "msd sharp & dohme gmbh, germany",
+        "msdavenir"
+      ],
+      [
+        "kwame nkrumah university of science and technology, ghana",
+        "kwame nkrumah university of science and technology (knust"
+      ],
+      [
+        "university of north bengal, india",
+        "university of north bengal"
+      ],
+      [
+        "mayo clinic, rochester, mn",
+        "olvg, amsterdam, the netherlands"
+      ],
+      [
+        "prospero laura",
+        "laura, prospero"
+      ],
+      [
+        "first people's hospital of lin'an district",
+        "first people's hospital of lin'an district, hangzhou"
+      ],
+      [
+        "uniklinik k\u00f6ln, institut f\u00fcr medizinische statistik und bioinformatik",
+        "uniklinik k\u00f6ln, zentrum f\u00fcr klinische studien"
+      ],
+      [
+        "centre hospitalier de saint-malo",
+        "saint malo hospital"
+      ],
+      [
+        "ch henri mondor (aurillac",
+        "ch henri mondor"
+      ],
+      [
+        "centro de salud sitges, barcelona, spain",
+        "centro de salud les roquetes-sant pere de ribes, barcelona, spain"
+      ],
+      [
+        "sectra ab, sweden",
+        "sectra benelux"
+      ],
+      [
+        "concussion legacy foundation (clf",
+        "chuck noll foundation"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 3,
+    "n_groups": 20,
+    "names_in_groups": 42,
+    "pairs": 24,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      3,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "am rosen foundation",
+        "ren\u00e9e fleming foundation"
+      ],
+      [
+        "second affiliated hospital of suzhou medical university",
+        "department of vascular surgery, the second affiliated hospital of soochow university, suzhou, china"
+      ],
+      [
+        "surrey memorial hospital (smh",
+        "surrey memorial hospital"
+      ],
+      [
+        "excelcare hospitals guwahati",
+        "apollo excelcare hospitals guwahati, india"
+      ],
+      [
+        "dunamenti rek pannon clinic",
+        "dunementi rek pannon clinic"
+      ],
+      [
+        "norrskenmind",
+        "norrsken mind"
+      ],
+      [
+        "zywie ventures privated",
+        "zywie ventures pvt"
+      ],
+      [
+        "mahatma gandhi institue of medical sciences, wardha, india",
+        "mahatma gandhi institute of medical sciences, wardha, india"
+      ],
+      [
+        "helsinki university hospital research funds (funding",
+        "helsinki university hospital research funds"
+      ],
+      [
+        "taksin hospital",
+        "infectious disease taksin hospital"
+      ],
+      [
+        "dr. sardjito general hospital, yogyakarta, indonesia",
+        "dr. sardjito hospital, yogyakarta"
+      ],
+      [
+        "germans trias i pujol research institute | igtp",
+        "hospital germans tr\u00edes i pujol de badalona"
+      ],
+      [
+        "centre r\u00e9gional de coordination des d\u00e9pistages des cancers, centre-carcassonne",
+        "centre r\u00e9gional de coordination des d\u00e9pistages des cancers (crcdc) centre val de loire"
+      ],
+      [
+        "first people's hospital of tianmen in hubei province",
+        "first people's hospital of tianmen"
+      ],
+      [
+        "anhui provincial hospita",
+        "first affiliated hospital of ustc (anhui provincial hospital"
+      ],
+      [
+        "bundesministerium f\u00fcr forschung, technologie und raumfahrt (bmftr",
+        "bmbf (bundes ministerium fuer bildung und forschung",
+        "federal ministry of education and reserach (bmbf"
+      ],
+      [
+        "gemeinsamer bundesausschuss (g-ba",
+        "gemeinsamer bundesausschuss (gba"
+      ],
+      [
+        "fundaci\u00f3n cient\u00edfica de la asociaci\u00f3n espa\u00f1ola contra el c\u00e1ncer",
+        "fundaci\u00f3n investigacion en innovacion biom\u00e9dica en atenci\u00f3n primaria fiibap",
+        "fundaci\u00f3n para la investigaci\u00f3n e innovaci\u00f3n biosanitaria de atenci\u00f3n primaria de la comunidad de madrid (fiibap"
+      ],
+      [
+        "department of anesthesiology, hopital foch, suresnes, france",
+        "hopital foch 92151 suresnes"
+      ],
+      [
+        "universitetssykehuset nord norge hf",
+        "universitetssykehuset i nord-norge hospital trust"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 4,
+    "n_groups": 30,
+    "names_in_groups": 69,
+    "pairs": 54,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      5,
+      2,
+      5,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3
+    ],
+    "groups": [
+      [
+        "chu h\u00f4pital lariboisi\u00e8re aphp",
+        "lariboisi\u00e8re hospital"
+      ],
+      [
+        "irccs bonino pulejo",
+        "irccs centro neurolesi bonino pulejo, messina"
+      ],
+      [
+        "pharmasuisse",
+        "swiss pharmacy association, pharmasuisse"
+      ],
+      [
+        "associazione italiana discinesia ciliare primaria sindrome di kargagener",
+        "selbsthilfegruppe kartagener syndrom und prim\u00e4re cili\u00e4re dyskinesie"
+      ],
+      [
+        "az monica campus antwerpen",
+        "az middelheim, antwerpen"
+      ],
+      [
+        "asian microbiome library pte",
+        "asian microbiome library (amili) pte"
+      ],
+      [
+        "fondation cancer, luxembourg",
+        "fondation cancer, belgique",
+        "fondazione di ricerca biomedica ebris"
+      ],
+      [
+        "centre r\u00e9gional de coordination du d\u00e9pistage des cancers - ile-de-france",
+        "centre r\u00e9gional de coordination des d\u00e9pistages des cancers de grand est"
+      ],
+      [
+        "conseil national de l'ordre des masseurs-kin\u00e9sith\u00e9rapeutes",
+        "conseil national de l'ordre des masseur kin\u00e9sith\u00e9rapeutes (cnomk"
+      ],
+      [
+        "direction g\u00e9n\u00e9rale de l'offre des soins (dgos",
+        "direction g\u00e9n\u00e9rale de l'offre de soin (dgos"
+      ],
+      [
+        "european molecular biology laboratory",
+        "european molecular biology laboratory, embl, university of heidelberg"
+      ],
+      [
+        "xinhua hospital of ili kazak autonomous prefecture",
+        "xinhua hospital of ili in kazakhstan automomous district"
+      ],
+      [
+        "aok bundesverband",
+        "wissenschaftliches institut der aok bundesverband"
+      ],
+      [
+        "fondazione gli angeli di padre pio",
+        "fondazione centri di riabilitazione padre pio onlus - gli angeli di padre pio"
+      ],
+      [
+        "university of the west indies at cave hill, barbados",
+        "university of the west indies, mona"
+      ],
+      [
+        "german sport university cologne (dshs), cologne, germany",
+        "centre for preventative doping research at the german sport university cologne, germany"
+      ],
+      [
+        "clinica las vegas- grupo quironsalud",
+        "grupo hpa"
+      ],
+      [
+        "assistance publique hopitaux de paris",
+        "assistance publique hopitaux paris la pitie salpetriere",
+        "assistance publique hopitaux paris henri mondor",
+        "assistance publique hopitaux paris beaujon",
+        "assistance publique hopitaux paris avicenne"
+      ],
+      [
+        "ap-hp, h\u00f4pital henri mondor",
+        "henri mondor hospital, cr\u00e9teil"
+      ],
+      [
+        "a.o.u. federico ii, napoli",
+        "azienda ospedaliera universitaria federico ii (aou federico ii",
+        "universit\u00e0 di napoli federico ii",
+        "federico ii university of naples, department of clinical medicine and surgery, naples, italy",
+        "department of clinical medicine and surgery - university of naples federico ii"
+      ],
+      [
+        "affiliated brain hospital of guangzhou medical university",
+        "brain hospital of guangzhou medical university"
+      ],
+      [
+        "national centre for tumor diseases heidelberg",
+        "nationales centrum f\u00fcr tumorerkrankungen"
+      ],
+      [
+        "msd sharp & dohme gmbh, germany",
+        "merck sharp & dohme de espa\u00f1a",
+        "msd china holding"
+      ],
+      [
+        "centre hospitalier de vannes",
+        "hospital, vannes"
+      ],
+      [
+        "nanjing brain hospital",
+        "wuhan brain hospital"
+      ],
+      [
+        "dept of cardiology, \u00f6rebro university hospital, sweden",
+        "\u00f4rebro university hospital"
+      ],
+      [
+        "university hospital, szeged, hungary",
+        "university of szeged, hungary"
+      ],
+      [
+        "universit\u00e4res herzzentrum hamburg-eppendorf",
+        "university heart & vascular center hamburg, department of cardiology"
+      ],
+      [
+        "university medical center hamburg-eppendorf (uke",
+        "university heart & vascular center hamburg, department of cardiology"
+      ],
+      [
+        "university hospital regensburg, tinnituszentrum regensburg, germany",
+        "university medical center regensburg",
+        "university hospital regensburg, department of neurosurgery"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 5,
+    "n_groups": 59,
+    "names_in_groups": 118,
+    "pairs": 59,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "national institute in computer science and automatic inria",
+        "institut national de recherche en informatique et automatique"
+      ],
+      [
+        "fondazione di ricerca biomedica ebris",
+        "associazione per la ricerca cardiologica (roma"
+      ],
+      [
+        "lucile packard children's hospital at stanford",
+        "lucile packard children's hospital stanford"
+      ],
+      [
+        "stanford university & lucile packard children's hospital (stanford-lpch",
+        "stanford's innovative medicines accelerator"
+      ],
+      [
+        "second affiliated hospital and yuying children's hospital of wenzhou medical university",
+        "yuying childrens hospital of wenzhou medical university"
+      ],
+      [
+        "afpa (association fran\u00e7aise de p\u00e9diatrie ambulatoire",
+        "association fran\u00e7aise de p\u00e9diatrie ambulatoire"
+      ],
+      [
+        "bristol myers squibb pharmaceuticals",
+        "bristol myers squibb company (bms"
+      ],
+      [
+        "hamilton health sciences centre",
+        "hamilton base hospital"
+      ],
+      [
+        "central manchester university hospitals nhs foundation trust (co-sponsor, uk",
+        "central manchester university hospital nhs foundation trust"
+      ],
+      [
+        "beaston west of scotland cancer centre",
+        "beatson west of scotland cancer centre"
+      ],
+      [
+        "instituto de biomedicina (ibis) de sevilla",
+        "instituto de biomedicina de sevilla"
+      ],
+      [
+        "vithas valencia (spain",
+        "vithas hospitales (spain"
+      ],
+      [
+        "claude d. pepper older american independence centers (oaics",
+        "claude d. pepper older americans independence center (oaic"
+      ],
+      [
+        "dep.for metabolic diseases, hhu, duesseldorf, germany",
+        "dep.of general-, visceral- and pediatric surgery, hhu, duesseldorf, germany"
+      ],
+      [
+        "nks kloverasen",
+        "norwegian women's public health association (nks"
+      ],
+      [
+        "giannuzzi vito",
+        "vito, giannuzzi"
+      ],
+      [
+        "maria notarnicola, clinical pathology director",
+        "notarnicola maria"
+      ],
+      [
+        "dr. aurea lumbau",
+        "dr. aurea m. i. lumbau"
+      ],
+      [
+        "affiliated jinyang hospital of guizhou medical university",
+        "affiliated cancer hospital of guizhou medical university"
+      ],
+      [
+        "forth - foundation for research and technology hellas",
+        "foundation for research and technology - hellas (forth"
+      ],
+      [
+        "istituto giannina gaslini - irccs",
+        "ircss gianna gaslini, genova, italy"
+      ],
+      [
+        "nanjing brain hospital",
+        "nanjing brain hospital affiliated with nanjing medical university"
+      ],
+      [
+        "jinling hospital affiliated to nanjing university school of medicine",
+        "jinling hospital, medical school of nanjing university"
+      ],
+      [
+        "i-reivac innovative clinical research network in vaccinology",
+        "ireivac/covireivac network"
+      ],
+      [
+        "hospital universitari vall d'hebron (drassanes",
+        "hospital universitario vall d\u00b4hebron"
+      ],
+      [
+        "zywie ventures pvt",
+        "zywie ventures privated"
+      ],
+      [
+        "ospedale fate bene fratelli di brescia",
+        "istittuo ricerca carattere sceintifico fatenefratelli brescia"
+      ],
+      [
+        "spedali civili, university of brescia, italy",
+        "asst spedali civili di brescia"
+      ],
+      [
+        "ifakara health institute (ihi",
+        "ifakara health institute clinical trial facility, bagamoyo research and training centre, po box 74, bagamoyo, tanzania"
+      ],
+      [
+        "centre int\u00e9gr\u00e9 universitaire de sant\u00e9 et de services sociaux du saguenay-lac-st-jean",
+        "ciusss saguenay-lac-saint-jean"
+      ],
+      [
+        "apa: american psychological association",
+        "american psychological association division 53 society for clinical child & adolescent psychology"
+      ],
+      [
+        "takeda pharmaceuticals u",
+        "takeda science foundation - medical research grant"
+      ],
+      [
+        "salubris (chengdu) biotechnology",
+        "salubris (suzhou) pharmaceutical"
+      ],
+      [
+        "fundaci\u00f3n para la investigaci\u00f3n biom\u00e9dica del hospital 12 de octubre",
+        "instituto de investigaci\u00f3n hospital 12 de octubre"
+      ],
+      [
+        "university hospital 12 octubre, madrid",
+        "hospital puerta de hierro, madrid"
+      ],
+      [
+        "el centro regional medical center",
+        "el centro de investigaci\u00f3n biom\u00e9dica en red, ciber"
+      ],
+      [
+        "changxing branch, second affiliated hospital, school of medicine, zhejiang university",
+        "shexian branch, second affiliated hospital, school of medicine, zhejiang university"
+      ],
+      [
+        "klm royal dutch airlines",
+        "klm health services"
+      ],
+      [
+        "henan provincial hospital of integrated traditional chinese and western medicine",
+        "guangzhou hospital of integrated traditional and west medicine"
+      ],
+      [
+        "instituto nacional del cancer, chile",
+        "instituto nacional de enfermedades neopl\u00e1sicas (inen, peru"
+      ],
+      [
+        "universit\u00e4tsklinikum hamburg-eppendorf, germany",
+        "university medical center hamburg-eppendorf (uke"
+      ],
+      [
+        "institute of medical biometry and epidemiology, university medical center hamburg-eppendorf",
+        "hamburg; university hospital hamburg-eppendorf"
+      ],
+      [
+        "miguel servet foundation/navarrabiomed, spain",
+        "hospital general obispo polanco, teruel"
+      ],
+      [
+        "sj\u00f6bergstiftelsen",
+        "sj\u00f6berg foundation"
+      ],
+      [
+        "clinique saint-luc bouge",
+        "orthopeadic team in saint-luc hospital brussels"
+      ],
+      [
+        "barcelona clinic hospital (hcb), spain",
+        "cl\u00ednica corachan"
+      ],
+      [
+        "universitas pertahanan indonesia",
+        "lppt tarumanagara"
+      ],
+      [
+        "chu de clermont-ferrand",
+        "m\u00e9decine du sport et explorations fonctionnelles, chu de clermont-ferrand, france"
+      ],
+      [
+        "people's hospital of jimo",
+        "people's hospital of jimo.qingdao"
+      ],
+      [
+        "hospital universitari arnau de vilanova, lleida",
+        "hospital arnau de vilanova, lleida (spain"
+      ],
+      [
+        "universit\u00e4tsklinikum d\u00fcsseldorf, germany",
+        "klinikum rechts der isar, technical university of munich"
+      ],
+      [
+        "asia pacific institute of healthy ageing",
+        "edwin s.h. leong centre for healthy children"
+      ],
+      [
+        "centro hospitalar lisboa ocidental hospital egas moniz",
+        "santa casa da miseric\u00f3rdia de lisboa"
+      ],
+      [
+        "beijing chest hospital of capital medical university",
+        "capital medical school beijing chest hospital"
+      ],
+      [
+        "chu caen, hematology department",
+        "h\u00f4pital c\u00f4te de nacre, chu de caen"
+      ],
+      [
+        "chu saint-etienne, hematology department",
+        "ap-hp, hematology department"
+      ],
+      [
+        "azienda ospedaliero universitaria renato dulbecco",
+        "azienda ospedaliero-universitaria senese"
+      ],
+      [
+        "belgian health care knowledge centre (kce",
+        "belgian health care knowledge centre"
+      ],
+      [
+        "federaal kenniscentrum voor gezondheidszorg, belgium",
+        "federal association of working groups of emergency physicians in germany"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 6,
+    "n_groups": 20,
+    "names_in_groups": 42,
+    "pairs": 24,
+    "group_sizes": [
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "960th hospital of pla",
+        "960th hospital of joint logistics support force of chinese people's liberation army"
+      ],
+      [
+        "prof. erik popp - head, department of crisis and disaster management",
+        "prof. markus ries - head of research, department of crisis and disaster management",
+        "prof. erik popp, md"
+      ],
+      [
+        "second people's hospital of nanhai district of foshan",
+        "nanhai district people's hospital of foshan city"
+      ],
+      [
+        "cr2o",
+        "cr2o b.v"
+      ],
+      [
+        "relaxera pharmaceuticals",
+        "relaxera pharmazeutische gesellschaft mbh & co. kg"
+      ],
+      [
+        "dr. notarnicola maria",
+        "dr. marianna zappimbulso"
+      ],
+      [
+        "canadian chiropractic research foundation",
+        "canadian chiropractic association, canadian chiropractic research foundation"
+      ],
+      [
+        "assistance publique hopitaux paris avicenne",
+        "aphp - hopital avicenne",
+        "h\u00f4pital avicenne, ap-hp, service h\u00e9patologie"
+      ],
+      [
+        "statistics netherlands (cbs",
+        "cbs"
+      ],
+      [
+        "rita & alex hillman foundation",
+        "rita and alex hillman foundation - hillman emergent innovation"
+      ],
+      [
+        "a.o.u. federico ii, napoli",
+        "federico ii university of naples, department of clinical medicine and surgery, naples, italy"
+      ],
+      [
+        "azienda ospedaliera universitaria luigi vanvitelli",
+        "university of campania luigi vanvitelli dipartimento di scienze mediche e chirurgiche avanzate"
+      ],
+      [
+        "centre int\u00e9gr\u00e9 universitaire de sant\u00e9 et de services sociaux du saguenay-lac-st-jean",
+        "ciusss saguenay-lac-saint-jean"
+      ],
+      [
+        "sahlgrenskauniversityhospital",
+        "department of neurological surgery, sahlgrenska university hospital"
+      ],
+      [
+        "galeazzi sant'ambrogio hospital - milan",
+        "ospedale galeazzi sant'ambrogio - irccs"
+      ],
+      [
+        "genentech foundation",
+        "genentech, inc., a subsidiary of f. hoffman-la roche"
+      ],
+      [
+        "istituti clinici scientifici maugeri spa, irccs pavia",
+        "istituti clinici scientifici maugeri spa, irccs montescano"
+      ],
+      [
+        "direction g\u00e9n\u00e9rale de l'offre des soins (dgos",
+        "direction g\u00e9n\u00e9rale de l'offre de soin (dgos"
+      ],
+      [
+        "bristol myers squibb company (bms",
+        "janssen biotech, inc., including johnson & johnson"
+      ],
+      [
+        "inserm, umr-s 1123 eceve universit\u00e9 de paris",
+        "inserm eceve 1123"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 7,
+    "n_groups": 19,
+    "names_in_groups": 40,
+    "pairs": 23,
+    "group_sizes": [
+      2,
+      3,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "institut du thorax",
+        "institut du thorax, inserm umr1087"
+      ],
+      [
+        "centro de investigaci\u00f3n biom\u00e9dica en red fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn), instituto de salud carlos iii, spain",
+        "centro de investigaci\u00f3n biom\u00e9dica en red fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn",
+        "centro de investigaci\u00f3n biom\u00e9dica en red de fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn"
+      ],
+      [
+        "consortia for food allergy research (cofar",
+        "consortium for food allergy research"
+      ],
+      [
+        "instituto nacional del cancer, chile",
+        "instituto nacional de salud"
+      ],
+      [
+        "technische universit\u00e4t m\u00fcnchen, germany",
+        "klinikum rechts der isar technische universit\u00e4t m\u00fcnchen",
+        "technical university munchen"
+      ],
+      [
+        "international flavors & fragrances",
+        "iff (international flavors & fragrances"
+      ],
+      [
+        "hospital de base de sao jose do rio preto",
+        "hospital de base s\u00e3o jos\u00e9 do rio preto"
+      ],
+      [
+        "hospital s\u00e3o vicente de paulo",
+        "hospital sao vicente de paulo e hospital de cidade, passo fundo, brasil"
+      ],
+      [
+        "cozzolongo raffaele",
+        "raffaele, cozzolongo"
+      ],
+      [
+        "ctd-cno, caen",
+        "ctd-cno"
+      ],
+      [
+        "beatson west of scotland cancer centre",
+        "beaston west of scotland cancer centre"
+      ],
+      [
+        "institut polaire fran\u00e7ais paul emile victor",
+        "institut polaire fran\u00e7ais paul-emile victor (ipev"
+      ],
+      [
+        "european molecular biology laboratory",
+        "european molecular biology laboratory, embl, university of heidelberg"
+      ],
+      [
+        "forskningsr\u00e5det f\u00f6r h\u00e4lsa, arbetsliv och v\u00e4lf\u00e4rd (forte",
+        "forte: swedish research council for health, working life and welfare"
+      ],
+      [
+        "helse forde hospital trust",
+        "helse f\u00f8rde hf"
+      ],
+      [
+        "scientific institute, irccs e.medea, pasian di prato",
+        "i.r.c.c.s. eugenio medea - associazione la nostra famiglia - sede di conegliano"
+      ],
+      [
+        "ospedale di riabilitazione fondazione santa lucia, roma",
+        "irccs santa lucia foundation, rome"
+      ],
+      [
+        "georgia clinical & translational science alliance (ctsa",
+        "georgia clinical & translational science alliance"
+      ],
+      [
+        "merck",
+        "strategic alliance: merck"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 8,
+    "n_groups": 30,
+    "names_in_groups": 63,
+    "pairs": 36,
+    "group_sizes": [
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "centre hospitalier de l'arrondissement de montreuil-sur-mer",
+        "ch arrond de montreuil",
+        "centre hospitalier de montreuil"
+      ],
+      [
+        "central manchester university hospitals nhs foundation trust (co-sponsor, uk",
+        "central manchester university hospital nhs foundation trust"
+      ],
+      [
+        "donawa lifescience consulting srl",
+        "donawa lifescience consulting"
+      ],
+      [
+        "pharmtrace",
+        "pharmtrace klinische entwicklung"
+      ],
+      [
+        "deutsches forschungszentrum f\u00fcr k\u00fcnstliche intelligenz (dfki",
+        "deutsches forschungszentrum f\u00fcr k\u00fcnstliche intelligenz gmbh (dfki"
+      ],
+      [
+        "laboratoire de psychologie et neurocognition (lpnc), universit\u00e9 grenoble alpes",
+        "laboratoire de psychologie et neurocognition (lpnc), universit\u00e3\u00a9 grenoble alpes"
+      ],
+      [
+        "uniwersytet medyczny w \u0142odzi",
+        "universytet medyczny w lodzi"
+      ],
+      [
+        "medisch centrum leeuwarden",
+        "medical center leeuwarden"
+      ],
+      [
+        "direction g\u00e9n\u00e9rale de l'offre des soins (dgos",
+        "direction g\u00e9n\u00e9rale de l'offre de soins (dgos"
+      ],
+      [
+        "frances perry house (ramsay health",
+        "frances perry private hospital"
+      ],
+      [
+        "austrian breast and colorectal cancer study group (abcsg",
+        "austrian breast & colorectal cancer study group (abcsg"
+      ],
+      [
+        "kce belgian healthcare knowledge centre",
+        "federal knowledge centre (kce"
+      ],
+      [
+        "sana kliniken l\u00fcbeck",
+        "sana kliniken d\u00fcsseldorf"
+      ],
+      [
+        "alternative energies and atomic energy commission (cea",
+        "french alternative energies and atomic energy commission (cea), grenoble",
+        "commissariat \u00e0 l'energie atomique (cea) grenoble"
+      ],
+      [
+        "xinhua hospital of ili kazak autonomous prefecture",
+        "xinhua hospital of ili in kazakhstan automomous district"
+      ],
+      [
+        "\u015fanl\u0131urfa harran university faculty of medicine, department of child and adolescent psychiatry",
+        "sanliurfa harran university"
+      ],
+      [
+        "centre hospitalier de compiegne",
+        "ch compi\u00e8gne"
+      ],
+      [
+        "b. braun milano",
+        "b. braun medical france"
+      ],
+      [
+        "affiliated huaian no.1 people's hospital of nanjing medical university",
+        "huai an first people hospital",
+        "huaian hospital"
+      ],
+      [
+        "affiliated hangzhou first people's hospital",
+        "department of vascular surgery, school of medicine, affiliated hangzhou first people's hospital, zhejiang university, hangzhou, china"
+      ],
+      [
+        "dr. coletta sergio",
+        "sergio coletta, laboratory technician"
+      ],
+      [
+        "chu de brest",
+        "universit\u00e9 de bretagne occidentale, brest-france"
+      ],
+      [
+        "foundation maladies rares, france",
+        "fondation maladies rares (french foundation for rare diseases"
+      ],
+      [
+        "hospital sant joan desp\u00ed mois\u00e8s broggi",
+        "hospital mois\u00e9s broggi de sant joan desp\u00ed, barcelona"
+      ],
+      [
+        "china academy of chinese medical sciences xiyuan hospital shanxi hospital",
+        "china academy of chinese medical sciences xiyuan hospital jining hospital"
+      ],
+      [
+        "1st affiliated hospital of wenzhou medical university",
+        "first affiliated hospital of wenzhou"
+      ],
+      [
+        "first hospital affiliated to zhengzhou university",
+        "first affiliated hospital hengyang medical school"
+      ],
+      [
+        "1st affiliated hospital of zhengzhou university",
+        "first hospital affiliated to zhengzhou university"
+      ],
+      [
+        "nanyang nanshi hospital, henan university",
+        "nanyang nanshi hospital"
+      ],
+      [
+        "laboratoire de psychologie des cognitions (strasbourg university, france",
+        "centre de recherches sur la cognition et l'apprentissage"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 9,
+    "n_groups": 21,
+    "names_in_groups": 45,
+    "pairs": 27,
+    "group_sizes": [
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      3,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "uniwersytet medyczny w \u0142odzi",
+        "uniwersytet medyczny w lodzi (poland"
+      ],
+      [
+        "centro de investigaci\u00f3n biom\u00e9dica en red fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn), instituto de salud carlos iii, spain",
+        "centro de investigaci\u00f3n biom\u00e9dica en red de fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn",
+        "centro de investigaci\u00f3n biom\u00e9dica en red fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn"
+      ],
+      [
+        "university of the west indies, mona",
+        "university of the west indies, mona, jamaica"
+      ],
+      [
+        "aniridia north america",
+        "ana-aniridia north america"
+      ],
+      [
+        "leland stanford junior university",
+        "board of trustees of the leland stanford junior university"
+      ],
+      [
+        "eurofins viracor",
+        "viracor eurofins"
+      ],
+      [
+        "european network for gynaecological oncological trial groups(engot",
+        "european network of gynecological oncological trial groups (engot"
+      ],
+      [
+        "direction g\u00e9n\u00e9rale de l'offre des soins (dgos",
+        "direction g\u00e9n\u00e9rale de l'offre de soins (dgos"
+      ],
+      [
+        "bhabha atomic research centre and indian institute of technology, mumbai",
+        "bhabha atomic research centre (barc"
+      ],
+      [
+        "university hospital, orleans",
+        "university hospital, orl\u00e9ans"
+      ],
+      [
+        "colegio profesional fisioterapeutas castilla y le\u00f3n",
+        "colegio profesional de fisioterapeutas de castilla y le\u00f3n"
+      ],
+      [
+        "edward via college of osteopathic medicine-auburn",
+        "edward via college of osteopathic medicine, auburn campus"
+      ],
+      [
+        "unitypoint health - meriter hospital",
+        "meriter hospital"
+      ],
+      [
+        "spanish breast cancer research group (solti",
+        "spanish breast cancer research group (geicam"
+      ],
+      [
+        "catholic university of korea eunpyeong st. mary's hospital",
+        "eunpyeong st. mary's hospital, the catholic university of korea"
+      ],
+      [
+        "fenghua district people's hospital",
+        "fenghua traditional chinese medicine hospital, ningbo city",
+        "fenghua district traditional chinese medicine hospital, ningbo city"
+      ],
+      [
+        "chru tours: centre hospitalier universitaire de tours",
+        "chru tours"
+      ],
+      [
+        "istituto giannina gaslini - irccs",
+        "ircss gianna gaslini, genova, italy"
+      ],
+      [
+        "ospedale pediatrico bambino ges\u00f9, rome (it",
+        "bambino ges\u00f9 children's hospital, rome, italy",
+        "ospedale pediatrico bambino (co-sponsor, italy"
+      ],
+      [
+        "university hospital, z\u00e3\u00bcrich",
+        "university hospital, z\u00fcrich, innovation pool"
+      ],
+      [
+        "affiliated nanhua hospital, university of south china",
+        "university of south china affiliated nanhua hospital"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 10,
+    "n_groups": 21,
+    "names_in_groups": 43,
+    "pairs": 23,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "college of pharmaceutical science at zhejiang university",
+        "college of pharmaceutical sciences at zhejiang university"
+      ],
+      [
+        "bianco antonella",
+        "antonella bianco"
+      ],
+      [
+        "donghia rossella",
+        "rossella donghia, biologist"
+      ],
+      [
+        "dr. zappimbulso marianna",
+        "dr. marianna zappimbulso"
+      ],
+      [
+        "universit\u00e4t zu k\u00f6ln",
+        "medizinische fakult\u00e4t der universit\u00e4t zu k\u00f6ln"
+      ],
+      [
+        "medizinische einrichtungen der universit\u00e4t d\u00fcsseldorf",
+        "dep.of general-, visceral- and pediatric surgery, hhu, duesseldorf, germany"
+      ],
+      [
+        "gemeinsamer bundesausschuss (gba",
+        "gemeinsamer bundesausschuss (g-ba"
+      ],
+      [
+        "aniridia north america",
+        "ana-aniridia north america"
+      ],
+      [
+        "astir",
+        "astir s.r.l"
+      ],
+      [
+        "yither biotechnology",
+        "yither biotech"
+      ],
+      [
+        "anticancerfund",
+        "anti cancer fund"
+      ],
+      [
+        "centre int\u00e9gr\u00e9 universitaire de sant\u00e9 et de services sociaux du saguenay-lac-st-jean",
+        "ciusss saguenay-lac-saint-jean"
+      ],
+      [
+        "g02 for lung cancer",
+        "go-2 lung"
+      ],
+      [
+        "leiden university medical center (sponsor mmrd-green trial",
+        "leiden university medical center, leiden, netherlands"
+      ],
+      [
+        "lucile packard children's hospital at stanford",
+        "stanford university & lucile packard children's hospital (stanford-lpch"
+      ],
+      [
+        "xd group hospital",
+        "xi'an xd group hospital"
+      ],
+      [
+        "university clermont auvergne (uca",
+        "university clermont auvergne (uca), clermont-ferrand, france"
+      ],
+      [
+        "alternative energies and atomic energy commission (cea",
+        "french alternative energies and atomic energy commission (cea), grenoble"
+      ],
+      [
+        "royal women's hospital",
+        "royal women's hospital, melbourne, australia",
+        "royal women hospital"
+      ],
+      [
+        "jinling hospital",
+        "jinling hospital, medical school of nanjing university"
+      ],
+      [
+        "james a. haley veterans' hospital (jahvh",
+        "tampa va healthcare system"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 11,
+    "n_groups": 22,
+    "names_in_groups": 48,
+    "pairs": 31,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "chu de brest",
+        "chru de brest (brest university hospital"
+      ],
+      [
+        "asst cremona, cremona",
+        "ospedale asst cremona"
+      ],
+      [
+        "canadian perioperative anesthesia clinical trials (pact) group",
+        "canadian perioperative anesthesia clinical trial (pact) group"
+      ],
+      [
+        "georgia clinical and translational science alliance (gactsa",
+        "georgia clinical & translational science alliance"
+      ],
+      [
+        "leiden university medical center (lumc",
+        "leidenumc"
+      ],
+      [
+        "hospital universitari de la vall de hebron",
+        "hospital universitario vall d\u00b4hebron",
+        "vall d'hebron barcelona hospital campus"
+      ],
+      [
+        "universit\u00e0 luigi vanvitelli della campania",
+        "universit\u00e0 della campania luigi vanvitelli"
+      ],
+      [
+        "sectra",
+        "sectra ab, sweden"
+      ],
+      [
+        "axelys sante",
+        "cro axelys sant\u00e9 dz"
+      ],
+      [
+        "decathlon",
+        "decathlon espa\u00f1a s.a.u"
+      ],
+      [
+        "fundaci\u00f3n disa, spain",
+        "fundaci\u00f3n disa, canary islands, spain"
+      ],
+      [
+        "jon moultontrust",
+        "jon moulton charity trust"
+      ],
+      [
+        "pesole pasqua letizia",
+        "dr. pesole pasqua letizia"
+      ],
+      [
+        "zai lab (china only",
+        "zai lab (shanghai) co., ltd. (for china only"
+      ],
+      [
+        "beone (china only",
+        "beone pharmaceutical"
+      ],
+      [
+        "helmholtz zentrum m\u00fcnchen deutsches forschungszentrum f\u00fcr gesundheit und umwelt",
+        "helmholtz center munich",
+        "helmholtz munich, munich",
+        "institute of virology helmholtz zentrum m\u00fcnchen trogerstra\u00dfe 30 81675 munich, germany"
+      ],
+      [
+        "university hospital, z\u00fcrich, innovation pool",
+        "university hospital, z\u00e3\u00bcrich",
+        "karolinska university hopsital"
+      ],
+      [
+        "freiwillige akademische gesellschaft (fag) basel",
+        "freie akademische gesellschaft basel"
+      ],
+      [
+        "dhsc/gamrif",
+        "global antimicrobial resistance innovation fund-(gamrif"
+      ],
+      [
+        "chu nice",
+        "chu nice, hematology department"
+      ],
+      [
+        "nki-avl",
+        "netherlands cancer institute - nki"
+      ],
+      [
+        "chu de brest",
+        "chru de brest (brest university hospital"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 12,
+    "n_groups": 34,
+    "names_in_groups": 75,
+    "pairs": 49,
+    "group_sizes": [
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      4,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "amphia, breda, the netherlands",
+        "amphia ziekenhuis"
+      ],
+      [
+        "international centre for antimicrobial resistance solutions",
+        "international centre for antimicrobial resistance solutions (icars"
+      ],
+      [
+        "henri mondor hospital, cr\u00e9teil",
+        "assistance publique hopitaux paris henri mondor",
+        "h\u00f4pital henri mondor, ap-hp, unit\u00e9 de recherche clinique"
+      ],
+      [
+        "wcn (werkgroep cardiologische centra nederland",
+        "dutch network for cardiovascular research (wcn"
+      ],
+      [
+        "qianjiang central hospital of chongqing",
+        "chongqing qianjiang central hospital"
+      ],
+      [
+        "people' s hospital of jiangmen",
+        "people's hospital of jiangmen"
+      ],
+      [
+        "nanchang university first affiliated hospital",
+        "nanchang city first hospital"
+      ],
+      [
+        "xinqiao hospital of the third military medical university",
+        "xinqiao hospital, amry medical university"
+      ],
+      [
+        "second affiliated hospital of air force medical university",
+        "second affiliated hospital of afmu"
+      ],
+      [
+        "centre hospitalier de vannes",
+        "hospital, vannes"
+      ],
+      [
+        "donawa lifescience consulting",
+        "donawa lifescience consulting srl"
+      ],
+      [
+        "allucent",
+        "allucent (us"
+      ],
+      [
+        "leiden university medical center, leiden, netherlands",
+        "leiden university medical center, lumc, leiden, the netherlands",
+        "leiden university medical center (sponsor mmrd-green trial"
+      ],
+      [
+        "institute gustave roussy paris",
+        "institute gustave roussy (sponsor p53abn-red trial",
+        "institut gustav roussy"
+      ],
+      [
+        "consorcio parc de salut mar, hospital del mar",
+        "hospital del mar research institute"
+      ],
+      [
+        "maimonides institute for biomedical research of cordoba (imibic",
+        "instituto maim\u00f3nides de investigaci\u00f3n biom\u00e9dica de c\u00f3rdoba"
+      ],
+      [
+        "servicio madrileno de salud (sermas",
+        "gerencia asistencial de atencion primaria, madrid health service (sermas",
+        "sermas"
+      ],
+      [
+        "sana kliniken l\u00fcbeck",
+        "sana kliniken d\u00fcsseldorf"
+      ],
+      [
+        "beone medicines i gmbh switzerland",
+        "beone (china only"
+      ],
+      [
+        "fondation contre le cancer",
+        "la fondation contre le cancer, belgique"
+      ],
+      [
+        "first people's hospital of lin'an district, hangzhou",
+        "people's hospital of lin 'an city"
+      ],
+      [
+        "irccs casa sollievo della sofferenza, san giovanni rotondo",
+        "fondazione gli angeli di padre pio"
+      ],
+      [
+        "bambino ges\u00f9 children's hospital, rome, italy",
+        "ospedale pediatrico bambino ges\u00f9, opbg, rome, italy"
+      ],
+      [
+        "universit\u00e0 di napoli federico ii",
+        "a.o.u. federico ii, napoli",
+        "federico ii university of naples, department of clinical medicine and surgery, naples, italy",
+        "department of clinical medicine and surgery - university of naples federico ii"
+      ],
+      [
+        "university hospital of padova, padova, italy",
+        "gastroenterology unit, university hospital of padova, padova, italy"
+      ],
+      [
+        "li hui li hospital",
+        "ningbo medical center li huili hospital"
+      ],
+      [
+        "istituti clinici scientifici maugeri spa, irccs montescano",
+        "istituti clinici scientifici maugeri spa, irccs telese",
+        "istituti clinici scientifici maugeri di pavia"
+      ],
+      [
+        "technical university in kosice",
+        "technical university of denmark (dtu"
+      ],
+      [
+        "fonds recherche du qu\u00e9bec sant\u00e9",
+        "frc- fonds de la recherche clinique"
+      ],
+      [
+        "zhongnan university xiangya second hospital",
+        "central south university xiangya hospital"
+      ],
+      [
+        "bethune hospital of shanxi medical university",
+        "affiliated bethune hospital of shanxi medical university"
+      ],
+      [
+        "new horizon health technology",
+        "hangzhou newhorizon health technology"
+      ],
+      [
+        "university hospitals sussex nhs foundation",
+        "university hospitals sussex nhs foundation trust"
+      ],
+      [
+        "ap-hp h\u00f4pital henri-mondor, hematology department",
+        "ap-hp, h\u00f4pital paul brousse"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 13,
+    "n_groups": 48,
+    "names_in_groups": 101,
+    "pairs": 58,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "chu de fort de france - martinique",
+        "cayenne hospital center, french guiana"
+      ],
+      [
+        "heinrich-heine-universitaet duesseldorf",
+        "leibniz research institute for environmental medicine d\u00fcsseldorf"
+      ],
+      [
+        "mahatma gandhi institute of medical sciences/ kasturba hospital, wardha, india",
+        "mahatma gandhi institute of medical sciences, wardha, india"
+      ],
+      [
+        "association for systematic therapy education center",
+        "association of systemic therapists education centre"
+      ],
+      [
+        "college of pharmaceutical sciences at zhejiang university",
+        "college of pharmaceutical science at zhejiang university"
+      ],
+      [
+        "noah's hope - hope 4 bridget family foundations",
+        "noah's hope - hope4bridget foundation"
+      ],
+      [
+        "plan nacional sobre drogas",
+        "delegaci\u00f3n del gobierno para el plan nacional sobre drogas"
+      ],
+      [
+        "centre de recherche sur les maladies emergentes et re-emergentes (cremer",
+        "centre de recherche sur les maladies emergentes et re-emergentes"
+      ],
+      [
+        "affiliated hangzhou first people's hospital, school of medicine, westlake university",
+        "department of vascular surgery, school of medicine, affiliated hangzhou first people's hospital, zhejiang university, hangzhou, china"
+      ],
+      [
+        "societat catalana de pneumologia",
+        "societat catalana de pneumologia (socap"
+      ],
+      [
+        "university of north bengal, india",
+        "university of north bengal"
+      ],
+      [
+        "servicio de salud del principado de asturias",
+        "asturias public health service (sespa"
+      ],
+      [
+        "ningbo medical center lihuiihospitai",
+        "ningbo medical center li huili hospital"
+      ],
+      [
+        "fakultn\u00ed nemocnice olomouc",
+        "palacky university olomouc institute of molecular and translational medicine, olomouc, czechia"
+      ],
+      [
+        "bmbf (bundes ministerium fuer bildung und forschung",
+        "germany's federal ministry of education and research (bmbf) agreement dated 1/30/23"
+      ],
+      [
+        "bundesministerium f\u00fcr forschung, technologie und raumfahrt (bmftr",
+        "germany's federal ministry of education and research (bmbf) agreement dated 1/30/23",
+        "bmbf (bundes ministerium fuer bildung und forschung"
+      ],
+      [
+        "az groeninge",
+        "groeninge hospital, kortrijk, belgium"
+      ],
+      [
+        "fenghua traditional chinese medicine hospital, ningbo city",
+        "fenghua district traditional chinese medicine hospital, ningbo city"
+      ],
+      [
+        "alexianen zorggroep tienen",
+        "psychiatric clinic of alexianen zorggroep tienen"
+      ],
+      [
+        "luopu people's hospital",
+        "luopu county people's hospital of hotan prefecture"
+      ],
+      [
+        "universit\u00e4tsklinikum hamburg-eppendorf - klinik f\u00fcr kardiologie universit\u00e4tsklinikum hamburg-eppendorf",
+        "university medical center hamburg-eppendorf - clinic for cardiology university medical center hamburg-eppendorf",
+        "university heart & vascular center hamburg, department of cardiology"
+      ],
+      [
+        "university medical center hamburg-eppendorf, department of neurosurgery",
+        "university medical center hamburg-eppendorf (uke",
+        "hamburg; university hospital hamburg-eppendorf"
+      ],
+      [
+        "centre hospitalier de cherbourg",
+        "ch cherbourg"
+      ],
+      [
+        "h\u00f4pital saint joseph",
+        "service d'h\u00e9pato-gastroent\u00e9rologie, h\u00f4pital saint joseph, marseille, france"
+      ],
+      [
+        "dr. pesole pasqua letizia",
+        "pasqua letizia pesole, biologist"
+      ],
+      [
+        "pomeranian medical university",
+        "uniwersytet medyczny w lublinie"
+      ],
+      [
+        "university hospital, tours (cosponsor",
+        "tours university",
+        "chru tours"
+      ],
+      [
+        "strategic research council of finland",
+        "strategic research council, finland"
+      ],
+      [
+        "beijingyouan hospital",
+        "beijing fengtai hospital"
+      ],
+      [
+        "chambery hospital, france",
+        "centre hospitalier de chamb\u00e9ry"
+      ],
+      [
+        "cabrini health, melbourne, australia",
+        "cabrini health (cab), malvern, australia"
+      ],
+      [
+        "rm partners",
+        "rm partners west london cancer alliance"
+      ],
+      [
+        "affiliated hospital of shaanxi university of chinese medicine",
+        "second affiliated hospital of shaanxi university of chinese medicine"
+      ],
+      [
+        "zoll foundation",
+        "zoll foundation, fondation les gueules cass\u00e9es"
+      ],
+      [
+        "chu h\u00f4pital lariboisi\u00e8re aphp",
+        "lariboisi\u00e8re-saint louis clinical research unit"
+      ],
+      [
+        "xuzhou medical university affiliated hospital of huaian",
+        "affiliated lianyungang hospital of xuzhou medical university"
+      ],
+      [
+        "instituto de investigaci\u00f3n sanitaria del principado de asturias - ispa",
+        "servicio de salud del principado de asturias"
+      ],
+      [
+        "lifespan/ the miriam hospital",
+        "miriam hospital/lifespan"
+      ],
+      [
+        "umr 1253, ibrain, universit\u00e9 de tours, inserm, tours, france",
+        "umr inserm u1253-ibrain-neurog\u00e9n\u00e9tique et physiopathologie neuronale"
+      ],
+      [
+        "yither biotechnology",
+        "yither biotech"
+      ],
+      [
+        "fhu precise: projet f\u00e9d\u00e9ratif hospitalo-universitaire precision health in complex immune-mediated inflammatory diseases",
+        "fhu imminent"
+      ],
+      [
+        "dr. pesole pasqua letizia",
+        "pasqua letizia pesole, biologist",
+        "de nucci sara"
+      ],
+      [
+        "first people's hospital of xiangtan city",
+        "first people's hospital of xiangtan"
+      ],
+      [
+        "nih biomarker, imaging and quality of life studies funding program (biqsfp",
+        "nih/nci - grant award number: r01ca218357"
+      ],
+      [
+        "complexo hospitalario universitario de pontevedra",
+        "complejo hospitalario universitario, a coru\u00f1a"
+      ],
+      [
+        "roche pharma (switzerland",
+        "shanghai roche pharmaceutical"
+      ],
+      [
+        "taizhou cancer hospital",
+        "taizhou hospital, affiliated cancer hospital of the university of chinese academy of sciences"
+      ],
+      [
+        "alzheimer's clinical trials consortium (actc",
+        "autoimmunity centers of excellence (ace"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 14,
+    "n_groups": 34,
+    "names_in_groups": 71,
+    "pairs": 40,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      3,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "foundation for biomedical research of the hospital universitario 12 de octubre",
+        "university hospital 12 octubre, madrid"
+      ],
+      [
+        "hospital universitario puerta del hierro",
+        "hospital universitario de puerta de hierro"
+      ],
+      [
+        "association fran\u00e7aise de p\u00e9diatrie ambulatoire",
+        "afpa (association fran\u00e7aise de p\u00e9diatrie ambulatoire"
+      ],
+      [
+        "global alliance to prevent prematurity and stillbirth",
+        "global alliance to prevent prematurity and stillbirth (gapps"
+      ],
+      [
+        "heart and stroke foundation canadian partnership for stroke recovery",
+        "heart & stroke richard lewar centres of excellence in cardiovascular research"
+      ],
+      [
+        "go2 foundation for lung cancer",
+        "go2 foundation"
+      ],
+      [
+        "pirkanmaa hospital district, tampere, finland",
+        "pirkanmaa hospital district"
+      ],
+      [
+        "universit\u00e3\u00a9 catholique de louvain",
+        "universite catholique de louvain"
+      ],
+      [
+        "luxembourg national research fund (fnr",
+        "luxembourg national research fund"
+      ],
+      [
+        "dr. miriam and sheldon g. adelson medical research foundation",
+        "adelson medical research"
+      ],
+      [
+        "dutch pancreatic cancer group (dpcg",
+        "dutch pancreatic cancer group"
+      ],
+      [
+        "university of massachusetts chan medical school",
+        "university of massachusetts chan medical school, worcester"
+      ],
+      [
+        "universit\u00e4tsklinikum hamburg-eppendorf - klinik f\u00fcr kardiologie universit\u00e4tsklinikum hamburg-eppendorf",
+        "university medical center hamburg-eppendorf - clinic for cardiology university medical center hamburg-eppendorf"
+      ],
+      [
+        "royal women hospital",
+        "royal women's hospital"
+      ],
+      [
+        "medical university vienna",
+        "medical university of innsbruck",
+        "kks meduni vienna"
+      ],
+      [
+        "affiliated hospital of guilin medical university, china",
+        "affiliated hospital of guilin medical college"
+      ],
+      [
+        "daping hospital, the third military medical university",
+        "daping hospital, the third military medical university (army medical university"
+      ],
+      [
+        "institut national de la sant\u00e3\u00a9 et de la recherche m\u00e3\u00a9dicale, france",
+        "institut national de la sant\u00e9 et de la recherche m\u00e9dical - d\u00e9l\u00e9gation grand ouest inserm u1253",
+        "institut national de la sant\u00e9 et de la recherche m\u00e9dicale, france - ltsi"
+      ],
+      [
+        "instituto de seguridad del trabajo, chile",
+        "instituto de investigaciones del sue\u00f1o"
+      ],
+      [
+        "american psychoanalytic association",
+        "american psychoanalytic association (apsa"
+      ],
+      [
+        "irccs policlinico san donato, milano",
+        "i.r.c.c.s. policlinico san donato, san donato milanese, italy",
+        "irccs policlinico s. donato, milano"
+      ],
+      [
+        "tongji hospital, affiliated to tongji medical college of huazhong university of science and technology",
+        "shanghai tongji hospital (tongji hospital of tongji university"
+      ],
+      [
+        "uz leuven",
+        "leuven university medical center"
+      ],
+      [
+        "decathlon",
+        "decathlon espa\u00f1a s.a.u"
+      ],
+      [
+        "federa\u00e7\u00e3o portuguesa de futebol",
+        "portugal football school, federa\u00e7\u00e3o portuguesa de futebol"
+      ],
+      [
+        "kantonal spital solothurn, olten",
+        "kantonal hospital solothurn, olten"
+      ],
+      [
+        "villa beretta rehabilitation research innovation institute",
+        "centro riabilitativo villa beretta"
+      ],
+      [
+        "azienda ospedaliero-universitaria maggiore della carit\u00e0 di novara",
+        "universit\u00e0 del piemonte orientale aou maggiore della carit\u00e0 - novara"
+      ],
+      [
+        "xijing hospital of airforce medical university",
+        "xijing hospital\uff0cfmmu"
+      ],
+      [
+        "second affiliated hospital of the army medical university",
+        "second affiliated hospital of air force medical university"
+      ],
+      [
+        "frieslandcampina, amersfoort, the netherlands",
+        "friesland campina"
+      ],
+      [
+        "catalan public health agency",
+        "ag\u00e8ncia de salut p\u00fablica de catalunya (aspcat"
+      ],
+      [
+        "hospital universitari vall d'hebron barcelona, spain",
+        "hospital universitario vall d\u00b4hebron"
+      ],
+      [
+        "centre hospitalier louis pasteur, chartres",
+        "louis pasteur hospital, bagnols sur c\u00e8ze"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 15,
+    "n_groups": 18,
+    "names_in_groups": 40,
+    "pairs": 27,
+    "group_sizes": [
+      2,
+      2,
+      4,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "chu caen, hematology department",
+        "chu caen"
+      ],
+      [
+        "centre for cancer detection (cvko",
+        "guangzhou kindness health care center (guangzhou jiubang shanxin clinic ltd), guangzhou, china"
+      ],
+      [
+        "technical university munchen",
+        "technische universit\u00e4t m\u00fcnchen, germany",
+        "klinikum rechts der isar technische universit\u00e4t m\u00fcnchen",
+        "school of medicine, technical university munich, m\u00fcnchner studienzentrum"
+      ],
+      [
+        "foundation for angelman syndrome therapeutics canada",
+        "foundation for angelman syndrome therapeutics"
+      ],
+      [
+        "asthma and lung uk",
+        "asthma + lung uk"
+      ],
+      [
+        "cardiology centres of the netherlands",
+        "cardiology centers of the netherlands"
+      ],
+      [
+        "canadian chiropractic research foundation",
+        "canadian chiropractic association, canadian chiropractic research foundation"
+      ],
+      [
+        "960th hospital of joint logistics support force of chinese people's liberation army",
+        "960th hospital of the pla joint logistics support force"
+      ],
+      [
+        "fondation contre le cancer",
+        "la fondation contre le cancer, belgique"
+      ],
+      [
+        "ictan-csic - madrid - spain",
+        "spanish national research council (ictan, csic"
+      ],
+      [
+        "puerta de hierro majadahonda university hospital",
+        "fundaci\u00f3n investigaci\u00f3n biom\u00e9dica puerta de hierro majadahonda",
+        "hospital universitario de puerta de hierro"
+      ],
+      [
+        "universitetssykehuset nord norge hf",
+        "universitetssykehuset i nord-norge hospital trust",
+        "northern norway regional health trust"
+      ],
+      [
+        "deutsche forschungegemeinschaft",
+        "dfg - deutsche forschungs gemeinschaft (german research foundation"
+      ],
+      [
+        "federal ministry of research, technology and space",
+        "bundesministerium f\u00fcr forschung, technologie und raumfahrt (bmftr"
+      ],
+      [
+        "istituto nazionale dei tumori regina elena, roma",
+        "istituto nazionale tumori regina elena"
+      ],
+      [
+        "aou pisana, pisa, italy",
+        "azienda ospedaliera universitaria pisana, pisa"
+      ],
+      [
+        "consortia for food allergy research (cofar",
+        "consortium for food allergy research"
+      ],
+      [
+        "st george's london university hospitals nhs foundation trust",
+        "st. george's hospital, university of london (uk sponsor"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 16,
+    "n_groups": 19,
+    "names_in_groups": 38,
+    "pairs": 19,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "nordic cll study group (ncllsg",
+        "nordic cll study group"
+      ],
+      [
+        "institut d'investigacions biom\u00e8diques august pi i sunyer (idibaps), spain",
+        "institut d'investigacions biom\u00e8diques august pi i sunyer (idibaps), universitat de barcelona, barcelona, spain"
+      ],
+      [
+        "institut du thorax, inserm umr1087",
+        "institut du thorax"
+      ],
+      [
+        "servicio de salud del principado de asturias. \u00e1rea sanitaria iii",
+        "servicio de salud del principado de asturias"
+      ],
+      [
+        "third medical center of pla general hospital",
+        "third medical center, pla general hospital"
+      ],
+      [
+        "deutsches forschungszentrum f\u00fcr k\u00fcnstliche intelligenz gmbh (dfki",
+        "deutsches forschungszentrum f\u00fcr k\u00fcnstliche intelligenz (dfki"
+      ],
+      [
+        "pediatric oncology experimental therapeutic investigators consortium",
+        "pediatric oncology experimental therapeutics investigators' consortium"
+      ],
+      [
+        "centro de investigaci\u00f3n biom\u00e9dica en red fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn), instituto de salud carlos iii, spain",
+        "centro de investigaci\u00f3n biom\u00e9dica en red fisiopatolog\u00eda de la obesidad y nutrici\u00f3n (ciberobn"
+      ],
+      [
+        "curesearch",
+        "curesearch for children's cancer"
+      ],
+      [
+        "curebrca foundation",
+        "curebrca"
+      ],
+      [
+        "ontario institute for regenerative medicine",
+        "ontario institute of regenerative medicine (oirm"
+      ],
+      [
+        "funda\u00e7\u00e3o para a ci\u00eancia e a tecnologia (fct",
+        "portuguese national funding agency for science, research and technology (fct"
+      ],
+      [
+        "institut national de recherche biom\u00e9dicale (inrb). kinshasa, democratic republic of congo",
+        "institut national pour la recherche biomedicale (inrb"
+      ],
+      [
+        "dunamenti rek reprodukcios kozpont",
+        "dunamenti rek pannon clinic"
+      ],
+      [
+        "ospedale galeazzi sant'ambrogio - irccs",
+        "galeazzi sant'ambrogio hospital - milan"
+      ],
+      [
+        "fenghua traditional chinese medicine hospital, ningbo city",
+        "fenghua district traditional chinese medicine hospital, ningbo city"
+      ],
+      [
+        "royal melbourne hospital, australia",
+        "department of neurology, royal melbourne hospital"
+      ],
+      [
+        "fifth medical center of the chinese people's liberation army (pla) general hospital",
+        "fifth hospital affiliated to wenzhou medical university/ lishui central hospital"
+      ],
+      [
+        "taighde \u00e9ireann - research ireland",
+        "irish group cti"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 17,
+    "n_groups": 23,
+    "names_in_groups": 49,
+    "pairs": 29,
+    "group_sizes": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "royal marsden partners west london cancer alliance",
+        "royal marsden partners cancer alliance"
+      ],
+      [
+        "royal london hospital, barts health nhs trust",
+        "barts helth nhs trust"
+      ],
+      [
+        "fundacion onkologikao (onk), san sebastian, spain",
+        "fundaci\u00f3n onkologikoa fundazioa"
+      ],
+      [
+        "foundation for research and technology - hellas",
+        "foundation for research and technology - hellas (forth"
+      ],
+      [
+        "h\u00f4pital saint philibert, ghicl",
+        "h\u00f4pital saint philibert, lomme"
+      ],
+      [
+        "region kalmar county",
+        "kalmar county council",
+        "l\u00e4nssjukhuset kalmar"
+      ],
+      [
+        "second affiliated hospital of air force medical university",
+        "second affiliated hospital of afmu",
+        "second affiliated hospital of air force military medical university"
+      ],
+      [
+        "rita and alex hillman foundation",
+        "rita & alex hillman foundation"
+      ],
+      [
+        "noah's hope - hope 4 bridget family foundations",
+        "noah's hope - hope4bridget foundation"
+      ],
+      [
+        "american association of orthodontics foundation",
+        "american association of orthodontists foundation"
+      ],
+      [
+        "b-crobes laboratory (m) sdn bhd",
+        "b-crobes laboratory sdn. bhd"
+      ],
+      [
+        "second affiliated hospital of xinxiang medical university",
+        "second affiliated hospital of xinxiang medical college"
+      ],
+      [
+        "people' s hospital of jiangmen",
+        "people's hospital of jiangmen"
+      ],
+      [
+        "isciii",
+        "carlos iii health institute (isciii), spain"
+      ],
+      [
+        "netherlands institute for the study of crime",
+        "netherlands institute for the study of crime and law enforcement"
+      ],
+      [
+        "foundation for biomedical research of the hospital universitario 12 de octubre",
+        "instituto de investigaci\u00f3n hospital 12 de octubre",
+        "university hospital 12 octubre, madrid"
+      ],
+      [
+        "puerta de hierro majadahonda university hospital",
+        "hospital puerta de hierro, madrid"
+      ],
+      [
+        "centro hospitalar universit\u00e1rio de santo ant\u00f3nio, unidade local de sa\u00fade de santo ant\u00f3nio, porto, portugal",
+        "unidade local de sa\u00fade de santo ant\u00f3nio, e.p.e"
+      ],
+      [
+        "chu de clermont-ferrand",
+        "m\u00e9decine physique et r\u00e9adaptation, chu de clermont-ferrand, france"
+      ],
+      [
+        "laboratoire epsylon",
+        "epsylon, asbl"
+      ],
+      [
+        "centre hospitalier universitaire de besan\u00e7on",
+        "chu de besancon"
+      ],
+      [
+        "asst papa giovanni xxiii, bergamo, italy",
+        "asst papa giovanni xxiii hospital"
+      ],
+      [
+        "ch thuir",
+        "university hospital, thuir"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 18,
+    "n_groups": 38,
+    "names_in_groups": 85,
+    "pairs": 62,
+    "group_sizes": [
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      3,
+      2,
+      3,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      6,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "institut d'investigacions biom\u00e8diques august pi i sunyer (idibaps), universitat de barcelona, barcelona, spain",
+        "institut d'investigacions biom\u00e8diques august pi i sunyer (idibaps), spain"
+      ],
+      [
+        "azienda ospedaliera universitaria \"luigi vanvitelli\" (aov",
+        "azienda ospedaliera universitaria luigi vanvitelli",
+        "universit\u00e0 luigi vanvitelli della campania"
+      ],
+      [
+        "fundaci\u00f3 privada institut d'investigaci\u00f3 oncol\u00f2gica de vall d'hebron",
+        "hospital universitari vall d'hebron research institute (vhir"
+      ],
+      [
+        "maimonides institute for biomedical research of cordoba (imibic",
+        "foundation for biomedical research of the hospital universitario 12 de octubre"
+      ],
+      [
+        "fundaci\u00f3n para la investigaci\u00f3n biom\u00e9dica del hospital 12 de octubre",
+        "foundation for biomedical research of the hospital universitario 12 de octubre"
+      ],
+      [
+        "taiho",
+        "taiho pharmaceuticals"
+      ],
+      [
+        "mucolipidosis type iv (ml4) foundation",
+        "ml4 foundation"
+      ],
+      [
+        "instituto de salud carlos iii (isciii",
+        "carlos iii health institute (isciii), spain",
+        "health research fund of isciii spain"
+      ],
+      [
+        "centre hospitalier universitaire clermont ferrand",
+        "centre hospitalier universitaire de toulouse, france"
+      ],
+      [
+        "chu de clermont-ferrand",
+        "centre hospitalier universitaire clermont ferrand",
+        "rhumatologie, chu de clermont-ferrand, france"
+      ],
+      [
+        "universit\u00e9 clermont-auvergne, france",
+        "university clermont auvergne (uca"
+      ],
+      [
+        "assistance publique - h\u00f4pitaux de paris, france",
+        "l'assistance publique - hopitaux de paris (ap-hp",
+        "assistance publique hopitaux paris la pitie salpetriere"
+      ],
+      [
+        "swedish childhood cancer foundation",
+        "swedish childhood cancer fund"
+      ],
+      [
+        "chu nice",
+        "chu nice, hematology department",
+        "h\u00f4pital pasteur, chu nice"
+      ],
+      [
+        "eye and ent hospital of fudan university",
+        "fudan university eye and ent hospital"
+      ],
+      [
+        "hospital of obstetrics and gynecology affiliated to fudan university",
+        "obstetrics & gynecology hospital of fudan university (shanghai red house ob & gyn hospital"
+      ],
+      [
+        "shanghai fudan university cancer center",
+        "fudan university attached tumor hospital"
+      ],
+      [
+        "ningbo medical center li huili hospital",
+        "ningbo medical center lihuiihospitai"
+      ],
+      [
+        "affiliated hospital of ningbo university",
+        "affiliated hospital of medical school of ningbo university"
+      ],
+      [
+        "fondazione irccs istituto nazionale dei tumori di milano, milan, italy",
+        "irccs istituto nazionale dei tumori"
+      ],
+      [
+        "ospedale pediatrico bambino ges\u00f9, opbg, rome, italy",
+        "bambino ges\u00f9 children's hospital"
+      ],
+      [
+        "deutsche forschungegemeinschaft",
+        "dfg"
+      ],
+      [
+        "taizhou cancer hospital",
+        "taizhou hospital, affiliated cancer hospital of the university of chinese academy of sciences"
+      ],
+      [
+        "vrije universiteit brussel, jette, belgium",
+        "vub"
+      ],
+      [
+        "universitair ziekenhuis brussel, department of neurology, belgium",
+        "vrije universiteit brussel, jette, belgium"
+      ],
+      [
+        "dr. d'attoma benedetta",
+        "benedetta, d attoma"
+      ],
+      [
+        "canfield scientific",
+        "canfield"
+      ],
+      [
+        "viracor eurofins",
+        "eurofins viracor biopharma"
+      ],
+      [
+        "centre r\u00e9gional de coordination des d\u00e9pistages des cancers sud paca",
+        "centre r\u00e9gional de coordination des d\u00e9pistages des cancers en occitanie crcdc-oc"
+      ],
+      [
+        "royal marsden hospital nhs foundation trust & the institute of cancer research",
+        "royal marsden nhs ft"
+      ],
+      [
+        "st george's university hospital nhs foundation trust",
+        "st george's london university hospitals nhs foundation trust"
+      ],
+      [
+        "girci auvergne rh\u00f4ne-alpes",
+        "girci no"
+      ],
+      [
+        "norges forskningsr\u00e3\u00a5d, stenberggata 26, pb. 2700, n-0131 oslo, norway",
+        "norinnova"
+      ],
+      [
+        "institut national de la sant\u00e3\u00a9 et de la recherche m\u00e3\u00a9dicale, france",
+        "inserm-u1068",
+        "inserm u1111",
+        "cic inserm 1402",
+        "inserm eceve 1123",
+        "inserm u1046 physiologie et m\u00e9decine exp\u00e9rimentale du coeur et des muscles"
+      ],
+      [
+        "affiliated tumor hospital of xinjiang medical university",
+        "cancer hospital affiliated to xinjiang medical university"
+      ],
+      [
+        "robert bosch-krankenhaus stuttgart",
+        "robert bosch center for integrative medicine and health"
+      ],
+      [
+        "association of academic surgery",
+        "association for academic surgery"
+      ],
+      [
+        "motor neurone disease association, uk",
+        "fight mnd"
+      ]
+    ]
+  },
+  {
+    "stratum": "UNKNOWN",
+    "n_total": 12973,
+    "n_sample": 2000,
+    "sample": 19,
+    "n_groups": 26,
+    "names_in_groups": 55,
+    "pairs": 32,
+    "group_sizes": [
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      3,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "groups": [
+      [
+        "ausl di modena - ospedale ramazzini di carpi",
+        "ausl di modena - ospedale di mirandola",
+        "ausl di modena - ospedale di pavullo nel frignano"
+      ],
+      [
+        "centro de estudos e investigacao em dinamicas sociais e saude associacao sem fins lucrativos (ceidss",
+        "centro de estudos e investigacao em dinamicas sociais e saude associacao sem fins lucrativos"
+      ],
+      [
+        "luxembourg national research fund",
+        "luxembourg national research fund (fnr"
+      ],
+      [
+        "evidenze health espa\u00f1a (cro",
+        "evidenze health s.r.l"
+      ],
+      [
+        "biovica",
+        "biovica international"
+      ],
+      [
+        "tangdu hospital of air force military medical university",
+        "tangdu hospital-air force medical university"
+      ],
+      [
+        "dep.of general-, visceral- and pediatric surgery, hhu, duesseldorf, germany",
+        "department of internal medicine, university hospital tulln, alter ziegelweg 10, 3430, tulln, austria",
+        "department of neurology, university hospital tulln, alter ziegelweg 10, 3430, tulln, austria"
+      ],
+      [
+        "second affiliated hospital and yuying children's hospital of wenzhou medical university",
+        "yuying childrens hospital of wenzhou medical university"
+      ],
+      [
+        "centre hospitalier universitaire dupuytren de limoges (chul",
+        "centre hospitalier de l'universite laval (chul"
+      ],
+      [
+        "aou citt\u00e0 della salute e della scienza di torino - presidio molinette",
+        "aou citt\u00e0 della salute e della scienza torino"
+      ],
+      [
+        "society of nuclear medicine and molecular imaging",
+        "society of nuclear medecine and molecular imaging"
+      ],
+      [
+        "rocket force special medical center of the people's liberation army",
+        "rocket force characteristic medical center"
+      ],
+      [
+        "huazhong university of science and technology union shenzhen hospital (nanshan hospital",
+        "huazhong university of science and technology union shenzhen hospital"
+      ],
+      [
+        "servicio de salud de castilla la mancha, albacete, spain",
+        "servicio de salud de castilla la mancha (spain"
+      ],
+      [
+        "fundaci\u00f3n instituto investigaci\u00f3n sanitaria arag\u00f3n, zaragoza, spain",
+        "pi antonio gimeno. instituto de investigaci\u00f3n sanitaria arag\u00f3n"
+      ],
+      [
+        "foundation for biomedical research of the hospital universitario 12 de octubre",
+        "fundaci\u00f3n para la investigaci\u00f3n biom\u00e9dica del hospital 12 de octubre"
+      ],
+      [
+        "universit\u00e0 pavia - dipartimento di scienze del sistema nervoso e del comportamento",
+        "universit\u00e0 di pavia",
+        "universit\u00e0 degli studi di pavia"
+      ],
+      [
+        "viecuri medisch centrum voor noord-limburg",
+        "viecuri, venlo, the netherlands"
+      ],
+      [
+        "dunamenti rek reproduction center",
+        "dunementi rek pannon clinic"
+      ],
+      [
+        "pla strategic support force's characteristic medical center",
+        "people's liberation army (pla) strategic support force characteristic medical center"
+      ],
+      [
+        "de pergola giovanni",
+        "de nucci sara"
+      ],
+      [
+        "dr. riezzo giuseppe",
+        "giuseppe, riezzo"
+      ],
+      [
+        "donghia rossella",
+        "rossella donghia, biologist"
+      ],
+      [
+        "dr. tatoli rossella",
+        "scalavino viviana"
+      ],
+      [
+        "cintesis - center for health technology and services research, porto",
+        "faculdade de medicina da universidade do porto - cintesis"
+      ],
+      [
+        "centre r\u00e9gional de coordination du d\u00e9pistage des cancers - auvergne-rh\u00f4ne-alpes",
+        "centre r\u00e9gional de coordination des d\u00e9pistages des cancers de grand est"
+      ]
+    ]
+  }
+]
