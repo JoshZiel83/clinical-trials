@@ -227,6 +227,20 @@ higher once recall < 1 and cross-stratum pairs are counted. Three consequences:
   generic tokens like "University Hospital"), so OTHER's 6.5% is the softest
   floor and the INDUSTRY–OTHER gap may be narrower than shown.
 
+**Implied true entity count (`notebooks/sponsor_synonym_distributions.ipynb`):**
+the per-record synonym distribution is **overdispersed** — strongly for INDUSTRY
+(var/mean ≈ 3.0: parent/subsidiary/legal-entity families), near-Poisson for
+academic (≈ 1.2). Modelling per-org variant counts (Poisson fit to pairs-per-name,
+and a negative binomial fit to **both** pairs *and* prevalence), the **~37.5k
+normalized names collapse to ≈ 33–35k true organizations** — i.e. **~2,500–3,000
+redundant names, a floor** (recall < 1, cross-stratum pairs unseen). Where
+overdispersion is real (industry), NB is the correct shape and puts redundancy at
+~640 vs Poisson's ~940 — **Poisson overstates the collapse** for clustered
+families. So the oracle's collapse is single-digit-percent in *count* but
+concentrated (industry/unknown) and meaningful in absolute terms (each redundant
+name silently splits a "trials by X" query). The definitive number falls out of
+running the clustering itself.
+
 **Algorithm — leader/canopy clustering with an LLM similarity judge:**
 1. Operate on the **normalized names** — `normalize_sponsor_name()` over distinct
    `raw.sponsors.name` yields **37,483** names (measured 2026-06-12). Note: the
