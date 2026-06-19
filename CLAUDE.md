@@ -9,14 +9,22 @@ Make sure the virtual environment is activated before installing new packages:
 conda activate clinical_trials_env
 ```
 
-## macOS note: quickumls_simstring libiconv linkage
-The `quickumls-simstring` pip wheel links against `/usr/lib/libiconv.2.dylib` which symbol-errors on modern macOS. After installing quickumls, rewrite the dylib path to the conda-provided libiconv:
+## Optional: QuickUMLS (Phase 6D/6E condition enrichment)
+`quickumls` + `quickumls-simstring` are **not** in `environment.yml` on purpose:
+they are pip-only, optional (lazy-loaded; only the QuickUMLS condition-enrichment
+tool and the index builder need them), and `quickumls-simstring` needs a
+macOS-specific dylib relink a conda manifest can't express. Install both with the
+env active:
 
 ```bash
-install_name_tool -change /usr/lib/libiconv.2.dylib \
-  $CONDA_PREFIX/lib/libiconv.2.dylib \
-  $CONDA_PREFIX/lib/python3.11/site-packages/quickumls_simstring/_simstring.so
+conda activate clinical_trials_env
+scripts/install_quickumls.sh
 ```
+
+The script pip-installs both packages and, on macOS, repoints `_simstring.so`
+off `/usr/lib/libiconv.2.dylib` (which symbol-errors on modern macOS) to the
+conda-provided libiconv. Then build the index once with
+`python -m scripts.build_quickumls_index <umls.zip>` (~5GB, one-time).
 
 # Pipeline Entry Points
 - `run_extract.py` — Phase 1: raw AACT extraction

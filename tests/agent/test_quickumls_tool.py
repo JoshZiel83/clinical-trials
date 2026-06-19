@@ -21,10 +21,18 @@ def test_lookup_empty_input_returns_empty():
 
 
 def test_lookup_without_index_raises():
-    """If the index is missing, a clear error should surface."""
+    """If QuickUMLS isn't set up, a clear, actionable error should surface.
+
+    Two distinct unconfigured states are both valid: no 'umls' reference source
+    registered (LookupError), or a registered source whose index dir is missing
+    (RuntimeError). Accept either — both tell the user what to run next.
+    """
     if quickumls_tool.is_available():
         pytest.skip("index exists; this test only runs when unavailable")
-    with pytest.raises(RuntimeError, match="QuickUMLS index not found"):
+    with pytest.raises(
+        (RuntimeError, LookupError),
+        match="QuickUMLS index not found|reference source registered for 'umls'",
+    ):
         quickumls_tool.lookup("glioblastoma")
 
 

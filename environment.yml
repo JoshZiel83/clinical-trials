@@ -15,3 +15,6 @@ dependencies:
   - rapidfuzz
   - anthropic
   - pip
+  # Optional QuickUMLS deps (quickumls, quickumls-simstring) are intentionally
+  # NOT listed here — pip-only + needs a macOS dylib relink. Install on demand:
+  #   scripts/install_quickumls.sh   (see CLAUDE.md)
