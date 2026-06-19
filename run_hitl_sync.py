@@ -78,7 +78,7 @@ def _rebuild_downstream(conn, domains_touched):
         create_study_sponsors(conn)
     # Views always get refreshed since any dict change may ripple through.
     try:
-        from src.transform.views import build_study_summary
+        from src.mart.study_summary import build_study_summary
         logger.info("[sync] rebuilding views.study_summary")
         build_study_summary(conn)
     except Exception as exc:

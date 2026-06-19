@@ -50,6 +50,18 @@ def _setup_promote_test_db(extract_date="2026-04-17"):
         ) AS t(id, nct_id, intervention_type, name)
     """)
 
+    # Designs: 1:1 per study; only the atomic enums classify_design consumes.
+    # NCT005 deliberately has no design row (LEFT JOIN → NULLs downstream).
+    conn.execute("""
+        CREATE TABLE raw.designs AS SELECT * FROM (VALUES
+            (1, 'NCT001', 'RANDOMIZED', 'PARALLEL', 'None', 'TREATMENT', 'DOUBLE'),
+            (2, 'NCT002', 'None', 'None', 'COHORT', 'None', 'None'),
+            (3, 'NCT003', 'NON_RANDOMIZED', 'SINGLE_GROUP', 'None', 'TREATMENT', 'NONE'),
+            (4, 'NCT004', 'RANDOMIZED', 'CROSSOVER', 'None', 'PREVENTION', 'SINGLE')
+        ) AS t(id, nct_id, allocation, intervention_model, observational_model,
+               primary_purpose, masking)
+    """)
+
     # Countries: NCT003 has removed=TRUE (drop), NCT004 has removed=NULL (keep).
     conn.execute("""
         CREATE TABLE raw.countries AS SELECT * FROM (VALUES
@@ -80,7 +92,7 @@ def test_promote_creates_enriched_schema_and_tables():
             "SELECT table_name FROM information_schema.tables WHERE table_schema = 'enriched'"
         ).fetchall()
     )
-    assert tables == {"studies", "interventions", "countries"}
+    assert tables == {"studies", "designs", "interventions", "countries"}
     conn.close()
 
 
@@ -148,17 +160,19 @@ def test_meta_enriched_tables_populated():
         FROM meta.enriched_tables
         ORDER BY table_name
     """).fetchall()
-    assert len(rows) == 3
+    assert len(rows) == 4
     by_name = {r[0]: r for r in rows}
     assert set(by_name) == {
         "enriched.studies",
+        "enriched.designs",
         "enriched.interventions",
         "enriched.countries",
     }
-    # All three stamped with the extract date from meta.extraction_log.
+    # All four stamped with the extract date from meta.extraction_log.
     assert all(str(r[1]) == "2026-04-17" for r in rows)
     # Row counts match actual enriched table counts.
     assert by_name["enriched.studies"][2] == 5
+    assert by_name["enriched.designs"][2] == 4
     assert by_name["enriched.interventions"][2] == 5
     assert by_name["enriched.countries"][2] == 3  # post-filter
     # last_built_at and notes non-null.
@@ -200,5 +214,28 @@ def test_idempotent_rebuild_refreshes_last_built_at():
     assert conn.execute("SELECT COUNT(*) FROM enriched.studies").fetchone()[0] == 5
     assert conn.execute("SELECT COUNT(*) FROM enriched.countries").fetchone()[0] == 3
     # Registry still has exactly three rows (no duplicates from the re-run).
-    assert conn.execute("SELECT COUNT(*) FROM meta.enriched_tables").fetchone()[0] == 3
+    assert conn.execute("SELECT COUNT(*) FROM meta.enriched_tables").fetchone()[0] == 4
+    conn.close()
+
+
+def test_designs_projects_atomic_enums():
+    conn = _setup_promote_test_db()
+    promote_to_enriched(conn)
+    cols = {
+        r[0] for r in conn.execute("DESCRIBE enriched.designs").fetchall()
+    }
+    assert cols == {
+        "nct_id",
+        "allocation",
+        "intervention_model",
+        "observational_model",
+        "masking",
+        "primary_purpose",
+    }
+    # 1:1 per study; NCT005 has no design row.
+    assert conn.execute("SELECT COUNT(*) FROM enriched.designs").fetchone()[0] == 4
+    row = conn.execute(
+        "SELECT allocation, intervention_model FROM enriched.designs WHERE nct_id = 'NCT001'"
+    ).fetchone()
+    assert row == ("RANDOMIZED", "PARALLEL")
     conn.close()

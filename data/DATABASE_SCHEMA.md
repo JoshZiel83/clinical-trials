@@ -1,7 +1,7 @@
 # DuckDB Schema Documentation
 
 **Database**: `data/clinical_trials.duckdb`
-**Last updated**: 2026-04-17 (Phase 7C)
+**Last updated**: 2026-06-19 (Phase 7C — `enriched.designs` added; `class.study_design` repointed off `raw.*`)
 
 ---
 
@@ -14,7 +14,7 @@
 | `ref` | Reference/lookup tables for normalization. Dictionaries FK into `entities.*`. | 5 tables |
 | `norm` | Normalized entities with provenance tracking. FK into `entities.*`. | 4 tables |
 | `class` | Study design classification and innovative feature detection. | 3 tables |
-| `enriched` | Stable analytical inputs promoted from `raw.*` with table-level provenance (Phase 7C). The mart reads these instead of `raw.*`. | 3 tables |
+| `enriched` | Stable analytical inputs promoted from `raw.*` with table-level provenance (Phase 7C). The mart — and the `class.*` design classifier — read these instead of `raw.*`. | 4 tables |
 | `meta` | Pipeline metadata (reference-source provenance, extraction logs, HITL sync, enriched-table registry). | 5 tables |
 | `views` | Denormalized analytical views (query-ready). | 1 table |
 
@@ -362,17 +362,18 @@ Drug/Biological interventions linked to `entities.drug` via `ref.drug_dictionary
 Study design classification and innovative feature detection. Created by `src/transform/classify_design.py` and `src/transform/innovative_features.py`.
 
 ### `class.study_design`
-One row per study with 4 classification levels derived from structured AACT fields.
+One row per study with the design-classification levels derived from structured AACT fields. Built from `enriched.studies` + `enriched.designs` (Phase 7C contract), never `raw.*` — so the promote step must run before this classifier.
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | `nct_id` | VARCHAR | NOT NULL | Study identifier |
-| `study_type` | VARCHAR | | L1: INTERVENTIONAL, OBSERVATIONAL, EXPANDED_ACCESS |
 | `design_architecture` | VARCHAR | YES | L2: Parallel RCT, Single-Arm, Cohort, etc. |
 | `blinding_level` | VARCHAR | YES | L4: Open Label, Single/Double/Triple/Quadruple Blind |
 | `purpose` | VARCHAR | YES | L5: TREATMENT, PREVENTION, DIAGNOSTIC, etc. |
 
-L2 is derived from combinatorial rules on `allocation` + `intervention_model` (interventional) or `observational_model` (observational). Studies without a `raw.designs` record have NULL for L2/L4/L5.
+L2 is derived from combinatorial rules on `allocation` + `intervention_model` (interventional) or `observational_model` (observational). Studies without an `enriched.designs` record have NULL for L2/L4/L5.
+
+**L1 Study Type is intentionally not re-emitted here** — the mart reads `study_type` straight off `enriched.studies`, so a copy in this table would be redundant. (Historically L1 lived here as a pass-through column.)
 
 **118,764 rows** — one per study (100% coverage)
 
@@ -414,6 +415,20 @@ Anchor table for the mart. Only the columns currently consumed by the mart are p
 | `start_year` | INTEGER | `YEAR(start_date)` — derived; NULL if `start_date IS NULL` |
 
 **119,753 rows** (one per study).
+
+### `enriched.designs`
+Atomic design enums projected 1:1 from `raw.designs` — the stable input contract for `class.study_design`. Only the columns the classifier consumes are promoted. The **derived** `design_architecture` label is *not* stored here: it is a lossy collapse of `allocation` × `intervention_model` × `observational_model`, so the atomic components are preserved at this layer (enabling allocation-level filtering and future re-cuts of the taxonomy) and the derivation stays in `class.study_design`.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `nct_id` | VARCHAR | FK → studies (1:1) |
+| `allocation` | VARCHAR | RANDOMIZED, NON_RANDOMIZED, NA, ... |
+| `intervention_model` | VARCHAR | PARALLEL, CROSSOVER, FACTORIAL, SEQUENTIAL, SINGLE_GROUP |
+| `observational_model` | VARCHAR | COHORT, CASE_CONTROL, CASE_ONLY, ... |
+| `masking` | VARCHAR | NONE, SINGLE, DOUBLE, TRIPLE, QUADRUPLE |
+| `primary_purpose` | VARCHAR | TREATMENT, PREVENTION, DIAGNOSTIC, ... |
+
+**118,498 rows** (one per study with a design record; studies without one are absent → NULL L2/L4/L5 downstream).
 
 ### `enriched.interventions`
 Row-level projection of `raw.interventions`. Aggregation stays in `views.study_summary` (mart-specific).
@@ -515,7 +530,7 @@ Records metadata for each table extraction from AACT.
 
 ## `views` Schema
 
-Denormalized, query-ready analytical views built by `src/transform/views.py`.
+Denormalized, query-ready analytical mart built by `src/mart/study_summary.py` (the serving layer; moved out of `src/transform/` to keep it distinct from the staging/intermediate transforms).
 
 ### `views.study_summary`
 

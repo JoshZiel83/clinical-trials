@@ -1,8 +1,8 @@
-"""Tests for src/views.py — denormalized analytical views."""
+"""Tests for src/mart/study_summary.py — the analytical mart (views.study_summary)."""
 
 import duckdb
 
-from src.transform.views import build_study_summary
+from src.mart.study_summary import build_study_summary
 
 
 def _setup_views_test_db():

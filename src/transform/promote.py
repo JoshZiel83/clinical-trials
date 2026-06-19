@@ -30,7 +30,7 @@ _REGISTRY_DDL = """
 def promote_to_enriched(duck_conn) -> dict[str, int]:
     """Project raw.* → enriched.* and stamp meta.enriched_tables.
 
-    Returns {table_name: row_count} for the three promoted tables.
+    Returns {table_name: row_count} for the four promoted tables.
     """
     duck_conn.execute("CREATE SCHEMA IF NOT EXISTS enriched")
     duck_conn.execute("CREATE SCHEMA IF NOT EXISTS meta")
@@ -42,6 +42,7 @@ def promote_to_enriched(duck_conn) -> dict[str, int]:
 
     counts = {
         "enriched.studies": _promote_studies(duck_conn, extraction_date),
+        "enriched.designs": _promote_designs(duck_conn, extraction_date),
         "enriched.interventions": _promote_interventions(duck_conn, extraction_date),
         "enriched.countries": _promote_countries(duck_conn, extraction_date),
     }
@@ -79,6 +80,36 @@ def _promote_studies(duck_conn, extraction_date) -> int:
         source_expression="raw.studies (+ start_year = YEAR(start_date))",
         row_count=row_count,
         notes="Anchor study row + derived start_year; only columns the mart consumes are promoted.",
+    )
+    return row_count
+
+
+def _promote_designs(duck_conn, extraction_date) -> int:
+    # Atomic design enums only. class.study_design derives design_architecture
+    # (a lossy collapse of allocation × intervention_model × observational_model)
+    # and the blinding/purpose relabels from these — so the components must be
+    # preserved here, not the derived label, to keep allocation-level filtering
+    # and future re-cuts of the taxonomy possible.
+    duck_conn.execute("DROP TABLE IF EXISTS enriched.designs")
+    duck_conn.execute("""
+        CREATE TABLE enriched.designs AS
+        SELECT
+            nct_id,
+            allocation,
+            intervention_model,
+            observational_model,
+            masking,
+            primary_purpose
+        FROM raw.designs
+    """)
+    row_count = _row_count(duck_conn, "enriched.designs")
+    _register(
+        duck_conn,
+        table_name="enriched.designs",
+        extraction_date=extraction_date,
+        source_expression="raw.designs",
+        row_count=row_count,
+        notes="Atomic design enums (1:1 per study); design_architecture derivation stays in class.study_design.",
     )
     return row_count
 

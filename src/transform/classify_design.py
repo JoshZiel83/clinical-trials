@@ -7,14 +7,17 @@ logger = get_logger("classify_design")
 
 
 def classify_study_design(duck_conn):
-    """Create class.study_design from structured fields in raw.studies and raw.designs.
+    """Create class.study_design from structured fields in enriched.studies and enriched.designs.
 
     Levels:
-    1. Study Type — from study_type
     2. Design Architecture — combinatorial rules on allocation + intervention_model
        (interventional) or observational_model (observational)
     4. Blinding Level — mapped from masking
     5. Purpose — from primary_purpose
+
+    L1 Study Type is not re-emitted here: the mart reads study_type straight off
+    enriched.studies, so a copy in this table would be dead weight. Drives off
+    enriched.* (Phase 7C contract), never raw.*.
 
     Returns the number of rows created.
     """
@@ -25,9 +28,6 @@ def classify_study_design(duck_conn):
         CREATE TABLE class.study_design AS
         SELECT
             s.nct_id,
-
-            -- L1: Study Type (pass through)
-            s.study_type,
 
             -- L2: Design Architecture
             CASE
@@ -104,8 +104,8 @@ def classify_study_design(duck_conn):
                 ELSE d.primary_purpose
             END AS purpose
 
-        FROM raw.studies s
-        LEFT JOIN raw.designs d ON s.nct_id = d.nct_id
+        FROM enriched.studies s
+        LEFT JOIN enriched.designs d ON s.nct_id = d.nct_id
     """)
 
     row_count = duck_conn.execute(

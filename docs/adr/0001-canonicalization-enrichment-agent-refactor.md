@@ -427,7 +427,7 @@ rots silently when untested.
 | **`src/transform/normalize_conditions.py`** | `create_study_conditions` gains override precedence; add `co_occurrence`-based ambiguity flag. **Preserves LB1 for unambiguous strings.** | **Med–High — most invasive change.** Pin with new tests; existing condition tests must still pass. |
 | New `norm.study_condition_overrides` | Per-study contextual mappings; promoted from HITL like the dictionary. | Med — new table, new promote path branch in `src/hitl/candidates.py`. |
 | `src/hitl/candidates.py` | `promote_candidates` learns a condition-override branch (parallel to the existing 7D sponsor-merge branch). `ref.mapping_candidates` may gain a nullable `nct_id` for contextual condition candidates. | Med. |
-| `src/transform/views.py` | **No change** — still reads `condition_id` from `norm.study_conditions`. (LB2 holds.) | Low — this is the point of B2. |
+| `src/transform/views.py` (now `src/mart/study_summary.py`) | **No change** — still reads `condition_id` from `norm.study_conditions`. (LB2 holds.) | Low — this is the point of B2. |
 | Anthropic SDK dep | Add `litellm`; `anthropic` becomes a transitive/optional backend. | Low. |
 | Tests | New eval runner; new override + ambiguity-router tests; rewrite the `_FakeClient` double around the adapter interface, not `tool_runner`. | Med. |
 

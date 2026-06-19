@@ -6,13 +6,17 @@ from src.transform.classify_design import classify_study_design
 
 
 def _setup_design_test_db():
-    """Create an in-memory DuckDB with mock data for design classification."""
+    """Create an in-memory DuckDB with mock data for design classification.
+
+    Fixtures mirror the Phase 7C contract: classify_study_design reads from
+    enriched.studies / enriched.designs, never raw.*.
+    """
     conn = duckdb.connect(":memory:")
-    conn.execute("CREATE SCHEMA raw")
+    conn.execute("CREATE SCHEMA enriched")
     conn.execute("CREATE SCHEMA class")
 
     conn.execute("""
-        CREATE TABLE raw.studies AS
+        CREATE TABLE enriched.studies AS
         SELECT * FROM (VALUES
             ('NCT001', 'INTERVENTIONAL'),
             ('NCT002', 'INTERVENTIONAL'),
@@ -26,7 +30,7 @@ def _setup_design_test_db():
     """)
 
     conn.execute("""
-        CREATE TABLE raw.designs AS
+        CREATE TABLE enriched.designs AS
         SELECT * FROM (VALUES
             -- NCT001: Randomized Parallel → Parallel RCT
             ('NCT001', 'RANDOMIZED', 'PARALLEL', 'None', 'TREATMENT', 'DOUBLE'),
@@ -50,19 +54,16 @@ def _setup_design_test_db():
     return conn
 
 
-def test_study_type_classification():
-    """L1: study_type should pass through."""
+def test_study_type_not_re_emitted():
+    """L1 is intentionally dropped: the mart reads study_type off enriched.studies,
+    so this table must not carry a redundant copy."""
     conn = _setup_design_test_db()
     classify_study_design(conn)
 
-    rows = conn.execute("""
-        SELECT nct_id, study_type FROM class.study_design
-        ORDER BY nct_id
-    """).fetchall()
-    types = {r[0]: r[1] for r in rows}
-    assert types["NCT001"] == "INTERVENTIONAL"
-    assert types["NCT004"] == "OBSERVATIONAL"
-    assert types["NCT005"] == "EXPANDED_ACCESS"
+    cols = {
+        r[0] for r in conn.execute("DESCRIBE class.study_design").fetchall()
+    }
+    assert "study_type" not in cols
     conn.close()
 
 
@@ -206,19 +207,18 @@ def test_none_string_treated_as_null():
 
 
 def test_study_without_design_record():
-    """Study with no row in raw.designs should have NULLs for L2/L4/L5."""
+    """Study with no row in enriched.designs should have NULLs for L2/L4/L5."""
     conn = _setup_design_test_db()
     classify_study_design(conn)
 
     result = conn.execute("""
-        SELECT study_type, design_architecture, blinding_level, purpose
+        SELECT design_architecture, blinding_level, purpose
         FROM class.study_design
         WHERE nct_id = 'NCT008'
     """).fetchone()
-    assert result[0] == "INTERVENTIONAL"  # L1 from studies table
-    assert result[1] is None  # L2 no design record
-    assert result[2] is None  # L4 no design record
-    assert result[3] is None  # L5 no design record
+    assert result[0] is None  # L2 no design record
+    assert result[1] is None  # L4 no design record
+    assert result[2] is None  # L5 no design record
     conn.close()
 
 
@@ -227,7 +227,7 @@ def test_all_studies_classified():
     conn = _setup_design_test_db()
     classify_study_design(conn)
 
-    study_count = conn.execute("SELECT COUNT(*) FROM raw.studies").fetchone()[0]
+    study_count = conn.execute("SELECT COUNT(*) FROM enriched.studies").fetchone()[0]
     class_count = conn.execute("SELECT COUNT(*) FROM class.study_design").fetchone()[0]
     assert class_count == study_count
     conn.close()

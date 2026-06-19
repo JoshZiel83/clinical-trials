@@ -1,14 +1,24 @@
-"""Build denormalized analytical views (Phase 4).
+"""Build the analytical mart (Phase 4 — serving layer).
 
-Creates views.study_summary — one row per study, joining design classification,
-innovative features, AI mentions, therapeutic areas, conditions, drugs, countries,
-and sponsors into a wide, query-ready table.
+This is the project's mart: the terminal, denormalized, one-row-per-study table
+that humans / notebooks / the Shiny app query directly. Nothing builds further
+transforms on top of it. It lives in `src/mart/` rather than `src/transform/`
+(normalize_*, promote, classify) to keep altitude legible — those modules produce
+building blocks, this one serves results.
+
+Creates views.study_summary by joining design classification, innovative
+features, AI mentions, therapeutic areas, conditions, drugs, countries, and
+sponsors into a wide, query-ready table. Reads only from the stable contract
+layers (enriched.* / class.* / norm.* / entities.*) — never raw.* (Phase 7C).
+
+The output schema stays `views.*` (the presentation schema name is unchanged);
+only the module's home moved from `src/transform/` to `src/mart/`.
 """
 
 from config.settings import get_duckdb_connection
 from src.logging_config import get_logger
 
-logger = get_logger("views")
+logger = get_logger("mart.study_summary")
 
 
 # (feature_type value in class.innovative_features, boolean column name)
@@ -142,13 +152,20 @@ def build_study_summary(duck_conn):
             -- Resolve through entities.sponsor_resolved (Phase 7D): when a
             -- sponsor has been merged into an anchor, views surface the
             -- effective parent's canonical name. Un-merged rows pass through.
+            -- AACT carries a single lead per study; the ROW_NUMBER is defensive
+            -- dedup. Tiebreak deterministically on the resolved canonical name
+            -- (NOT the partition key) so rebuilds are reproducible if a study
+            -- ever has >1 lead row.
             SELECT nct_id, lead_sponsor_name, lead_sponsor_agency_class
             FROM (
                 SELECT
                     ss.nct_id,
                     es.canonical_name AS lead_sponsor_name,
                     ss.agency_class   AS lead_sponsor_agency_class,
-                    ROW_NUMBER() OVER (PARTITION BY ss.nct_id ORDER BY ss.nct_id) AS rn
+                    ROW_NUMBER() OVER (
+                        PARTITION BY ss.nct_id
+                        ORDER BY es.canonical_name NULLS LAST
+                    ) AS rn
                 FROM norm.study_sponsors ss
                 LEFT JOIN entities.sponsor_resolved r ON ss.sponsor_id = r.sponsor_id
                 LEFT JOIN entities.sponsor es ON r.effective_sponsor_id = es.sponsor_id
@@ -219,7 +236,7 @@ def build_study_summary(duck_conn):
             COALESCE(co.countries, []::VARCHAR[]) AS countries,
             COALESCE(co.country_count, 0) AS country_count,
 
-            -- Sponsors (pre-Phase-6, un-normalized)
+            -- Sponsors (normalized + merge-resolved via entities.sponsor_resolved)
             ls.lead_sponsor_name,
             ls.lead_sponsor_agency_class,
             COALESCE(cb.collaborator_names, []::VARCHAR[]) AS collaborator_names

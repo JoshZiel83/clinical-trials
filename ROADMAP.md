@@ -118,8 +118,10 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 **Completed 2026-04-07.**
 
+**Updated 2026-06-19 — now reads `enriched.*`, not `raw.*`.** `classify_study_design` was repointed off `raw.studies`/`raw.designs` onto `enriched.studies`/`enriched.designs` to close a Phase 7C leak (the mart was decoupled from raw, but this `class.*` input still rooted in it). **Ordering consequence: Phase 7C (promote) must now run before Phase 2B** — `enriched.designs` is a prerequisite of the classifier. The redundant L1 `study_type` column was dropped from `class.study_design` (the mart reads it straight off `enriched.studies`). See Phase 7C below.
+
 **Levels 1, 2, 4, 5** (`class.study_design` — one row per study):
-- L1 Study Type: from `study_type` (INTERVENTIONAL: 87,581 | OBSERVATIONAL: 30,931 | EXPANDED_ACCESS: 252)
+- L1 Study Type: from `study_type` (INTERVENTIONAL: 87,581 | OBSERVATIONAL: 30,931 | EXPANDED_ACCESS: 252). *As of 2026-06-19 not re-emitted in `class.study_design` — consumed from `enriched.studies` directly.*
 - L2 Design Architecture: combinatorial rules on `allocation` + `intervention_model` for interventional; `observational_model` for observational. Top: Parallel RCT (47,427), Single-Arm (24,339), Cohort (20,441)
 - L4 Blinding: mapped from `masking` (Open Label: 52,955 | Double Blind: 9,329 | Single Blind: 13,300 | Quadruple Blind: 6,907 | Triple Blind: 5,063)
 - L5 Purpose: from `primary_purpose` (Treatment: 57,207 | Prevention: 8,315 | Other: 5,398 | ...)
@@ -131,15 +133,15 @@ The critical path to the target analysis is: **raw data → conditions/TAs → s
 
 **Data quality notes:**
 - AACT uses "None" string as NULL placeholder for fields that don't apply (e.g., masking for observational studies) — handled by treating "None" as NULL
-- 266 studies have no `raw.designs` record — L2/L4/L5 are NULL for these
+- 266 studies have no `enriched.designs` record (1:1 projection of `raw.designs`) — L2/L4/L5 are NULL for these
 - "platform" requires "trial/study/design/protocol" context to avoid tech-platform false positives
 - "SMART" is case-sensitive to avoid "smart" adjective
 - "enrichment" requires "design/strategy/trial/study" context to avoid nutritional enrichment
 
 **Unit tests**: 26 tests (13 classify_design + 13 innovative_features), all passing.
 
-**Module**: `src/classify_design.py`, `src/innovative_features.py`
-**Entry point**: `run_classify_design.py`
+**Module**: `src/transform/classify_design.py`, `src/transform/innovative_features.py`
+**Entry point**: `run_classify_design.py` (requires `enriched.designs` — run `run_promote_enriched.py` first)
 **Validation**: `notebooks/03_design_classification.ipynb`
 
 ---
@@ -373,7 +375,7 @@ Only after 7A–7C (and ideally 7E) land should Phase 5 (refresh automation) shi
 
 **Completed 2026-04-17.**
 
-**Symptom** (before): `src/transform/views.py` read directly from `raw.studies`, `raw.interventions`, and `raw.countries` alongside the `class.*` / `norm.*` / `entities.*` layers. Cheap while re-extraction was manual and infrequent, but a hazard for Phase 5 automation: a re-extract could transiently expose partial data to mart consumers, and mart output had no way to pin itself to a specific upstream snapshot. (The roadmap originally listed `raw.browse_conditions` too; spot-check confirmed it already flowed through `norm.study_therapeutic_areas`.)
+**Symptom** (before): `src/transform/views.py` (now `src/mart/study_summary.py`) read directly from `raw.studies`, `raw.interventions`, and `raw.countries` alongside the `class.*` / `norm.*` / `entities.*` layers. Cheap while re-extraction was manual and infrequent, but a hazard for Phase 5 automation: a re-extract could transiently expose partial data to mart consumers, and mart output had no way to pin itself to a specific upstream snapshot. (The roadmap originally listed `raw.browse_conditions` too; spot-check confirmed it already flowed through `norm.study_therapeutic_areas`.)
 
 **Design principle** (from discussion): promote only where the transformation has real cross-consumer value or where the schema boundary itself is load-bearing. Don't rote-mirror `norm.*` / `class.*` — they're already stable analytical inputs. Do promote the raw reads so the single-rule contract ("the mart reads zero `raw.*`") is enforceable and extract-safe.
 
@@ -382,11 +384,14 @@ Only after 7A–7C (and ideally 7E) land should Phase 5 (refresh automation) shi
   - `enriched.studies` (119,753 rows) — anchor columns + derived `start_year = YEAR(start_date)`. Only columns the mart consumes today; future columns added when a concrete consumer appears.
   - `enriched.interventions` (207,891 rows) — row-level projection; aggregation stays mart-side.
   - `enriched.countries` (164,068 rows) — `removed = FALSE OR removed IS NULL` filter applied once upstream, instead of being re-asserted in every consumer query.
+  - `enriched.designs` (118,498 rows, **added 2026-06-19**) — atomic design enums (`allocation`, `intervention_model`, `observational_model`, `masking`, `primary_purpose`) projected 1:1 from `raw.designs`. Added when `class.study_design` was repointed off raw (see below); the **derived** `design_architecture` label deliberately stays in `class.study_design`, not here, since it's a lossy collapse of the atomic enums.
 - `meta.enriched_tables` registry: one row per enriched table stamped on each projection run with `last_built_at` (wall clock), `extraction_date` (pulled from `MAX(meta.extraction_log.extract_date)`), `source_expression`, `row_count`, `notes`. Answers *when was this rebuilt?* and *which raw extract does it reflect?*
-- `src/transform/views.py` rewritten to read `enriched.studies` / `enriched.interventions` / `enriched.countries` instead of raw. The `start_year` derivation and the `removed` filter moved upstream with them. `grep -n "raw\." src/transform/views.py` returns zero matches.
+- `src/transform/views.py` rewritten to read `enriched.studies` / `enriched.interventions` / `enriched.countries` instead of raw. The `start_year` derivation and the `removed` filter moved upstream with them. `grep -n "raw\." src/transform/views.py` returns zero matches. *(Module relocated 2026-06-19 to `src/mart/study_summary.py` — recognized as the serving/mart layer, separated from the staging/intermediate transforms in `src/transform/`. Output schema `views.study_summary` unchanged. All `src/transform/views.py` references in this doc are historical and refer to that same module.)*
 - Output contract preserved: `views.study_summary` remains 119,753 rows with identical coverage (78.2% ≥1 TA, 20.6% ≥1 mapped drug, 3.9% innovative, 2.2% AI, 100% lead sponsor).
 
-**Not migrated intentionally**: `norm.*` and `class.*` continue to read directly from `raw.*` — they *produce* derived data one abstraction below the mart, and fronting them with enriched mirrors would add a maintenance surface for no contract value. Per-row `source_extracted_at` stamps on enriched tables are also deferred; the table-level stamp is enough until longitudinal analysis actually needs it.
+**Not migrated intentionally**: `norm.*` continues to read directly from `raw.*` — it *produces* derived data one abstraction below the mart, and fronting it with enriched mirrors would add a maintenance surface for no contract value. Per-row `source_extracted_at` stamps on enriched tables are also deferred; the table-level stamp is enough until longitudinal analysis actually needs it.
+
+**Amended 2026-06-19 — `class.study_design` migrated to `enriched.designs`.** The original 7C scope left the `class.*` design classifier reading `raw.studies`/`raw.designs` directly, on the rationale above. That was reconsidered: per the rule *nothing downstream of the `enriched` contract reads `raw.*` — not just the mart*, the classifier was a leak (the mart's design columns transitively depended on raw through `class`). It now reads `enriched.studies`/`enriched.designs`, which adds the **Phase 7C-before-2B ordering dependency** (promote before classify). `norm.*` is *not* swept up in this — its raw reads produce entity FKs that flow through the `norm` contract, not the enriched one.
 
 **Tests**: 219 passed, 1 skipped (up from 211 pre-7C). New `tests/transform/test_promote.py` covers schema creation, `start_year` derivation, removed filter, registry provenance, and idempotency. `tests/transform/test_views.py` fixtures retargeted to `enriched.*` (the `test_countries_excludes_removed` contract migrated to `test_promote.py` where it now belongs).
 
@@ -446,7 +451,7 @@ Add nullable `anchor_sponsor_id BIGINT` column to `ref.mapping_candidates`, `Pro
 - `register_anchor_set`: bumps `meta.reference_sources` with version = checksum of the JSON + `top_n`.
 - Invoked from `run_normalize_sponsors.py` after `build_sponsor_dictionary`, before the agent runs.
 
-**6. Views merge resolution** (`src/entities.py` + `src/transform/views.py`):
+**6. Views merge resolution** (`src/entities.py` + `src/transform/views.py`, now `src/mart/study_summary.py`):
 
 New recursive view `entities.sponsor_resolved(sponsor_id, effective_sponsor_id)` flattens chains:
 
@@ -534,7 +539,7 @@ Per-step validation: `views.study_summary` row count unchanged; `lead_sponsor_na
 - `src/agent/enrichment_tools.py` — `sponsor_anchor_lookup`, `sponsor_co_occurrence`, register in `DOMAIN_TOOLS["sponsor"]`; `ToolContext._anchor_set` property.
 - `src/agent/enrichment_agent.py` — `Proposal.anchor_sponsor_id`, `_select_pending_inputs` anchor-exclusion, system-prompt sponsor paragraph, `AGENT_SYSTEM_PROMPT_VERSION` bump.
 - `src/transform/normalize_sponsors.py` — remove `generate_sponsor_fuzzy_candidates` from `run_sponsor_pipeline`; deprecation docstring.
-- `src/transform/views.py` — join swap to `entities.sponsor_resolved`.
+- `src/transform/views.py` (now `src/mart/study_summary.py`) — join swap to `entities.sponsor_resolved`.
 - `apps/review/app.R` — anchor column + reactive approve-button label + decision-log column.
 - `config/settings.py` — `SPONSOR_AGENT_V2_ENABLED` feature flag.
 - `run_normalize_sponsors.py` — invoke anchor-set build.
@@ -705,7 +710,7 @@ UPDATE pipeline_runs SET status='completed', completed_at=...
 - `config/settings.py` — demote `ACTIVE_STATUSES` to documentation constant.
 - `tests/test_settings.py`, `tests/extract/test_tables.py` — update assertions.
 
-**Reused (no changes)**: `run_hitl_sync.py`, `src/hitl/candidates.py`, `src/agent/enrichment_agent.py`, `src/transform/promote.py`, `src/transform/views.py`, `src/transform/normalize_*.py`.
+**Reused (no changes)**: `run_hitl_sync.py`, `src/hitl/candidates.py`, `src/agent/enrichment_agent.py`, `src/transform/promote.py`, `src/transform/views.py` (now `src/mart/study_summary.py`), `src/transform/normalize_*.py`.
 
 ### Verification
 
@@ -777,7 +782,7 @@ Phase 1 (Raw Extract) ✅
 - `resources/Innovative & Emerging Clinical Trial Designs.md` — reference catalog of innovative/emerging trial designs
 - `src/transform/normalize_drugs.py` — drug dictionary + study drugs (3 layers: control mapping, MeSH exact, ChEMBL local)
 - `src/transform/normalize_sponsors.py` — sponsor dictionary + fuzzy merger candidates
-- `src/transform/views.py` — `views.study_summary` (joins through `entities.*`)
+- `src/transform/views.py` (now `src/mart/study_summary.py`) — `views.study_summary` (joins through `entities.*`)
 - `src/hitl/candidates.py` — `ref.mapping_candidates` plumbing, throttle, `promote_candidates` (Phase 7A + 7B)
 - `src/agent/enrichment_agent.py`, `src/agent/enrichment_tools.py`, `src/agent/quickumls_tool.py` — Phase 6E agent + its tools
 - `scripts/load_mesh_descriptors.py` — MeSH XML → `entities.condition` bulk loader (Phase 7B)
