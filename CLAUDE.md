@@ -56,6 +56,37 @@ conda-provided libiconv. Then build the index once with
 > `data/reference/umls/2025AB/quickumls_index/`). Both tracked in
 > [#2](https://github.com/JoshZiel83/clinical-trials/issues/2).
 
+# R environment (rig + renv)
+This is a multilingual repo: **conda owns Python, renv owns R, and the two never
+manage each other** (see `docs/adr` philosophy / the multilingual-projects ref).
+R is used by the Shiny review app (`apps/review/`) and the R-kernel notebook
+(`notebooks/04_innovation_by_therapeutic_area.ipynb`).
+
+- **R version** is managed by [`rig`](https://github.com/r-lib/rig). Current
+  default is R 4.6.0 (pinned in `renv.lock`). Install/switch with
+  `rig add release` / `rig default release`. NB: the unrelated Homebrew formula
+  is also named `rig`; the R installer is the **cask** `r-lib/rig/rig` (installs
+  as the `r-rig` formula / `/opt/homebrew/bin/rig`).
+- **R packages** are managed by [`renv`](https://rstudio.github.io/renv/) at the
+  repo root. `renv.lock` is the source of truth; snapshot mode is `"all"`.
+  - Reproduce the library: open R at the repo root → `renv::restore()`.
+  - Add a package: `renv::install("<pkg>"); renv::snapshot()`.
+- **R ↔ Python bridge** is `reticulate`, **point-only**: `.Rprofile` resolves the
+  conda env *by name* and sets `RETICULATE_PYTHON` to its interpreter (via
+  `CONDA_EXE`). conda still owns Python entirely — never run `renv::use_python()`.
+  The normal data handoff is on-disk via DuckDB/Parquet; reticulate is only for
+  in-process pandas↔data.frame sharing when you want it.
+
+**Running R code:**
+- **Shiny app** — launch from the repo root so `.Rprofile` auto-activates renv:
+  `Rscript -e 'shiny::runApp("apps/review", launch.browser=TRUE)'`.
+- **R notebook** — the `ir` Jupyter kernel starts in `notebooks/`, where the
+  repo-root `.Rprofile` does **not** run, so the notebook's first cell calls
+  `renv::load("..")` to activate the project library. `IRkernel` is intentionally
+  installed in the **user** library (kernel infrastructure), not in `renv.lock`;
+  analysis packages (duckdb, ggplot2, …) come from renv. Re-register the kernel
+  after an R-version change with `R --vanilla -e 'IRkernel::installspec(user=TRUE)'`.
+
 # Pipeline Entry Points
 - `run_pipeline.py` — **A3 full-refresh orchestrator.** Threads one DuckDB
   connection through every phase in order (extract → hitl_sync → promote → normalize →

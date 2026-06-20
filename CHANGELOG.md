@@ -207,6 +207,22 @@ in 157s; immediate re-run skipped via the pin-gate; full suite 279 passed / 1 sk
 
 ---
 
+## Tooling — Reproducible R environment (rig + renv) · ✅ 2026-06-20
+Brought the repo's R usage (Shiny review app + R-kernel notebook 04) up to a
+reproducible multilingual standard: **conda owns Python, renv owns R, reticulate
+only points between them.** Adopted `rig` for the R binary (R 4.6.0, replacing the
+ad-hoc Homebrew R), initialized `renv` at the repo root (snapshot mode `"all"`),
+and locked the union of R deps (`shiny, DT, duckdb, arrow, dplyr, tidyr, ggplot2,
+scales, jsonlite, DBI, RColorBrewer, reticulate`) into `renv.lock`. `.Rprofile`
+resolves the conda env by name (via `CONDA_EXE`) and sets `RETICULATE_PYTHON` —
+point-only, no `renv::use_python()`. `IRkernel` re-registered against rig's R and
+kept user-level (kernel infra, not in the lock); notebook 04 gained a first-cell
+`renv::load("..")` since the Jupyter kernel starts in `notebooks/`.
+**Files:** `renv.lock`, `.Rprofile`, `renv/`; docs in `CLAUDE.md` ("R environment"),
+`apps/review/README.md`. **Reproduce:** `rig add <ver>` → `renv::restore()`.
+
+---
+
 ## Reference appendix
 
 ### Action items (all resolved)
