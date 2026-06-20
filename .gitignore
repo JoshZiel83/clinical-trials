@@ -27,6 +27,12 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 
+# R (renv self-ignores its library via renv/.gitignore; these are session cruft)
+.Rhistory
+.RData
+.Rdata
+.Rproj.user/
+
 # IDE
 .vscode/
 .idea/

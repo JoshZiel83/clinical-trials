@@ -6,12 +6,20 @@ a Parquet decision log that `python run_hitl_sync.py` applies to the DuckDB.
 
 ## Install R deps
 
+R packages are managed by [renv](https://rstudio.github.io/renv/) at the repo
+root (see CLAUDE.md → "R environment"). From the **project root**, restore the
+locked library once:
+
 ```r
-install.packages(c("shiny", "DT", "duckdb", "arrow", "dplyr", "jsonlite"),
-                 repos = "https://cloud.r-project.org")
+renv::restore()
 ```
 
+This installs the exact `shiny`, `DT`, `duckdb`, `arrow`, `dplyr`, `jsonlite`
+versions recorded in `renv.lock` — no manual `install.packages` needed.
+
 ## Run
+
+Launch from the **project root** so the repo-root `.Rprofile` activates renv:
 
 ```bash
 Rscript -e 'shiny::runApp("apps/review", launch.browser = TRUE)'
