@@ -36,5 +36,5 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
 fi
 
 # Verify the native extension actually loads (this is what the dylib bug breaks).
-python -c "import simstring; from quickumls import QuickUMLS; print('QuickUMLS import OK')"
+python -c "from quickumls_simstring import simstring; from quickumls import QuickUMLS; print('QuickUMLS import OK')"
 echo "Done. Next: build the index with scripts.build_quickumls_index (~5GB, one-time)."
