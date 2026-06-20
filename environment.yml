@@ -14,6 +14,7 @@ dependencies:
   - matplotlib
   - rapidfuzz
   - anthropic
+  - dbt-duckdb
   - pip
   # Optional QuickUMLS deps (quickumls, quickumls-simstring) are intentionally
   # NOT listed here — pip-only + needs a macOS dylib relink. Install on demand:
