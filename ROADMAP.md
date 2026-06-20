@@ -246,6 +246,8 @@ Originally planned as a standalone fuzzy-dedup module. Same rationale as 2C: the
 
 **Tests**: 184 passing + 1 skipped (skip = `test_lookup_without_index_raises`, correctly inactive now that the QuickUMLS index exists).
 
+> **⚠️ Rebuild needed — QuickUMLS index lost in 2026-06 env/DB regeneration ([#2](https://github.com/JoshZiel83/clinical-trials/issues/2)).** The Phase 6D index (and the `quickumls`/`quickumls-simstring` packages) did not survive the recent conda-env + DuckDB regeneration. Current state: packages reinstalled via `scripts/install_quickumls.sh`, but **no UMLS index exists**, so `umls@2025AB` is unregistered, `quickumls_tool.is_available()` is `False`, and `test_lookup_glioblastoma_returns_cui` is skipped (the "now that the index exists" note above is temporarily stale). To restore: download `umls-2025AB-metathesaurus-full.zip` (NLM UMLS, UTS-licensed) → `python -m scripts.build_quickumls_index`. **Blocker:** the builder writes `data/reference/umls/quickumls_index/` (flat) while bootstrap/registration expects `data/reference/umls/2025AB/quickumls_index/` (versioned) — reconcile so the rebuilt index auto-registers. Tracked in [#2](https://github.com/JoshZiel83/clinical-trials/issues/2).
+
 **Modules** added: `src/hitl.py`, `src/normalize_sponsors.py`, `src/quickumls_tool.py`, `src/enrichment_tools.py`, `src/enrichment_agent.py`. **Entry points**: `run_normalize_sponsors.py`, `run_enrichment_agent.py`, `run_hitl_sync.py`. **Scripts**: `scripts/migrate_condition_candidates.py`, `scripts/build_quickumls_index.py`. **App**: `apps/review/`.
 
 ---
