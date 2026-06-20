@@ -427,6 +427,53 @@ rots silently when untested.
 
 ---
 
+### 5.2 Benchmark targets — precision at coverage, not accuracy
+
+The benchmark metric is **precision at a chosen coverage level**, never raw
+"accuracy." Two facts force this: the **HITL gate** (the model is a candidate
+generator feeding a reviewer, not an autonomous writer) and the **asymmetric error
+cost** (§1 non-goal: a wrong write silently corrupts every downstream query forever;
+an abstain just leaves a gap — roughly a 100:1 cost ratio). Accuracy is also
+degenerate under class imbalance: at 3.9% innovative-feature prevalence, predicting
+"no feature" everywhere scores 96% accuracy and is useless.
+
+So there is no single target — there are **operating points** on a precision–coverage
+curve, with coverage (recall) maximized *subject to* a precision floor, never traded
+against it:
+
+| Path | Precision target | Rationale |
+|---|---|---|
+| **Auto-accept** (no human) | **≥99%** | Matches/beats the deterministic `exact`/`1:1` layers it augments; a wrong auto-write is permanent silent corruption. |
+| **Route-to-review** | **~80–90%** | Below ~70% reviewers lose trust and the queue is noise (the fuzzy 7D/7F failure mode). Below threshold ⇒ **abstain**. |
+
+**Per-domain bars** (track the oracle, Axis B′):
+- **Condition** — auto-accept ≥98–99% (cross-checkable vs UMLS); contextual cases
+  route to per-study review, never auto-accept.
+- **Drug** — auto-accept ≥99% (brand/generic/salt errors are insidious;
+  cross-checkable vs ChEMBL/MeSH).
+- **Sponsor** — **no auto-accept** (no external oracle). Benchmark **merge precision
+  on high-impact groups** (≥95–99%) *and* **block recall** — a missed pair never
+  reaches the judge, the silent failure here.
+- **Innovative-features (B2)** — not identity, doesn't corrupt joins: **per-class
+  precision/recall + macro-F1 vs the regex baseline**, not accuracy. Bar: beat regex
+  on rare-class recall (some classes <100 studies) without tanking precision.
+
+**The two gold tiers answer different questions.** The auto-harvested regression
+floor should score ~100% — it's a plumbing gate, not a quality measure. The curated
+hard tail is where the real number lives and where the frontier model sets the
+achievable ceiling; on genuinely ambiguous cases ~90% precision at ~50% coverage is a
+fine result *because the rest abstains to review*.
+
+**Sizing precondition (blocking; cf. R5).** A precision number is only as credible as
+the gold set behind it: ~**400 labeled hard-tail items/domain** to claim ≥99%
+(95% CI ≈ ±1%), ~**200/domain** for ≥95% (±3%). The current fixture is **10 items
+wired to nothing** — sizing the curated set to ~200–400/domain is step-0, not optional.
+
+**How each number is set empirically** (not by decree): **floor** = the measured
+precision of the deterministic layers (the auto-accept bar to beat); **ceiling** = the
+frontier model on the hard tail (what's achievable); **operating threshold** = where
+calibrated confidence yields the target precision, with coverage tuned up to that line.
+
 ## 6. Side-effect surface & migration
 
 | Component | Change | Risk |

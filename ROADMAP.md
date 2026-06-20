@@ -106,6 +106,12 @@ frontier model sets the achievable ceiling, cheaper backends scored as a fractio
   exists yet — add shared fixtures here.
 - **First shared piece:** a golden-eval *runner* that actually consumes
   `tests/fixtures/enrichment_golden.json` (orphaned today, 10 items) and grows it.
+- **Benchmark targets (ADR 0001 §5.2):** precision-at-coverage, not accuracy.
+  Auto-accept (no human) **≥99%** precision; route-to-review **~80–90%**; below
+  threshold abstain. Per-domain: condition ≥98–99%, drug ≥99%, sponsor no auto-accept
+  (merge precision ≥95–99% + block recall), innovative-features per-class P/R + macro-F1
+  vs the regex baseline. **Sizing is the precondition** — ~200–400 labeled hard-tail
+  items/domain to make a 95–99% claim measurable (current fixture: 10).
 
 ### B2 — Innovative-features: regex → NLP/ML model
 Keep the regex (`INNOVATIVE_PATTERNS` in `src/transform/innovative_features.py`) as
