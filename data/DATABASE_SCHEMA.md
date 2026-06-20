@@ -1,7 +1,12 @@
 # DuckDB Schema Documentation
 
 **Database**: `data/clinical_trials.duckdb`
-**Last updated**: 2026-06-19 (Phase 7C — `enriched.designs` added; `class.study_design` repointed off `raw.*`)
+**Last updated**: 2026-06-20 (Epic A3 — full AACT cohort; active-status filter removed)
+
+> **Row counts below are point-in-time.** The authoritative, repeatable source is
+> `python -m scripts.schema_counts`; the "Live row counts" block immediately below
+> is its output as of 2026-06-20 (the first full-cohort run). Inline per-table
+> counts further down are illustrative and may lag — trust the script.
 
 ---
 
@@ -9,22 +14,55 @@
 
 | Schema | Purpose | Tables |
 |--------|---------|--------|
-| `raw` | Direct mirrors of AACT tables, filtered to active/planned studies. No transformations. | 14 tables |
-| `entities` | Canonical entity tables with stable surrogate IDs + external-ID crosswalks (Phase 7B). | 3 tables |
+| `raw` | Direct mirrors of the **full AACT cohort** (no status filter as of A3). No transformations. | 14 tables |
+| `entities` | Canonical entity tables with stable surrogate IDs + external-ID crosswalks (Phase 7B). | 3 tables + 1 view |
 | `ref` | Reference/lookup tables for normalization. Dictionaries FK into `entities.*`. | 5 tables |
 | `norm` | Normalized entities with provenance tracking. FK into `entities.*`. | 4 tables |
-| `class` | Study design classification and innovative feature detection. | 3 tables |
+| `class` | Study design classification, innovative-feature detection, AI-mention detection. | 3 tables |
 | `enriched` | Stable analytical inputs promoted from `raw.*` with table-level provenance (Phase 7C). The mart — and the `class.*` design classifier — read these instead of `raw.*`. | 4 tables |
-| `meta` | Pipeline metadata (reference-source provenance, extraction logs, HITL sync, enriched-table registry). | 5 tables |
+| `meta` | Pipeline metadata (reference-source provenance, extraction/pipeline-run logs, change events, HITL sync, registries, agent cache). | 7+ tables |
 | `views` | Denormalized analytical views (query-ready). | 1 table |
 
 **Identity invariant (Phase 7B)**: entity rows (`entities.*`) come only from trusted external vocabularies (MeSH, ChEMBL) or from approved HITL decisions — never from unresolved candidates. Dictionaries and `norm.*` FK into surrogate IDs; labels are resolved at query/view time.
+
+**Cohort (A3)**: the extract mirrors the full ~590K AACT cohort. The five
+"active/planned" `overall_status` values that previously filtered the extract are now
+just a documented analytical dimension (`config.tables.ACTIVE_STATUS_VALUES`), not a
+precondition — re-slice with a `WHERE overall_status IN (...)` if you want active-only.
+
+---
+
+## Live row counts (2026-06-20, `python -m scripts.schema_counts`)
+
+```
+raw:       studies 590,350 · conditions 1,056,711 · browse_conditions 4,288,006 ·
+           interventions 998,270 · browse_interventions 2,520,065 · sponsors 942,312 ·
+           designs 585,572 · keywords 1,573,959 · countries 801,315 ·
+           design_groups 1,084,320 · brief_summaries/detailed_descriptions/
+           eligibilities 589,374 · calculated_values 590,350
+enriched:  studies 590,350 · designs 585,572 · interventions 998,270 · countries 765,682
+class:     study_design 590,350 · innovative_features 20,346 · ai_mentions 12,148
+norm:      study_conditions 1,056,711 · study_drugs 454,748 · study_sponsors 942,312 ·
+           study_therapeutic_areas 965,693
+entities:  condition 5,000 · drug 53,271 · sponsor 100,440  (+ sponsor_resolved view)
+ref:       condition_dictionary 33,215 · drug_dictionary 23,691 · sponsor_dictionary 101,256 ·
+           therapeutic_areas 21 · condition_candidates 4,640 · mapping_candidates 997
+views:     study_summary 590,350
+meta:      reference_sources 4 · extraction_log 84 · enriched_tables 4 · pipeline_runs · 
+           trial_change_events 46,282 · decision_log_applied · sponsor_anchor_set 202
+```
+
+> **Note (issue #2):** `entities.condition` is 5,000 (all `origin='mesh'`), well below
+> the historical ~31K MeSH seed — the MeSH/UMLS reference index was lost in the 2026-06
+> env/DB regen and is not yet rebuilt, so entity seeding is partial. Condition *mapping*
+> is still healthy (~80% of `norm.study_conditions` resolved) because the dictionary
+> covers common terms. Tracked in #2, independent of Epic A.
 
 ---
 
 ## `raw` Schema
 
-All tables are extracted from AACT via `src/extract/aact.py`. Filtered to studies where `overall_status IN ('RECRUITING', 'NOT_YET_RECRUITING', 'ACTIVE_NOT_RECRUITING', 'ENROLLING_BY_INVITATION', 'AVAILABLE')`. Child tables are filtered via `INNER JOIN` to `studies` on `nct_id`.
+All tables are extracted from AACT via `src/extract/aact.py` (DuckDB Postgres scanner + atomic stage-then-swap; see [ADR 0002](adr/0002-extract-scanner-atomic-swap.md)). As of A3 the **full AACT cohort** is mirrored — there is no active-status filter. Child tables are joined to `studies` on `nct_id` (so the optional `--since` pre-filter can reach them).
 
 ### `raw.studies`
 The anchor table. One row per clinical trial.
@@ -43,7 +81,7 @@ The anchor table. One row per clinical trial.
 | `source` | VARCHAR | Organization responsible for data submission |
 | ... | ... | 60+ additional columns (dates, regulatory flags, etc.) |
 
-**119,753 rows** (as of 2026-03-21 extraction)
+**590,350 rows** (full cohort, 2026-06-20). `overall_status` spans all AACT statuses now (COMPLETED, TERMINATED, WITHDRAWN, … in addition to the active set).
 
 ### `raw.conditions`
 Free-text condition names assigned by investigators. Not controlled vocabulary.
@@ -170,7 +208,7 @@ Seeded from MeSH descriptor XML via `scripts/load_mesh_descriptors.py`. One row 
 | `canonical_term` | VARCHAR | NOT NULL | Human-readable canonical label |
 | `source_versions` | JSON | YES | Per-source release stamp, e.g. `{"mesh": "2026"}` |
 
-**31,505 rows** (31,110 MeSH 2026 seed + 395 cancer-synonym-invented). All current rows `origin='mesh'`.
+**5,000 rows** (all `origin='mesh'`) in the current DB — partial seed; the MeSH/UMLS reference was lost in the 2026-06 regen (issue #2). Historically ~31,505 (31,110 MeSH 2026 seed + 395 cancer-synonym).
 
 ### `entities.drug`
 Seeded from ChEMBL 36 synonyms parquet (one row per distinct `chembl_id`). MeSH-only drugs and HITL-promoted drugs add more rows.
@@ -375,7 +413,7 @@ L2 is derived from combinatorial rules on `allocation` + `intervention_model` (i
 
 **L1 Study Type is intentionally not re-emitted here** — the mart reads `study_type` straight off `enriched.studies`, so a copy in this table would be redundant. (Historically L1 lived here as a pass-through column.)
 
-**118,764 rows** — one per study (100% coverage)
+**590,350 rows** — one per study (100% coverage)
 
 ### `class.innovative_features`
 Multi-label innovative design feature detection via regex NLP on free-text fields. A study can have multiple features; a feature can be detected in multiple source fields.
@@ -387,7 +425,21 @@ Multi-label innovative design feature detection via regex NLP on free-text field
 | `source_field` | VARCHAR | NOT NULL | brief_title, official_title, description, keyword |
 | `matched_text` | VARCHAR | NOT NULL | The text that triggered the match |
 
-**7,014 rows** — 4,680 distinct studies (3.9% of all studies)
+**20,346 rows** (full cohort) — multi-label; one row per (study, feature, source field).
+
+### `class.ai_mentions`
+AI/ML mention detection via regex over the same free-text fields. One row per
+(study, AI term, source field); feeds `views.study_summary.has_ai_mention` /
+`ai_mention_terms`. Produced by `src.transform.innovative_features.detect_ai_mentions`.
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `nct_id` | VARCHAR | NOT NULL | Study identifier |
+| `ai_term` | VARCHAR | NOT NULL | Matched term (artificial intelligence, machine learning, deep learning, neural network, LLM, NLP, computer vision, ChatGPT/GPT, reinforcement learning, …) |
+| `source_field` | VARCHAR | NOT NULL | brief_title, official_title, description, keyword |
+| `matched_text` | VARCHAR | NOT NULL | The text that triggered the match |
+
+**12,148 rows** (full cohort) — 5,827 studies with ≥1 AI/ML mention (~1.0%).
 
 ---
 
@@ -414,7 +466,7 @@ Anchor table for the mart. Only the columns currently consumed by the mart are p
 | `source` | VARCHAR | Submitting organization |
 | `start_year` | INTEGER | `YEAR(start_date)` — derived; NULL if `start_date IS NULL` |
 
-**119,753 rows** (one per study).
+**590,350 rows** (one per study).
 
 ### `enriched.designs`
 Atomic design enums projected 1:1 from `raw.designs` — the stable input contract for `class.study_design`. Only the columns the classifier consumes are promoted. The **derived** `design_architecture` label is *not* stored here: it is a lossy collapse of `allocation` × `intervention_model` × `observational_model`, so the atomic components are preserved at this layer (enabling allocation-level filtering and future re-cuts of the taxonomy) and the derivation stays in `class.study_design`.
@@ -469,7 +521,7 @@ Single source of truth for active versions of external reference datasets (ChEMB
 | `notes` | VARCHAR | YES | License, URL, post-processing notes |
 | PRIMARY KEY | | | (`source_name`, `version`) |
 
-**Current rows (4 active)**: `chembl@36`, `mesh@2026`, `mesh_ta_mapping@v1`, `umls@2025AB`.
+**Current rows (4 active, 2026-06-20)**: `aact@2026-06-20` (the pinned AACT build — A2), `chembl@36`, `mesh_ta_mapping@v1`, `sponsor_anchors@<hash>`. (`mesh@2026` and `umls@2025AB` are **not** registered in the current DB — lost in the 2026-06 regen; see #2.)
 
 Entity rows carry a `source_versions` JSON column stamped at creation time (e.g. `{"chembl": "36"}`, `{"mesh": "2026"}`) for row-level reference provenance.
 
@@ -508,7 +560,7 @@ One row per table in the `enriched.*` schema. Refreshed on every `promote_to_enr
 | `row_count` | INTEGER | Row count after projection |
 | `notes` | VARCHAR | Free-text promotion rationale — the decision to promote lives in data, not just roadmap prose |
 
-**3 rows** (one per enriched table).
+**4 rows** (one per enriched table: studies, designs, interventions, countries).
 
 ### `meta.extraction_log`
 Records metadata for each table extraction from AACT.
@@ -524,7 +576,38 @@ Records metadata for each table extraction from AACT.
 | `completed_at` | TIMESTAMP | When extraction completed |
 | `parquet_path` | VARCHAR | Path to the Parquet archive file |
 
-**14 rows** (one per table per extraction run)
+14 rows per extraction run (one per table); rows accumulate across runs.
+
+### `meta.pipeline_runs` (A3)
+One row per `run_pipeline.py` full-refresh, written `running` at start and updated to
+`completed` / `failed` / `skipped` at the end. The audit trail for the orchestrator.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `run_id` | VARCHAR | UUID for the pipeline run |
+| `started_at` / `completed_at` | TIMESTAMP | Wall-clock bounds |
+| `status` | VARCHAR | `running` / `completed` / `failed` / `skipped` |
+| `extract_status` | VARCHAR | `completed` / `skipped` (pin-gate) |
+| `extract_version` | VARCHAR | Pinned AACT build (e.g. `2026-06-20`) |
+| `force` / `cohort_expansion` | BOOLEAN | Run flags |
+| `since` | VARCHAR | Extract pre-filter, if any |
+| `phases_completed` | VARCHAR | Comma-joined phases that ran |
+| `error` | VARCHAR | Failure message (NULL on success) |
+
+### `meta.trial_change_events` (A3)
+Per-trial change log produced by `src/transform/change_events.py` — diffs the current vs
+prior dated Parquet snapshot. The single home for "what changed about a study" (absorbs
+the proposed `change_log`, #10). Idempotent per target snapshot.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `run_id` | VARCHAR | Pipeline run that produced the diff |
+| `from_snapshot` / `to_snapshot` | DATE | The two snapshots compared |
+| `nct_id` | VARCHAR | Study |
+| `event_type` | VARCHAR | `first_seen` / `dropped` / `status_transition` / `enrollment_changed` / `phase_changed` / `date_changed` / `conditions_changed` / `interventions_changed` / `sponsors_changed` |
+| `field` | VARCHAR | Which field changed (date/status events); NULL for set/membership events |
+| `old_value` / `new_value` | VARCHAR | Before/after (for set events: removed / added names) |
+| `detected_at` | TIMESTAMP | |
 
 ---
 
@@ -549,7 +632,7 @@ One row per study (`nct_id`). Joins `enriched.studies` + `class.study_design` + 
 | Countries | `countries` (LIST, `removed=TRUE` excluded), `country_count` |
 | Sponsors | `lead_sponsor_name`, `lead_sponsor_agency_class`, `collaborator_names` (LIST) |
 
-**119,753 rows** (matches `raw.studies` exactly, post-7B regen). Coverage: 78.2% ≥1 TA, 20.6% ≥1 mapped drug, 3.9% innovative feature, 2.2% AI mention, 100% lead sponsor.
+**590,350 rows** (matches `raw.studies` exactly — full cohort). Coverage: 78.4% ≥1 TA, 26.7% ≥1 mapped drug, 2.4% innovative feature, 1.0% AI mention, 100% lead sponsor.
 
 `lead_sponsor_name` and `collaborator_names` carry canonical names sourced from `norm.study_sponsors → entities.sponsor` (Phase 6B — deterministic `exact-after-normalize` layer). Near-duplicates beyond that layer are candidates in `ref.mapping_candidates(domain='sponsor')` awaiting HITL review.
 

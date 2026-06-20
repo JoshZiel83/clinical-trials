@@ -57,7 +57,18 @@ conda-provided libiconv. Then build the index once with
 > [#2](https://github.com/JoshZiel83/clinical-trials/issues/2).
 
 # Pipeline Entry Points
-- `run_extract.py` — Phase 1: raw AACT extraction. Pulls via DuckDB's `postgres`
+- `run_pipeline.py` — **A3 full-refresh orchestrator.** Threads one DuckDB
+  connection through every phase in order (extract → hitl_sync → promote → normalize →
+  classify → views → change_events), writing a `meta.pipeline_runs` audit row. The
+  extract pin-gate gates the whole refresh (skips if the AACT build hasn't advanced
+  unless `--force`). Flags: `--force`, `--cohort-expansion` (suppress change-event
+  `first_seen` on the one-time active→full-cohort run), `--enrich` + `--budget-{condition,
+  drug,sponsor}` (the enrichment agent is **off by default** — the only paid step). The
+  individual `run_*.py` below remain usable standalone.
+- `run_change_events.py` — A3: diff the current vs prior dated Parquet snapshot into
+  `meta.trial_change_events` (`--cohort-expansion`). `src/transform/change_events.py`.
+- `run_extract.py` — Phase 1: raw AACT extraction. Mirrors the **full AACT cohort**
+  (~600K; no status filter as of A3). Pulls via DuckDB's `postgres`
   scanner (`ATTACH … READ_ONLY`, auto-installed extension; creds via `PG*` env vars),
   stages each table then **atomically swaps** `raw.*` + the dated Parquet dir, checks
   schema drift against `config/aact_expected_columns.json`, and pins the build as

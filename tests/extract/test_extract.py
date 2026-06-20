@@ -26,31 +26,33 @@ from src.extract.aact import (
 
 
 class TestGetExtractQuery:
-    def test_studies_uses_where_clause_no_join(self):
+    def test_studies_full_pull_has_no_status_filter_or_join(self):
+        # A3 removed the active-status filter — anchor is an unfiltered mirror.
         query = get_extract_query("studies")
-        assert "WHERE" in query
         assert "INNER JOIN" not in query
-        assert "overall_status IN" in query
+        assert "overall_status" not in query
+        assert "WHERE" not in query
 
-    def test_non_studies_uses_join(self):
+    def test_non_studies_uses_join_no_status_filter(self):
         query = get_extract_query("conditions")
         assert "INNER JOIN" in query
         assert f"{AACT_CATALOG}.ctgov.studies s ON t.nct_id = s.nct_id" in query
-        assert "overall_status IN" in query
+        assert "overall_status" not in query
+        assert "WHERE" not in query  # no since => no predicate, no dangling WHERE
 
     def test_all_tables_are_scanner_qualified(self):
         for table in EXTRACT_TABLES:
             query = get_extract_query(table)
             assert f"{AACT_CATALOG}.ctgov.{table}" in query
-            assert "overall_status IN" in query
+            assert "overall_status" not in query
 
     def test_since_filter_on_anchor(self):
         query = get_extract_query("studies", since="2026-06-01")
-        assert "last_update_posted_date >= DATE '2026-06-01'" in query
+        assert "WHERE last_update_posted_date >= DATE '2026-06-01'" in query
 
     def test_since_filter_on_child_is_alias_qualified(self):
         query = get_extract_query("conditions", since="2026-06-01")
-        assert "s.last_update_posted_date >= DATE '2026-06-01'" in query
+        assert "WHERE s.last_update_posted_date >= DATE '2026-06-01'" in query
 
     def test_no_since_means_full_pull(self):
         assert "last_update_posted_date" not in get_extract_query("studies")

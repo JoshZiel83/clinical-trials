@@ -37,16 +37,6 @@ SPONSOR_AGENT_V2_ENABLED = os.environ.get(
 ROR_API_BASE = os.environ.get("ROR_API_BASE", "https://api.ror.org")
 ROR_CACHE_TTL_DAYS = int(os.environ.get("ROR_CACHE_TTL_DAYS", "30"))
 
-# Status filter for active/planned trials
-ACTIVE_STATUSES = (
-    "RECRUITING",
-    "NOT_YET_RECRUITING",
-    "ACTIVE_NOT_RECRUITING",
-    "ENROLLING_BY_INVITATION",
-    "AVAILABLE",
-)
-
-
 def get_aact_connection():
     """Open a psycopg2 connection to the AACT PostgreSQL database."""
     import psycopg2

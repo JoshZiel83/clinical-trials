@@ -143,6 +143,39 @@ ADR 0001: the drug agent is re-homed onto the new harness as part of Epic C. The
 ~800 pending `domain='drug', source='fuzzy'` candidates remain ignorable in their
 current form pending that rebuild.
 
+## Epic A3 + A4 — Refresh automation + docs hygiene · ✅ 2026-06-20 (Epic A complete)
+Turned the hardened extract into a one-command full-cohort longitudinal refresh. Closes
+#4, #10, #6. Spec: [ADR 0002](docs/adr/0002-extract-scanner-atomic-swap.md).
+- **Full cohort (#4):** removed the active-status filter — the extract now mirrors the
+  whole ~590K AACT corpus (was ~120K). `get_extract_query` builds its WHERE conditionally
+  (only the optional `--since` predicate); `STATUS_VALUES`/`ACTIVE_STATUSES` collapsed to
+  one documentation constant `config.tables.ACTIVE_STATUS_VALUES`.
+- **Orchestrator:** `run_pipeline.py` + `src/pipeline/orchestrator.py` thread **one**
+  DuckDB connection through every phase (extract → hitl_sync → promote → normalize →
+  classify → views → change_events) with a `meta.pipeline_runs` audit row
+  (running → completed/failed/skipped). The extract pin-gate gates the whole refresh.
+  `run_extraction()` now accepts an external `duck_conn`. The Claude enrichment agent is
+  opt-in (`--enrich` + per-domain budgets) — the only paid step, off by default.
+- **Change events (#10):** `meta.trial_change_events` (`src/transform/change_events.py`,
+  entry `run_change_events.py`) diffs the current vs prior dated Parquet snapshot →
+  first_seen / dropped / status_transition / enrollment_changed / phase_changed /
+  date_changed / conditions_/interventions_/sponsors_changed. Cheap-gated on
+  `last_update_posted_date`; `--cohort-expansion` suppresses the one-time first_seen flood.
+  The single home for "what changed about a study" (no separate `change_log`).
+- **A4 docs (#6):** `data/DATABASE_SCHEMA.md` reconciled to the live full-cohort DB via a
+  repeatable `scripts/schema_counts.py` (added a live-counts block, fixed the active-only
+  framing, documented `class.ai_mentions` + the new `meta.*` tables).
+- **Incidental fix:** the full-cohort run surfaced a latent `normalize_drugs` bug — a few
+  ChEMBL synonyms carry a null/NaN `pref_name` that violated the dictionary's NOT NULL
+  (only reached at full scale); now filtered. A stale empty `ref.drug_dictionary` (old
+  schema, 0 rows) was dropped so it rebuilt with the current `drug_id` schema.
+**Verified:** `run_pipeline.py --force --cohort-expansion` completed end-to-end —
+`raw.studies` 590,350, all downstream rebuilt (`views.study_summary` 590,350), 46,282
+change events (zero first_seen), `meta.pipeline_runs` `completed`; pin-gate re-run skipped;
+suite 286 passed / 1 skipped.
+**Known gap (#2, not A3):** `entities.condition` is a partial 5,000-row MeSH seed (the
+MeSH/UMLS reference index was lost in the 2026-06 regen); condition mapping still ~80%.
+
 ## Epic A1 + A2 — Extract hardening + snapshot provenance · ✅ 2026-06-20
 Rebuilt the Phase 1 extract (`src/extract/aact.py`; entry `run_extract.py`) into an
 atomic, provenanced, drift-checked pull. Closes #3, #5, #7, #11, #8. Spec:

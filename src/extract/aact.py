@@ -35,7 +35,7 @@ from config.settings import (
     get_aact_attach_params,
     get_duckdb_connection,
 )
-from config.tables import ANCHOR_TABLE, EXTRACT_TABLES, STATUS_WHERE_CLAUSE
+from config.tables import ANCHOR_TABLE, EXTRACT_TABLES
 from src import reference_sources
 from src.logging_config import get_logger
 
@@ -51,9 +51,10 @@ EXPECTED_COLUMNS_PATH = PROJECT_ROOT / "config" / "aact_expected_columns.json"
 def get_extract_query(table_name, since=None, catalog=AACT_CATALOG):
     """Build the SQL to mirror one AACT table through the Postgres scanner.
 
-    The studies (anchor) table is filtered directly; child tables are filtered
-    via an INNER JOIN to studies. ``since`` adds an optional
-    ``last_update_posted_date >= since`` predicate.
+    The full AACT cohort is mirrored — there is no active-status filter (removed
+    in A3; the cohort is now the whole ~600K corpus). Child tables are joined to
+    studies so the optional ``since`` predicate (``last_update_posted_date >=
+    since``) can filter them too.
 
     NOTE: a ``since``-filtered pull returns only studies whose content changed —
     it is a *subset*, not a complete snapshot, and cannot detect dropped studies
@@ -62,22 +63,17 @@ def get_extract_query(table_name, since=None, catalog=AACT_CATALOG):
     (``since=None``) is a full pull.
     """
     schema = AACT_SCHEMA
-    since_pred = f" AND last_update_posted_date >= DATE '{since}'" if since else ""
 
     if table_name == ANCHOR_TABLE:
-        return (
-            f"SELECT * FROM {catalog}.{schema}.{table_name} "
-            f"WHERE {STATUS_WHERE_CLAUSE}{since_pred}"
-        )
+        where = f" WHERE last_update_posted_date >= DATE '{since}'" if since else ""
+        return f"SELECT * FROM {catalog}.{schema}.{table_name}{where}"
 
-    # Child tables qualify the predicate columns through the studies alias `s`.
-    child_since = since_pred.replace(
-        "last_update_posted_date", "s.last_update_posted_date"
-    )
+    # Child tables join to studies; the since predicate qualifies through alias `s`.
+    where = f" WHERE s.last_update_posted_date >= DATE '{since}'" if since else ""
     return (
         f"SELECT t.* FROM {catalog}.{schema}.{table_name} t "
-        f"INNER JOIN {catalog}.{schema}.studies s ON t.nct_id = s.nct_id "
-        f"WHERE s.{STATUS_WHERE_CLAUSE}{child_since}"
+        f"INNER JOIN {catalog}.{schema}.studies s ON t.nct_id = s.nct_id"
+        f"{where}"
     )
 
 
@@ -331,6 +327,7 @@ def run_extraction(
     since=None,
     force=False,
     update_schema_baseline=False,
+    duck_conn=None,
 ):
     """Run the full extraction.
 
@@ -342,6 +339,9 @@ def run_extraction(
         force: Re-pull even when the AACT build has not advanced (pin-gate).
         update_schema_baseline: Regenerate ``config/aact_expected_columns.json``
             from this run instead of enforcing it.
+        duck_conn: Optional external DuckDB connection (the orchestrator threads
+            one through every phase — DuckDB is single-writer). If omitted, opens
+            and closes its own.
 
     Returns:
         A result dict ``{"status": "completed"|"skipped", ...}``.
@@ -365,7 +365,8 @@ def run_extraction(
     staging_dir = RAW_DATA_DIR / f".{extract_date}.staging"
     final_dir = RAW_DATA_DIR / extract_date
 
-    duck_conn = get_duckdb_connection()
+    close_conn = duck_conn is None
+    duck_conn = duck_conn or get_duckdb_connection()
     try:
         ensure_extract_schema(duck_conn)
         attach_aact(duck_conn)
@@ -439,7 +440,8 @@ def run_extraction(
             "tables": ordered_tables,
         }
     finally:
-        duck_conn.close()
+        if close_conn:
+            duck_conn.close()
 
 
 if __name__ == "__main__":

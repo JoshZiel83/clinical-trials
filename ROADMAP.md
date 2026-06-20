@@ -30,43 +30,18 @@ The work below is organized into three epics around exactly those gaps.
 ## Epic A — Extract hardening + refresh cadence
 
 *Make extract trustworthy, then automate a full-cohort longitudinal refresh.*
-Remaining issues [#4, #6, #9, #10, #12](https://github.com/JoshZiel83/clinical-trials/issues).
 
-**Direction (decided):** full-snapshot longitudinal. Remove the active-status filter,
-snapshot the full AACT cohort (~600K), full-rebuild downstream, and track per-trial
-change events run-over-run. Incremental extraction is deferred (see below).
-
-> **A1 (extract hardening) + A2 (snapshot provenance) shipped 2026-06-20**
-> (#3/#5/#7/#11/#8) — Postgres scanner, atomic stage-then-swap, schema-drift
-> detection, and the `aact@<build-date>` pin in `meta.reference_sources`. See
-> [`CHANGELOG.md`](CHANGELOG.md) and [ADR 0002](docs/adr/0002-extract-scanner-atomic-swap.md).
-> The `since` filter + pin-gate hooks A3 will consume are already in place.
-
-### A3 — Refresh automation (full-snapshot longitudinal)
-- Remove the status filter (~600K studies, ~5× current). **[#4]** `STATUS_VALUES` /
-  `ACTIVE_STATUSES` collapse to a single **documentation constant** — not a dedup,
-  since the filter is deleted from the extract path.
-- `run_pipeline.py` + `src/pipeline/orchestrator.py` — one `duck_conn` threaded
-  through every idempotent phase (DuckDB single-writer); `meta.pipeline_runs` audit
-  row (running → completed/failed). `aact.run_extraction()` accepts an optional
-  external `duck_conn`.
-- **Change events — `meta.trial_change_events`** (`src/transform/change_events.py`,
-  entry `run_change_events.py`): diff current vs prior Parquet snapshot →
-  `first_seen` / `dropped` / `status_transition` / `date_changed` /
-  `enrollment_changed` / `phase_changed` / `conditions_changed` /
-  `interventions_changed` / `sponsors_changed`. **This is the single home for "what
-  changed about a study," absorbing [#10]** (do not build a separate `meta.change_log`).
-  `last_update_submitted_date` cheap-gate (the extract already exposes a
-  `since=` / `last_update_posted_date` pre-filter hook + a build pin-gate from A1/A2);
-  `--cohort-expansion` flag suppresses the one-time `first_seen` flood on the
-  filter-removal run.
-- Per-refresh: `run_hitl_sync` (cascade approvals) → normalize → classify → promote →
-  views → change_events → enrichment agent (budget/`max_pending`-bounded).
-
-### A4 — Docs hygiene
-- **[#6]** Reconcile `data/DATABASE_SCHEMA.md` to the live DB (enriched/class table
-  counts, the stale relationships diagram, conflicting coverage stats). Can land
-  early and independently.
+> **Epic A complete (A1–A4) — shipped 2026-06-20.**
+> - **A1/A2** (#3/#5/#7/#11/#8): Postgres scanner, atomic stage-then-swap, schema-drift
+>   detection, `aact@<build-date>` pin. [ADR 0002](docs/adr/0002-extract-scanner-atomic-swap.md).
+> - **A3** (#4, #10): full-cohort extract (status filter removed, ~600K); `run_pipeline.py`
+>   + `src/pipeline/orchestrator.py` threading one `duck_conn` through every phase with a
+>   `meta.pipeline_runs` audit row; change-event tracking in `meta.trial_change_events`
+>   (`run_change_events.py`) — the single home for "what changed," absorbing #10.
+> - **A4** (#6): `data/DATABASE_SCHEMA.md` reconciled to the live full-cohort DB
+>   (`scripts/schema_counts.py`).
+>
+> Details in [`CHANGELOG.md`](CHANGELOG.md). Only the deferred items below remain open.
 
 ### Deferred (revisit on profiling)
 - **[#9]** Incremental manifest-diff extraction — full-rebuild is fast enough at 5×;
