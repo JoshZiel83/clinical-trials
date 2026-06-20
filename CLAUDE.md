@@ -1,7 +1,30 @@
+# Documentation & issue discipline
+
+Keeping the project's living docs in sync is part of every task, not an afterthought:
+
+- **`ROADMAP.md`** — forward-looking work only, organized as epics. Every forward
+  item links the GitHub issue(s) that track it (e.g. `[#13]`). When an item ships,
+  move it to `CHANGELOG.md` and remove it here.
+- **`CHANGELOG.md`** — shipped work, in completion order (the historical record).
+- **`CLAUDE.md`** (this file) — operational ground truth: env, entry points,
+  conventions. Update it the moment an entry point, path, kernel, or workflow changes.
+- **`docs/adr/`** — architectural decisions; add or supersede ADRs, don't rewrite them.
+
+**File issues for deferred work.** When you identify a bug, cleanup, or improvement
+that you are *not* doing right now, file a GitHub issue for it — do not bury it in a
+code comment or leave it only in conversation. The issue tracker, not memory, is the
+source of truth for deferred work. Label it (`tech-debt`, `architecture`,
+`provenance`, …) and, if it belongs to a roadmap epic, name that epic in the issue.
+
+**Link issues and roadmap both ways.** If a filed issue maps to roadmap work, add its
+`#n` under the owning epic in `ROADMAP.md`; if you defer a roadmap item, mark it
+deferred and keep its issue open. The roadmap and the open-issue list should never
+disagree about what is planned vs deferred.
+
 # Virtual Environment
 Conda is used for package and dependency management in a virtual environment:
 - Environment is `clinical_trials_env`
-- Python path: `/Users/joshuaziel/miniforge3/envs/clinical_trials_env/bin/python`
+- Python path: `/opt/homebrew/Caskroom/miniforge/base/envs/clinical_trials_env/bin/python`
 
 Make sure the virtual environment is activated before installing new packages: 
 
@@ -26,6 +49,13 @@ off `/usr/lib/libiconv.2.dylib` (which symbol-errors on modern macOS) to the
 conda-provided libiconv. Then build the index once with
 `python -m scripts.build_quickumls_index <umls.zip>` (~5GB, one-time).
 
+> **Current state:** the UMLS index was lost in a 2026-06 env/DB regen and is not
+> currently built — the QuickUMLS tool is inactive until it is rebuilt. There is also
+> a known builder/registration path mismatch (builder writes flat
+> `data/reference/umls/quickumls_index/`; registration expects versioned
+> `data/reference/umls/2025AB/quickumls_index/`). Both tracked in
+> [#2](https://github.com/JoshZiel83/clinical-trials/issues/2).
+
 # Pipeline Entry Points
 - `run_extract.py` — Phase 1: raw AACT extraction
 - `run_normalize_conditions.py` — Phase 2A: condition normalization + therapeutic areas
@@ -49,5 +79,6 @@ conda-provided libiconv. Then build the index once with
 - DuckDB does not support concurrent write access — only one process can hold a write lock. Shut down any notebook kernels (R or Python) connected in read-write mode before running pipeline scripts.
 
 # Notebooks
-- Notebooks 01-03 use Python kernel
-- Notebook 04 (`04_innovation_by_therapeutic_area.ipynb`) uses **R kernel** (`ir`)
+- All notebooks use the Python kernel **except** `04_innovation_by_therapeutic_area.ipynb`,
+  which uses the **R kernel** (`ir`).
+- The notebook ↔ phase verification mapping lives in `CHANGELOG.md`.

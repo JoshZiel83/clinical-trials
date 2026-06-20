@@ -1,7 +1,7 @@
 # ADR 0001 — Refactor the canonicalization enrichment agent
 
-- **Status:** Proposed
-- **Date:** 2026-06-12
+- **Status:** Accepted
+- **Date:** 2026-06-12 (accepted 2026-06-20)
 - **Deciders:** Josh Ziel
 - **Supersedes / touches:** Phase 6E (enrichment agent), Phase 7D (sponsor merge, flag-gated), Phase 7F (drug dedup, deferred)
 
@@ -331,6 +331,17 @@ vs. an empty table) and in whether an external source can vouch for the fix. So
 "build the sponsor oracle" (Axis B″) is not a special case; it is the extreme
 point of a gap-fill that conditions and drugs need too (the ~25k unmapped
 conditions are exactly this gap).
+
+The corollary on the *resolve* side (measured 2026-06-20, issue #13): AACT's
+`browse_conditions` / `browse_interventions` tables are themselves a **pre-resolved,
+per-study oracle layer** — NLM has already attached MeSH to most studies. The
+current deterministic layer *re-derives* this rather than reading it: ~62% of mapped
+condition rows (the `exact` layer 100%; drug `mesh-exact` 99%) are recoverable
+straight from `browse_*`, while lexical-string keying drops ~42k (study, MeSH) pairs
+AACT already provides. So "resolve-or-extend against an oracle" applies one level
+below the agent too: the deterministic base should **read** `browse_*` as the
+study-level oracle and reserve the dictionary/agent for the genuine gap (cross-study
+transfer + the studies NLM never tagged). This sharpens, not changes, the principle.
 
 What differs per domain is **not the mechanism** but how the oracle is seeded,
 how resolution is done, and how a mint is trusted — *uniform mechanism,
