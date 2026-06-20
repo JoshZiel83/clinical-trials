@@ -17,7 +17,7 @@ from src.logging_config import get_logger
 logger = get_logger("reference_sources")
 
 
-KNOWN_SOURCES = ("chembl", "umls", "mesh", "mesh_ta_mapping")
+KNOWN_SOURCES = ("aact", "chembl", "umls", "mesh", "mesh_ta_mapping")
 
 
 def ensure_table(duck_conn):

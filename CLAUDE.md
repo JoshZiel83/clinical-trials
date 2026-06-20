@@ -57,7 +57,14 @@ conda-provided libiconv. Then build the index once with
 > [#2](https://github.com/JoshZiel83/clinical-trials/issues/2).
 
 # Pipeline Entry Points
-- `run_extract.py` — Phase 1: raw AACT extraction
+- `run_extract.py` — Phase 1: raw AACT extraction. Pulls via DuckDB's `postgres`
+  scanner (`ATTACH … READ_ONLY`, auto-installed extension; creds via `PG*` env vars),
+  stages each table then **atomically swaps** `raw.*` + the dated Parquet dir, checks
+  schema drift against `config/aact_expected_columns.json`, and pins the build as
+  `aact@<build-date>` (`max(studies.updated_at)::date`) in `meta.reference_sources`.
+  Flags: `--force` (re-pull even if the build hasn't advanced — default is to skip),
+  `--since YYYY-MM-DD` (A3 `last_update_posted_date` pre-filter; **subset, not a
+  snapshot**), `--update-schema-baseline`. See [ADR 0002](docs/adr/0002-extract-scanner-atomic-swap.md).
 - `run_normalize_conditions.py` — Phase 2A: condition normalization + therapeutic areas
 - `run_classify_design.py` — Phase 2B: study design classification + innovative features + AI mentions
 - `run_normalize_drugs.py` — Phase 2D: drug normalization

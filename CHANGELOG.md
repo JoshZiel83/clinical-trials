@@ -143,6 +143,35 @@ ADR 0001: the drug agent is re-homed onto the new harness as part of Epic C. The
 ~800 pending `domain='drug', source='fuzzy'` candidates remain ignorable in their
 current form pending that rebuild.
 
+## Epic A1 + A2 — Extract hardening + snapshot provenance · ✅ 2026-06-20
+Rebuilt the Phase 1 extract (`src/extract/aact.py`; entry `run_extract.py`) into an
+atomic, provenanced, drift-checked pull. Closes #3, #5, #7, #11, #8. Spec:
+[ADR 0002](docs/adr/0002-extract-scanner-atomic-swap.md).
+- **Postgres scanner (#7):** rows pulled via DuckDB's `postgres` extension
+  (`ATTACH … (TYPE postgres, READ_ONLY)`, creds through `PG*` env vars), filtered
+  scanner-side; pandas `read_sql` left the hot path.
+- **Atomic stage-then-swap (#5):** each table builds into `raw.<t>__staging` + a hidden
+  `data/raw/.<date>.staging/` dir, swapped into place in one transaction +
+  `os.replace`; a pre-swap failure leaves `raw.*` and the prior snapshot intact. Per-table
+  `meta.extraction_log` rows are committed as each completes (forensic trail).
+- **Schema-drift detection (#11):** incoming columns compared to
+  `config/aact_expected_columns.json` — dropped column fails, new column warns;
+  self-seeds, `--update-schema-baseline` regenerates.
+- **Build pin + gate (#8 / A2):** the build is pinned `aact@<build-date>` in
+  `meta.reference_sources` (`max(studies.updated_at)::date`, checksum over the snapshot);
+  a run short-circuits when the build hasn't advanced (`--force` overrides).
+- **#3:** deleted dead `connection_test.py`; bootstrap DDL consolidated into
+  `ensure_extract_schema`.
+- **A3-readiness hooks (inert):** `--since` (`last_update_posted_date` pre-filter — a
+  *subset, not a snapshot*) and the pin-gate, for the A3 change-events diff.
+**Key finding:** AACT full-reloads its corpus nightly (`studies.created_at == updated_at`
+for every row; child tables carry no audit timestamps; legacy `nlm_download_date` columns
+100% NULL), so `updated_at` is a build watermark, not a delta gate — corroborating the
+roadmap's full-snapshot direction over incremental (#9). The stable per-study change
+signal is `last_update_posted_date`.
+**Verified:** live full-cohort pull pinned `aact@2026-06-20`, 14 tables / 120,739 studies
+in 157s; immediate re-run skipped via the pin-gate; full suite 279 passed / 1 skipped.
+
 ---
 
 ## Reference appendix

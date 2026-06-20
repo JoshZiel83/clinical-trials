@@ -67,6 +67,23 @@ def get_aact_connection():
     )
 
 
+def get_aact_attach_params():
+    """Return (libpq_dsn, env) for DuckDB's Postgres scanner ATTACH.
+
+    The DSN carries only non-secret connection params (host/port/db); the
+    credentials are returned separately as PG* env vars so the username and
+    password never appear in SQL text or logs. Caller does
+    ``os.environ.update(env)`` before ``ATTACH '<dsn>' ... (TYPE postgres)``.
+    """
+    if not AACT_USER or not AACT_PASSWORD:
+        raise ValueError(
+            "AACT_USER and AACT_PASSWORD must be set in environment or .env file"
+        )
+    dsn = f"host={AACT_HOST} port={AACT_PORT} dbname={AACT_DB}"
+    env = {"PGUSER": AACT_USER, "PGPASSWORD": AACT_PASSWORD}
+    return dsn, env
+
+
 def get_duckdb_connection(path=None, read_only=False):
     """Open a DuckDB connection. Defaults to the project database path."""
     import duckdb
