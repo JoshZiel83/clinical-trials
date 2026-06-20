@@ -351,10 +351,13 @@ def _build_chembl_mappings(duck_conn):
             pref_name, chembl_id = match
             mappings.append((norm_name, pref_name, chembl_id))
 
-    logger.info(f"  ChEMBL local lookup: {len(unmatched):,} candidates, {len(mappings):,} matched")
-
     if mappings:
         df = pd.DataFrame(mappings, columns=["source_name", "canonical_name", "canonical_id"])
+        # canonical_name is NOT NULL in ref._drug_dictionary_staging; a few ChEMBL
+        # synonyms carry a null/NaN pref_name — drop them (only reached at
+        # full-cohort scale). notna() handles None and pandas NaN uniformly.
+        df = df[df["canonical_name"].notna()
+                & (df["canonical_name"].astype(str).str.strip() != "")].copy()
         df["mapping_method"] = "chembl-synonym"
         df["confidence"] = "high"
         duck_conn.execute("""
@@ -362,6 +365,11 @@ def _build_chembl_mappings(duck_conn):
             SELECT source_name, canonical_name, canonical_id, mapping_method, confidence
             FROM df
         """)
+    else:
+        df = None
+
+    logger.info(f"  ChEMBL local lookup: {len(unmatched):,} candidates, "
+                f"{0 if df is None else len(df):,} matched")
 
 
 def create_study_drugs(duck_conn):

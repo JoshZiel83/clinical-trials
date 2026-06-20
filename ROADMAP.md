@@ -30,53 +30,18 @@ The work below is organized into three epics around exactly those gaps.
 ## Epic A — Extract hardening + refresh cadence
 
 *Make extract trustworthy, then automate a full-cohort longitudinal refresh.*
-Backlog issues [#3–#12](https://github.com/JoshZiel83/clinical-trials/issues).
 
-**Direction (decided):** full-snapshot longitudinal. Remove the active-status filter,
-snapshot the full AACT cohort (~600K), full-rebuild downstream, and track per-trial
-change events run-over-run. Incremental extraction is deferred (see below).
-
-### A1 — Extract hardening
-- **[#3]** Remove dead `src/extract/connection_test.py`; consolidate the
-  schema/`meta.extraction_log` bootstrap DDL into one shared helper in `aact.py`.
-- **[#5]** Make an extraction run atomic — transaction / stage-then-swap so a mid-run
-  failure can't leave some `raw.*` refreshed, others stale, and no log row; log
-  per-table as each completes.
-- **[#7]** Replace the pandas `read_sql` pass-through with DuckDB's Postgres scanner
-  (`ATTACH … (READ_ONLY)` → `CREATE TABLE raw.x AS SELECT …`). Prerequisite for the
-  scanner-side filtering and the full-cohort pull.
-- **[#11]** Detect upstream AACT schema drift on the `SELECT *` mirror (compare
-  incoming columns to an expected set; warn/fail).
-
-### A2 — Snapshot provenance
-- **[#8]** Pin the extract to a dated AACT static release and register it in
-  `meta.reference_sources` (version, `acquired_at`, checksum), like `chembl@36`.
-  Today `extract_date` records *when* we pulled, not *what* — the dated Parquet at
-  `data/raw/YYYY-MM-DD/` (already the change-event diff source) becomes reproducible.
-
-### A3 — Refresh automation (full-snapshot longitudinal)
-- Remove the status filter (~600K studies, ~5× current). **[#4]** `STATUS_VALUES` /
-  `ACTIVE_STATUSES` collapse to a single **documentation constant** — not a dedup,
-  since the filter is deleted from the extract path.
-- `run_pipeline.py` + `src/pipeline/orchestrator.py` — one `duck_conn` threaded
-  through every idempotent phase (DuckDB single-writer); `meta.pipeline_runs` audit
-  row (running → completed/failed). `aact.run_extraction()` accepts an optional
-  external `duck_conn`.
-- **Change events — `meta.trial_change_events`** (`src/transform/change_events.py`,
-  entry `run_change_events.py`): diff current vs prior Parquet snapshot →
-  `first_seen` / `dropped` / `status_transition` / `date_changed` /
-  `enrollment_changed` / `phase_changed` / `conditions_changed` /
-  `interventions_changed` / `sponsors_changed`. **This is the single home for "what
-  changed about a study," absorbing [#10]** (do not build a separate `meta.change_log`).
-  `last_update_submitted_date` cheap-gate; `--cohort-expansion` flag suppresses the
-  one-time `first_seen` flood on the filter-removal run.
-- Per-refresh: `run_hitl_sync` (cascade approvals) → normalize → classify → promote →
-  views → change_events → enrichment agent (budget/`max_pending`-bounded).
-
-### A4 — Docs hygiene
-- **[#6]** Reconcile `data/DATABASE_SCHEMA.md` to the live DB (enriched/class table
-  counts, the stale relationships diagram, conflicting coverage stats). Can land
-  early and independently.
+> **Epic A complete (A1–A4) — shipped 2026-06-20.**
+> - **A1/A2** (#3/#5/#7/#11/#8): Postgres scanner, atomic stage-then-swap, schema-drift
+>   detection, `aact@<build-date>` pin. [ADR 0002](docs/adr/0002-extract-scanner-atomic-swap.md).
+> - **A3** (#4, #10): full-cohort extract (status filter removed, ~600K); `run_pipeline.py`
+>   + `src/pipeline/orchestrator.py` threading one `duck_conn` through every phase with a
+>   `meta.pipeline_runs` audit row; change-event tracking in `meta.trial_change_events`
+>   (`run_change_events.py`) — the single home for "what changed," absorbing #10.
+> - **A4** (#6): `data/DATABASE_SCHEMA.md` reconciled to the live full-cohort DB
+>   (`scripts/schema_counts.py`).
+>
+> Details in [`CHANGELOG.md`](CHANGELOG.md). Only the deferred items below remain open.
 
 ### Deferred (revisit on profiling)
 - **[#9]** Incremental manifest-diff extraction — full-rebuild is fast enough at 5×;
@@ -205,9 +170,9 @@ Shared foundations (eval + adapter + embeddings)
         └── Epic C (canonicalization rebuild → sponsor oracle)   ← B and C interleave
 ```
 
-Epic A is the floor — trustworthy, regularly-refreshing data — and its cleanups
-(A1) and docs pass (A4 / #6) can start immediately. B and C share the foundations and
-can run in parallel once those exist.
+Epic A is the floor — trustworthy, regularly-refreshing data. A1/A2 (hardening +
+provenance) are done; A3 (refresh automation) and the A4 docs pass (#6) remain. B and C
+share the foundations and can run in parallel once those exist.
 
 ## Open questions (resolve in design, non-blocking)
 - Innovative-features model class — LLM vs fine-tuned vs embedding+classifier (B2).

@@ -3,22 +3,7 @@
 import tempfile
 from pathlib import Path
 
-from config.settings import ACTIVE_STATUSES, DUCKDB_PATH, RAW_DATA_DIR, get_duckdb_connection
-
-
-def test_active_statuses_count():
-    assert len(ACTIVE_STATUSES) == 5
-
-
-def test_active_statuses_values():
-    expected = {
-        "RECRUITING",
-        "NOT_YET_RECRUITING",
-        "ACTIVE_NOT_RECRUITING",
-        "ENROLLING_BY_INVITATION",
-        "AVAILABLE",
-    }
-    assert set(ACTIVE_STATUSES) == expected
+from config.settings import DUCKDB_PATH, RAW_DATA_DIR, get_duckdb_connection
 
 
 def test_duckdb_path_is_in_data_dir():

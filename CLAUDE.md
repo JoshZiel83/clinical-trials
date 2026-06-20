@@ -57,7 +57,25 @@ conda-provided libiconv. Then build the index once with
 > [#2](https://github.com/JoshZiel83/clinical-trials/issues/2).
 
 # Pipeline Entry Points
-- `run_extract.py` — Phase 1: raw AACT extraction
+- `run_pipeline.py` — **A3 full-refresh orchestrator.** Threads one DuckDB
+  connection through every phase in order (extract → hitl_sync → promote → normalize →
+  classify → views → change_events), writing a `meta.pipeline_runs` audit row. The
+  extract pin-gate gates the whole refresh (skips if the AACT build hasn't advanced
+  unless `--force`). Flags: `--force`, `--cohort-expansion` (suppress change-event
+  `first_seen` on the one-time active→full-cohort run), `--enrich` + `--budget-{condition,
+  drug,sponsor}` (the enrichment agent is **off by default** — the only paid step). The
+  individual `run_*.py` below remain usable standalone.
+- `run_change_events.py` — A3: diff the current vs prior dated Parquet snapshot into
+  `meta.trial_change_events` (`--cohort-expansion`). `src/transform/change_events.py`.
+- `run_extract.py` — Phase 1: raw AACT extraction. Mirrors the **full AACT cohort**
+  (~600K; no status filter as of A3). Pulls via DuckDB's `postgres`
+  scanner (`ATTACH … READ_ONLY`, auto-installed extension; creds via `PG*` env vars),
+  stages each table then **atomically swaps** `raw.*` + the dated Parquet dir, checks
+  schema drift against `config/aact_expected_columns.json`, and pins the build as
+  `aact@<build-date>` (`max(studies.updated_at)::date`) in `meta.reference_sources`.
+  Flags: `--force` (re-pull even if the build hasn't advanced — default is to skip),
+  `--since YYYY-MM-DD` (A3 `last_update_posted_date` pre-filter; **subset, not a
+  snapshot**), `--update-schema-baseline`. See [ADR 0002](docs/adr/0002-extract-scanner-atomic-swap.md).
 - `run_normalize_conditions.py` — Phase 2A: condition normalization + therapeutic areas
 - `run_classify_design.py` — Phase 2B: study design classification + innovative features + AI mentions
 - `run_normalize_drugs.py` — Phase 2D: drug normalization

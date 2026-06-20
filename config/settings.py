@@ -37,16 +37,6 @@ SPONSOR_AGENT_V2_ENABLED = os.environ.get(
 ROR_API_BASE = os.environ.get("ROR_API_BASE", "https://api.ror.org")
 ROR_CACHE_TTL_DAYS = int(os.environ.get("ROR_CACHE_TTL_DAYS", "30"))
 
-# Status filter for active/planned trials
-ACTIVE_STATUSES = (
-    "RECRUITING",
-    "NOT_YET_RECRUITING",
-    "ACTIVE_NOT_RECRUITING",
-    "ENROLLING_BY_INVITATION",
-    "AVAILABLE",
-)
-
-
 def get_aact_connection():
     """Open a psycopg2 connection to the AACT PostgreSQL database."""
     import psycopg2
@@ -65,6 +55,23 @@ def get_aact_connection():
         options=f"-c search_path={AACT_SCHEMA}",
         connect_timeout=30,
     )
+
+
+def get_aact_attach_params():
+    """Return (libpq_dsn, env) for DuckDB's Postgres scanner ATTACH.
+
+    The DSN carries only non-secret connection params (host/port/db); the
+    credentials are returned separately as PG* env vars so the username and
+    password never appear in SQL text or logs. Caller does
+    ``os.environ.update(env)`` before ``ATTACH '<dsn>' ... (TYPE postgres)``.
+    """
+    if not AACT_USER or not AACT_PASSWORD:
+        raise ValueError(
+            "AACT_USER and AACT_PASSWORD must be set in environment or .env file"
+        )
+    dsn = f"host={AACT_HOST} port={AACT_PORT} dbname={AACT_DB}"
+    env = {"PGUSER": AACT_USER, "PGPASSWORD": AACT_PASSWORD}
+    return dsn, env
 
 
 def get_duckdb_connection(path=None, read_only=False):

@@ -109,6 +109,21 @@ def apply_logs(conn, log_paths):
     return total, domains_touched
 
 
+def sync_pending(conn):
+    """Apply all unapplied decision logs on an existing connection.
+
+    The orchestrator (run_pipeline.py) calls this to fold pending human
+    decisions into the `ref.*` dictionaries before the full rebuild. Returns
+    ``(total, domains_touched)`` or ``None`` when there's nothing to apply.
+    """
+    _ensure_applied_table(conn)
+    log_paths = _unapplied_logs(conn)
+    if not log_paths:
+        logger.info("[sync] no unapplied decision logs")
+        return None
+    return apply_logs(conn, log_paths)
+
+
 def main(argv):
     setup_logging()
     conn = get_duckdb_connection()

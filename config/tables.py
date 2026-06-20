@@ -19,16 +19,14 @@ EXTRACT_TABLES = [
 
 ANCHOR_TABLE = "studies"
 
-STATUS_VALUES = (
+# Documentation only. The extract no longer filters on status — it mirrors the
+# full AACT cohort (A3). These are the `overall_status` values that *used* to
+# define the "active/planned" subset, kept as a reference dimension (e.g. for
+# analysis that wants to re-slice to active trials). NOT a filter.
+ACTIVE_STATUS_VALUES = (
     "RECRUITING",
     "NOT_YET_RECRUITING",
     "ACTIVE_NOT_RECRUITING",
     "ENROLLING_BY_INVITATION",
     "AVAILABLE",
-)
-
-STATUS_WHERE_CLAUSE = (
-    "overall_status IN ("
-    + ", ".join(f"'{s}'" for s in STATUS_VALUES)
-    + ")"
 )
