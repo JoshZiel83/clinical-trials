@@ -2,9 +2,15 @@
 data/raw/
 data/logs/
 data/reviews/
+# Large external reference dumps (reproducible from source; registered in
+# meta.reference_sources). Small curated reference (chembl synonyms,
+# mesh_ta_mapping) stays tracked.
 data/reference/umls/
 data/reference/mesh/
+data/reference/ror/
+# DuckDB file + its write-ahead/temp sidecars (.wal, .tmp/)
 data/*.duckdb
+data/*.duckdb.*
 data/*.zip
 
 # Python
