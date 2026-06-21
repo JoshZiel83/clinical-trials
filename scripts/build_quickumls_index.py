@@ -2,15 +2,19 @@
 
 Extracts only MRCONSO.RRF + MRSTY.RRF (~2.4GB combined; saves 50GB
 vs. extracting the whole archive), then invokes the QuickUMLS install
-script to build the index at data/reference/umls/quickumls_index/.
+script to build the index at data/reference/umls/<version>/quickumls_index/.
+
+The index is written under a version-pinned directory so it lands exactly
+where scripts/bootstrap_reference_sources.py registers it (resolves the
+flat-vs-versioned path mismatch tracked in #2).
 
 Inputs:
-  data/umls-YYYYxx-metathesaurus-full.zip  (UMLS release zip)
+  data/reference/umls/umls-YYYYxx-metathesaurus-full.zip  (UMLS release zip)
 
 Outputs:
-  data/raw/umls/2025AB/META/MRCONSO.RRF
-  data/raw/umls/2025AB/META/MRSTY.RRF
-  data/reference/umls/quickumls_index/
+  data/raw/umls/2026AA/META/MRCONSO.RRF
+  data/raw/umls/2026AA/META/MRSTY.RRF
+  data/reference/umls/2026AA/quickumls_index/
 
 Run: python -m scripts.build_quickumls_index [path/to/zip]
 
@@ -28,9 +32,13 @@ from src.logging_config import get_logger, setup_logging
 logger = get_logger("build_quickumls_index")
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_ZIP = PROJECT_ROOT / "data" / "raw" / "umls" / "metathesaurus-2025AB.zip"
+UMLS_VERSION = "2026AA"
+DEFAULT_ZIP = (
+    PROJECT_ROOT / "data" / "reference" / "umls"
+    / f"umls-{UMLS_VERSION}-metathesaurus-full.zip"
+)
 EXTRACT_ROOT = PROJECT_ROOT / "data" / "raw" / "umls"
-INDEX_DIR = PROJECT_ROOT / "data" / "reference" / "umls" / "quickumls_index"
+INDEX_DIR = PROJECT_ROOT / "data" / "reference" / "umls" / UMLS_VERSION / "quickumls_index"
 
 REQUIRED_FILES = ("MRCONSO.RRF", "MRSTY.RRF")
 

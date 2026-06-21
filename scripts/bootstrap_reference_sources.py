@@ -3,13 +3,13 @@ and populate meta.reference_sources (Phase 7E).
 
 Expected before:
     data/reference/chembl_synonyms.parquet
-    data/reference/umls/quickumls_index/
+    data/reference/umls/quickumls_index/          (or already versioned, see below)
     data/reference/therapeutic_area_mapping.json
     data/reference/mesh/2026/desc.xml     (already placed)
 
 After:
     data/reference/chembl/36/synonyms.parquet
-    data/reference/umls/2025AB/quickumls_index/
+    data/reference/umls/2026AA/quickumls_index/   (written here directly by build_quickumls_index)
     data/reference/mesh_ta_mapping/v1/mapping.json
     data/reference/mesh/2026/desc.xml
 
@@ -39,10 +39,10 @@ MOVES = [
         "ChEMBL 36 drug synonyms: synonym, pref_name, chembl_id",
     ),
     (
-        "umls", "2025AB",
+        "umls", "2026AA",
         "umls/quickumls_index",
-        "umls/2025AB/quickumls_index",
-        "UMLS 2025AB Metathesaurus — QuickUMLS-built index",
+        "umls/2026AA/quickumls_index",
+        "UMLS 2026AA Metathesaurus — QuickUMLS-built index",
     ),
     (
         "mesh_ta_mapping", "v1",

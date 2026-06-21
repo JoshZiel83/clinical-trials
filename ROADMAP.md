@@ -48,7 +48,8 @@ The work below is organized into three epics around exactly those gaps.
   incremental is a later optimization.
 - **[#12]** Delta-driven selective transform recompute — depends on #9, and the
   corpus-global mapping methods (condition co-occurrence) can't be incrementalized
-  correctly anyway.
+  correctly anyway. **Generalized by Epic D ([#21]):** one recompute engine, two delta
+  sources (records + vocabs); #12 stays the data-clock half.
 
 ---
 
@@ -141,6 +142,36 @@ manual entries survive rebuilds.
 
 ---
 
+## Epic D — Reference data lifecycle + canonicalization-version migration
+
+*AACT has a refresh story (Epic A); the reference vocabularies (MeSH, ChEMBL,
+UMLS, ROR) do not. Two independent clocks make a row stale — the **data clock**
+(AACT changes) and the **reference clock** (a vocab release bumps, changing
+mappings even for records that never moved). This epic gives the reference clock
+the same trustworthiness Epic A gave the data clock, and defines what a
+reference update does.*
+
+Every canonical mapping is `f(record@v, vocab@v, code@v, agent@v)`. Migration
+stance is set by recompute economics, not uniformly:
+- **Deterministic** mappings — disposable cache; auto-recompute against the new vocab.
+- **Agent** gap-fills — persisted *paid* ground truth; never auto-rerun. A vocab-diff
+  splits them into oracle-grew (**auto-reclaim**), oracle-target-moved (**gate** for
+  review), untouched (leave). ADR 0001 §5.0 across a version bump.
+- **HITL/manual** — survives all rebuilds (ADR 0001 §3). Disagreements route to review,
+  never clobbered.
+
+- **[#18]** Register ROR in `meta.reference_sources` (currently unpinned). *Small.*
+- **[#19]** Version provenance at the mapping grain + canonicalization-version tuple. *Precondition.*
+- **[#20]** Per-source reference acquire/refresh/diff + retention policy.
+- **[#21]** Selective re-canonicalization engine — generalizes **[#12]** to the reference clock.
+- **[#22]** Staleness-as-a-query + auditable migrations.
+
+**Decisions:** full-snapshot+diff as the default AACT refresh (subset is a later
+optimization — corpus-global co-occurrence can't be incrementalized, [#12]); agent
+re-runs on a vocab bump are auto-reclaim / human-gated, never blanket-automatic.
+
+---
+
 ## Shared foundations (build once, used by B and C)
 
 The consolidation insight: Epics B and C are not two agent problems but **one
@@ -167,7 +198,8 @@ Epic A (harden extract + cadence)        ← near-term priority
 Shared foundations (eval + adapter + embeddings)
         │
         ├── Epic B (transform QA → innovative-features ML)
-        └── Epic C (canonicalization rebuild → sponsor oracle)   ← B and C interleave
+        ├── Epic C (canonicalization rebuild → sponsor oracle)   ← B and C interleave
+        └── Epic D (reference data lifecycle + version migration) ← provenance foundation; interleaves with B/C
 ```
 
 Epic A is the floor — trustworthy, regularly-refreshing data. A1/A2 (hardening +

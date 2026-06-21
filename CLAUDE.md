@@ -23,8 +23,14 @@ disagree about what is planned vs deferred.
 
 # Virtual Environment
 Conda is used for package and dependency management in a virtual environment:
-- Environment is `clinical_trials_env`
-- Python path: `/opt/homebrew/Caskroom/miniforge/base/envs/clinical_trials_env/bin/python`
+- Environment is `clinical_trials_env` — the env **name** is the portable source of
+  truth (this repo is developed on more than one machine, and the conda base differs
+  per machine, e.g. `~/miniforge3` vs. a Homebrew Caskroom path). Never hard-code the
+  interpreter path.
+- Resolve the interpreter on the current machine by name:
+  `conda run -n clinical_trials_env python -c 'import sys; print(sys.executable)'`
+  (or `echo "$CONDA_PREFIX/bin/python"` once the env is activated). The `.Rprofile`
+  reticulate bridge resolves it the same way, via `conda_python("clinical_trials_env")`.
 
 Make sure the virtual environment is activated before installing new packages: 
 
@@ -47,14 +53,17 @@ scripts/install_quickumls.sh
 The script pip-installs both packages and, on macOS, repoints `_simstring.so`
 off `/usr/lib/libiconv.2.dylib` (which symbol-errors on modern macOS) to the
 conda-provided libiconv. Then build the index once with
-`python -m scripts.build_quickumls_index <umls.zip>` (~5GB, one-time).
+`python -m scripts.build_quickumls_index [path/to/umls.zip]` (~5GB, one-time) —
+it writes the index directly to the version-pinned `data/reference/umls/<version>/
+quickumls_index/`, exactly where `bootstrap_reference_sources.py` registers it.
 
-> **Current state:** the UMLS index was lost in a 2026-06 env/DB regen and is not
-> currently built — the QuickUMLS tool is inactive until it is rebuilt. There is also
-> a known builder/registration path mismatch (builder writes flat
-> `data/reference/umls/quickumls_index/`; registration expects versioned
-> `data/reference/umls/2025AB/quickumls_index/`). Both tracked in
-> [#2](https://github.com/JoshZiel83/clinical-trials/issues/2).
+> **Current state:** the **UMLS 2026AA** index is built and registered active in
+> `meta.reference_sources` (`data/reference/umls/2026AA/quickumls_index/`, ~5.5GB,
+> 10.7M terms); the QuickUMLS tool is live. The old flat-vs-versioned builder/
+> registration path mismatch (#2) is resolved — both scripts now use the versioned
+> `2026AA` path. Bumping releases: drop the new zip in `data/reference/umls/`, set
+> `UMLS_VERSION` in `build_quickumls_index.py` + the `umls` entry in
+> `bootstrap_reference_sources.py`, rebuild, re-bootstrap.
 
 # R environment (rig + renv)
 This is a multilingual repo: **conda owns Python, renv owns R, and the two never
